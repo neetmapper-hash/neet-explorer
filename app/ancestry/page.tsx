@@ -39,10 +39,13 @@ export default function AncestryPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [answer, setAnswer] = useState<string>('')
+
   // Pick up question passed from heatmap page
   useEffect(() => {
     const q = sessionStorage.getItem('ancestry_question');
     const s = sessionStorage.getItem('ancestry_subject');
+    const opts = sessionStorage.getItem('ancestry_options');
+    const correct = sessionStorage.getItem('ancestry_correct');
     if (q) {
       setQuestion(q);
       sessionStorage.removeItem('ancestry_question');
@@ -50,6 +53,14 @@ export default function AncestryPage() {
     if (s && ['Physics', 'Chemistry', 'Biology'].includes(s)) {
       setSubject(s as Subject);
       sessionStorage.removeItem('ancestry_subject');
+    }
+    if (opts) {
+      setQuestionOptions(JSON.parse(opts));
+      sessionStorage.removeItem('ancestry_options');
+    }
+    if (correct) {
+      setCorrectAnswer(correct);
+      sessionStorage.removeItem('ancestry_correct');
     }
   }, []);
 
@@ -62,8 +73,6 @@ export default function AncestryPage() {
     setError(null);
     setChain([]);
     setHasSearched(true);
-    
-    console.log('Searching for:', queryText, 'subject:', subject);
 
     try {
       const res = await fetch('/api/ancestry', {
@@ -71,9 +80,7 @@ export default function AncestryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: queryText, subject }),
       });
-      console.log('API response status:', res.status);
       const data = await res.json();
-      console.log('API response data:', data);
       setChain(data.chain ?? [])
       setAnswer(data.answer ?? '')
 
@@ -108,6 +115,8 @@ export default function AncestryPage() {
           setChain([]);
           setHasSearched(false);
           setError(null);
+          setQuestionOptions({});
+          setCorrectAnswer('');
         }}
         onYearsChange={() => {}}
       />
@@ -132,7 +141,11 @@ export default function AncestryPage() {
             {SAMPLES[subject].map((sample, i) => (
               <button
                 key={i}
-                onClick={() => handleSearch(sample)}
+                onClick={() => {
+                  setQuestionOptions({});
+                  setCorrectAnswer('');
+                  handleSearch(sample);
+                }}
                 className="text-left text-xs px-3 py-2 rounded-lg bg-[#1a1a1a] text-[#888] hover:text-white hover:bg-[#222] transition-colors"
               >
                 {sample.length > 55 ? sample.slice(0, 55) + '…' : sample}
@@ -150,6 +163,31 @@ export default function AncestryPage() {
             rows={3}
             className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl px-4 py-3 text-[#f0f0f0] text-sm placeholder-[#444] resize-none focus:outline-none focus:border-[#ff4b4b] transition-colors"
           />
+
+          {/* Options if available */}
+          {Object.keys(questionOptions).length > 0 && (
+            <div className="flex flex-col gap-2 mt-3 mb-2">
+              {Object.entries(questionOptions).map(([num, text]) => {
+                const isCorrect = String(num) === String(correctAnswer)
+                return (
+                  <div
+                    key={num}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
+                    style={{
+                      background: isCorrect ? '#1a4a1a' : '#1e1e1e',
+                      borderColor: isCorrect ? '#2ca02c' : '#2a2a2a',
+                      color: '#f0f0f0',
+                    }}
+                  >
+                    <span className="text-[#888] shrink-0">({num})</span>
+                    <span className="flex-1">{text}</span>
+                    {isCorrect && <span className="text-green-400 shrink-0">✓</span>}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           <button
             onClick={() => handleSearch()}
             disabled={isLoading || !question.trim()}
@@ -159,39 +197,15 @@ export default function AncestryPage() {
           </button>
         </div>
 
-        {/* Options if available */}
-        {Object.keys(questionOptions).length > 0 && (
-          <div className="flex flex-col gap-2 mb-4">
-            {Object.entries(questionOptions).map(([num, text]) => {
-              const isCorrect = String(num) === String(correctAnswer)
-              return (
-                <div
-                  key={num}
-                  className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
-                  style={{
-                    background: isCorrect ? '#1a4a1a' : '#1e1e1e',
-                    borderColor: isCorrect ? '#2ca02c' : '#2a2a2a',
-                    color: '#f0f0f0',
-                  }}
-                >
-                  <span className="text-[#888] shrink-0">({num})</span>
-                  <span className="flex-1">{text}</span>
-                  {isCorrect && <span className="text-green-400 shrink-0">✓</span>}
-                </div>
-              )
-            })}
-          </div>
-        )}
-
         {/* Results */}
         {hasSearched && (
           <AncestryChain
-          chain={chain}
-          isLoading={isLoading}
-          error={error}
-          questionText={question}
-          answer={answer}
-        />
+            chain={chain}
+            isLoading={isLoading}
+            error={error}
+            questionText={question}
+            answer={answer}
+          />
         )}
       </main>
     </div>
