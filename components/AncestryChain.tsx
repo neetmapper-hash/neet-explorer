@@ -82,7 +82,13 @@ export default function AncestryChain({
         </h3>
 
         <div className="flex flex-col gap-3">
-          {[...chain].reverse().map((concept, idx) => {
+          {[...chain].sort((a, b) => {
+  const getClass = (id: string) => {
+    try { return parseInt(id.split('_')[1].replace('c', '')) }
+    catch { return 0 }
+  }
+  return getClass(b.id) - getClass(a.id)
+}).map((concept, idx) => {
             const { classNum, chapterNum } = parseConceptId(concept.id);
             const cfg = CLASS_CONFIG[classNum] ?? {
               emoji: '📖',
