@@ -23,7 +23,7 @@ export default function Sidebar({
   showBackButton,
   onBack,
 }: SidebarProps) {
-  const subjects: Subject[] = ['Physics', 'Chemistry', 'Biology'];
+  const subjects: Subject[] = ['Biology', 'Physics', 'Chemistry'];
 
   const toggleYear = (year: number) => {
     if (selectedYears.includes(year)) {

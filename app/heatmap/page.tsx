@@ -60,6 +60,10 @@ export default function HeatmapPage() {
   const handleFindAncestry = (questionText: string) => {
     sessionStorage.setItem('ancestry_question', questionText);
     sessionStorage.setItem('ancestry_subject', subject);
+    if (selectedQuestion) {
+      sessionStorage.setItem('ancestry_options', JSON.stringify(selectedQuestion.options));
+      sessionStorage.setItem('ancestry_correct', selectedQuestion.correct_answer);
+    }
     router.push('/ancestry');
   };
 

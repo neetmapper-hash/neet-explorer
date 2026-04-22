@@ -31,7 +31,9 @@ export default function AncestryPage() {
   const router = useRouter();
 
   const [subject, setSubject] = useState<Subject>('Physics');
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState('')
+  const [questionOptions, setQuestionOptions] = useState<Record<string, string>>({})
+  const [correctAnswer, setCorrectAnswer] = useState('');
   const [chain, setChain] = useState<Concept[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,6 +158,30 @@ export default function AncestryPage() {
             {isLoading ? 'Searching…' : '🔍 Find Concept Ancestry'}
           </button>
         </div>
+
+        {/* Options if available */}
+        {Object.keys(questionOptions).length > 0 && (
+          <div className="flex flex-col gap-2 mb-4">
+            {Object.entries(questionOptions).map(([num, text]) => {
+              const isCorrect = String(num) === String(correctAnswer)
+              return (
+                <div
+                  key={num}
+                  className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
+                  style={{
+                    background: isCorrect ? '#1a4a1a' : '#1e1e1e',
+                    borderColor: isCorrect ? '#2ca02c' : '#2a2a2a',
+                    color: '#f0f0f0',
+                  }}
+                >
+                  <span className="text-[#888] shrink-0">({num})</span>
+                  <span className="flex-1">{text}</span>
+                  {isCorrect && <span className="text-green-400 shrink-0">✓</span>}
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Results */}
         {hasSearched && (
