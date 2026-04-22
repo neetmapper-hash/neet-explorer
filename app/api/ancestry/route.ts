@@ -208,7 +208,7 @@ const getClass = (id: string) => {
   try { return parseInt(id.split('_')[1].replace('c', '')) }
   catch { return 0 }
 }
-const chain = dedupedChain.sort((a, b) => getClass(b.id) - getClass(a.id))
+const chain = [...dedupedChain].sort((a, b) => getClass(b.id) - getClass(a.id))
     console.log('Subject:', subject);
     console.log('Concept found:', conceptId);
     console.log('Chain length:', chain.length);
