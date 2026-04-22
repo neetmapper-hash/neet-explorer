@@ -27,7 +27,7 @@ export default function Sidebar({
 
   const toggleYear = (year: number) => {
     if (selectedYears.includes(year)) {
-      if (selectedYears.length === 1) return; // keep at least one
+      if (selectedYears.length === 1) return;
       onYearsChange(selectedYears.filter((y) => y !== year));
     } else {
       onYearsChange([...selectedYears, year]);
@@ -37,16 +37,16 @@ export default function Sidebar({
   const allSelected = selectedYears.length === AVAILABLE_YEARS.length;
 
   return (
-    <div className="w-56 min-h-screen bg-[#111] border-r border-[#222] flex flex-col p-4 gap-6 shrink-0">
+    <div className="w-56 min-h-screen bg-[#0d0d14] border-r border-[#2a2a3f] flex flex-col p-4 gap-6 shrink-0">
       {/* Logo */}
       <div className="pt-2">
         <div className="text-lg font-bold text-white">🧬 NEET Explorer</div>
-        <div className="text-xs text-[#555] mt-1">5 years · 3 subjects</div>
+        <div className="text-xs text-[#6b6b8a] mt-1">5 years · 3 subjects</div>
       </div>
 
       {/* Navigation */}
       <div>
-        <div className="text-xs text-[#555] uppercase tracking-wider mb-2">
+        <div className="text-xs text-[#6b6b8a] uppercase tracking-wider mb-2">
           Navigate
         </div>
         <div className="flex flex-col gap-1">
@@ -54,8 +54,8 @@ export default function Sidebar({
             onClick={() => onPageChange('heatmap')}
             className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
               currentPage === 'heatmap'
-                ? 'bg-[#ff4b4b22] text-[#ff4b4b] font-medium'
-                : 'text-[#888] hover:text-white hover:bg-[#1e1e1e]'
+                ? 'bg-[#00e6b420] text-[#00e6b4] font-semibold'
+                : 'text-[#a0a0c0] hover:text-white hover:bg-[#1e1e30]'
             }`}
           >
             🔥 Topic Heatmap
@@ -64,8 +64,8 @@ export default function Sidebar({
             onClick={() => onPageChange('ancestry')}
             className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
               currentPage === 'ancestry'
-                ? 'bg-[#ff4b4b22] text-[#ff4b4b] font-medium'
-                : 'text-[#888] hover:text-white hover:bg-[#1e1e1e]'
+                ? 'bg-[#00e6b420] text-[#00e6b4] font-semibold'
+                : 'text-[#a0a0c0] hover:text-white hover:bg-[#1e1e30]'
             }`}
           >
             🧬 Find Ancestry
@@ -75,7 +75,7 @@ export default function Sidebar({
 
       {/* Subject */}
       <div>
-        <div className="text-xs text-[#555] uppercase tracking-wider mb-2">
+        <div className="text-xs text-[#6b6b8a] uppercase tracking-wider mb-2">
           Subject
         </div>
         <div className="flex flex-col gap-1">
@@ -85,8 +85,8 @@ export default function Sidebar({
               onClick={() => onSubjectChange(s)}
               className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                 subject === s
-                  ? 'bg-[#1e1e1e] text-white font-medium'
-                  : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'
+                  ? 'bg-[#1e1e30] text-white font-semibold border border-[#3a3a5a]'
+                  : 'text-[#a0a0c0] hover:text-white hover:bg-[#1a1a28]'
               }`}
             >
               {s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿'} {s}
@@ -95,17 +95,17 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Year filter — only on heatmap page */}
+      {/* Year filter */}
       {currentPage === 'heatmap' && (
         <div>
-          <div className="text-xs text-[#555] uppercase tracking-wider mb-2">
+          <div className="text-xs text-[#6b6b8a] uppercase tracking-wider mb-2">
             Year Filter
           </div>
           <button
             onClick={() =>
               onYearsChange(allSelected ? [2025] : [...AVAILABLE_YEARS])
             }
-            className="text-xs text-[#888] hover:text-white mb-2 transition-colors"
+            className="text-xs text-[#00e6b4] hover:text-white mb-2 transition-colors font-semibold"
           >
             {allSelected ? 'Deselect all' : 'Select all'}
           </button>
@@ -117,18 +117,18 @@ export default function Sidebar({
                 <button
                   key={year}
                   onClick={() => toggleYear(year)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#1a1a1a] transition-colors"
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#1a1a28] transition-colors"
                 >
                   <div
                     className="w-2.5 h-2.5 rounded-full transition-opacity"
                     style={{
                       background: color,
-                      opacity: selected ? 1 : 0.25,
+                      opacity: selected ? 1 : 0.3,
                     }}
                   />
                   <span
-                    className="text-sm transition-colors"
-                    style={{ color: selected ? '#ddd' : '#555' }}
+                    className="text-sm transition-colors font-medium"
+                    style={{ color: selected ? '#e0e0ff' : '#6b6b8a' }}
                   >
                     NEET {year}
                   </span>
@@ -144,7 +144,7 @@ export default function Sidebar({
         <div className="mt-auto">
           <button
             onClick={onBack}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#888] hover:text-white hover:bg-[#1e1e1e] transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#a0a0c0] hover:text-white hover:bg-[#1e1e30] transition-colors"
           >
             ← Back to Heatmap
           </button>
