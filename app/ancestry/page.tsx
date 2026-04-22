@@ -78,7 +78,7 @@ export default function AncestryPage() {
       const res = await fetch('/api/ancestry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: queryText, subject }),
+        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer }),
       });
       const data = await res.json();
       setChain(data.chain ?? [])

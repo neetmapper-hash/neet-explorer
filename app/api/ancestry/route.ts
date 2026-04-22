@@ -43,22 +43,37 @@ function traverseAncestry(
 }
 async function generateAnswer(
   question: string,
-  concept: Concept
+  concept: Concept,
+  options?: Record<string, string>,
+  correctAnswer?: string
 ): Promise<string> {
   const context = `${concept.concept_title}: ${concept.description}`
-  const prompt = `You are a NEET expert. Answer this question directly as a teacher.
-- Start with: The correct option is (X)...
-- Explain WHY it is correct in 2-3 sentences
-- Say why other options are wrong in 1 sentence
-- Max 5 sentences total, no bullet points
-- No markdown formatting
+
+  const optionsBlock = options && Object.keys(options).length > 0
+    ? `OPTIONS:\n${Object.entries(options).map(([k, v]) => `(${k}) ${v}`).join('\n')}`
+    : ''
+
+  const correctLine = correctAnswer
+    ? `THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options?.[correctAnswer] ?? ''}`
+    : ''
+
+  const prompt = `You are a NEET expert. Explain this question to a student.
+- The correct answer is already known — do NOT guess it
+- Start with: "The correct option is (${correctAnswer ?? 'X'})..."
+- Explain WHY that option is correct in 2-3 sentences using the background concept
+- Say briefly why the other options are wrong
+- Max 5 sentences total, no bullet points, no markdown
 - Speak directly as a teacher
 
 BACKGROUND: ${context}
 
 QUESTION: ${question}
 
-ANSWER:`
+${optionsBlock}
+
+${correctLine}
+
+EXPLANATION:`
 
   try {
     const res = await fetch(GROQ_URL, {
@@ -146,7 +161,7 @@ export async function POST(req: NextRequest) {
       'length:',
       GROQ_API_KEY.length
     );
-    const { question, subject } = await req.json();
+    const { question, subject, options, correctAnswer } = await req.json();
 
     if (!question || !subject) {
       return NextResponse.json(
@@ -214,7 +229,7 @@ const chain = [...dedupedChain].sort((a, b) => getClass(b.id) - getClass(a.id))
     console.log('Chain length:', chain.length);
     console.log('Chain:', JSON.stringify(chain.map((c) => c.id)));
     const answer = conceptId 
-  ? await generateAnswer(question, lookup[conceptId])
+  ? await generateAnswer(question, lookup[conceptId], options, correctAnswer)
   : ''
 
 return NextResponse.json({ chain, conceptId, answer })
