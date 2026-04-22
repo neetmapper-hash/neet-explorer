@@ -10,7 +10,7 @@ export default function HeatmapPage() {
 
   const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, ChapterEntry>>>({});
   const [loading, setLoading] = useState(true);
-  const [subject, setSubject] = useState<Subject>('Physics');
+  const [subject, setSubject] = useState<Subject>('Biology');
   const [selectedYears, setSelectedYears] = useState<number[]>([...AVAILABLE_YEARS]);
   const [selectedChapter, setSelectedChapter] = useState<ChapterEntry | null>(null);
   const [expandedQuestion, setExpandedQuestion] = useState<Question | null>(null);
@@ -145,7 +145,7 @@ export default function HeatmapPage() {
                 const pct = Math.round(((chapter.total_count ?? 0) / maxCount) * 100);
                 return (
                   <div
-                    key={chapter.chapter_name}
+                    key={`${subject}-${chapter.chapter_name}`}
                     onClick={() => {
                       setSelectedChapter(chapter);
                       setExpandedQuestion(null);
@@ -203,7 +203,7 @@ export default function HeatmapPage() {
             </div>
 
             {/* ── RIGHT PANEL ── */}
-            <div className="flex-1 overflow-y-auto bg-[#0d0d0d]">
+            <div key={subject} className="flex-1 overflow-y-auto bg-[#0d0d0d]">
               {!selectedChapter ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="text-4xl opacity-20">←</div>
@@ -272,7 +272,7 @@ export default function HeatmapPage() {
                           const isExpanded = expandedQuestion?.question === q.question;
                           return (
                             <div
-                              key={qi}
+                              key={`${subject}-${qi}`}
                               className="rounded-xl border transition-all duration-200"
                               style={{
                                 background: isExpanded ? '#161616' : '#111',
