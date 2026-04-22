@@ -14,6 +14,7 @@ export default function HeatmapPage() {
   const [selectedYears, setSelectedYears] = useState<number[]>([...AVAILABLE_YEARS]);
   const [selectedChapter, setSelectedChapter] = useState<ChapterEntry | null>(null);
   const [expandedQuestion, setExpandedQuestion] = useState<Question | null>(null);
+  const [activeYearFilter, setActiveYearFilter] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -48,7 +49,8 @@ export default function HeatmapPage() {
   // Questions for selected chapter filtered by selected years
   const filteredQuestions: Question[] = selectedChapter
     ? (selectedChapter.questions ?? []).filter(
-        (q) => !q.year || selectedYears.includes(q.year)
+        (q) => (!q.year || selectedYears.includes(q.year)) &&
+               (activeYearFilter === null || q.year === activeYearFilter)
       )
     : [];
 
@@ -235,25 +237,46 @@ export default function HeatmapPage() {
                         Year breakdown
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {yearCards.map(({ year, count }) => (
-                          <div
-                            key={year}
-                            className="flex flex-col items-center px-4 py-3 rounded-lg border"
-                            style={{
-                              background: intensityColor(count, Math.max(...yearCards.map(y => y.count))),
-                              borderColor: '#1e1e1e',
-                              minWidth: '60px',
-                            }}
-                          >
-                            <span className="text-[9px] font-mono text-[#555] mb-1">{year}</span>
-                            <span
-                              className="text-lg font-bold font-mono"
-                              style={{ color: intensityText(count, Math.max(...yearCards.map(y => y.count))) }}
+                        {/* Select All pill */}
+                        <div
+                          onClick={() => setActiveYearFilter(null)}
+                          className="flex flex-col items-center px-3 py-2 rounded-lg border cursor-pointer transition-all"
+                          style={{
+                            background: activeYearFilter === null ? '#ff4b4b22' : '#141414',
+                            borderColor: activeYearFilter === null ? '#ff4b4b55' : '#1e1e1e',
+                            minWidth: '52px',
+                          }}
+                        >
+                          <span className="text-[9px] font-mono mb-1" style={{ color: activeYearFilter === null ? '#ff6b6b' : '#333' }}>ALL</span>
+                          <span className="text-sm font-bold font-mono" style={{ color: activeYearFilter === null ? '#ff4b4b' : '#444' }}>
+                            {yearCards.reduce((s, y) => s + y.count, 0)}
+                          </span>
+                        </div>
+                        {yearCards.map(({ year, count }) => {
+                          const isActive = activeYearFilter === year;
+                          const maxYr = Math.max(...yearCards.map(y => y.count));
+                          return (
+                            <div
+                              key={year}
+                              onClick={() => setActiveYearFilter(isActive ? null : year)}
+                              className="flex flex-col items-center px-4 py-3 rounded-lg border cursor-pointer transition-all"
+                              style={{
+                                background: isActive ? intensityColor(count, maxYr) : '#111',
+                                borderColor: isActive ? '#ff4b4b55' : '#1e1e1e',
+                                minWidth: '60px',
+                                opacity: activeYearFilter !== null && !isActive ? 0.4 : 1,
+                              }}
                             >
-                              {count}
-                            </span>
-                          </div>
-                        ))}
+                              <span className="text-[9px] font-mono text-[#555] mb-1">{year}</span>
+                              <span
+                                className="text-lg font-bold font-mono"
+                                style={{ color: isActive ? intensityText(count, maxYr) : '#444' }}
+                              >
+                                {count}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
