@@ -193,13 +193,22 @@ export async function POST(req: NextRequest) {
     // Traverse ancestry
     const rawChain = traverseAncestry(conceptId, lookup)
 
+// Deduplicate — keep only one concept per chapter
+const seenChapters = new Set<string>()
+const dedupedChain = rawChain.filter(concept => {
+  const parts = concept.id.split('_')
+  const key = parts[1] + '_' + parts[2]
+  if (seenChapters.has(key)) return false
+  seenChapters.add(key)
+  return true
+})
+
 // Sort by class number descending: 12 → 11 → 10 → 9
-// Extract class number from concept ID e.g. bio_c12_ch5_c1 → 12
 const getClass = (id: string) => {
-  try { return parseInt(id.split('_')[1].replace('c', '')) } 
+  try { return parseInt(id.split('_')[1].replace('c', '')) }
   catch { return 0 }
 }
-const chain = rawChain.sort((a, b) => getClass(b.id) - getClass(a.id))
+const chain = dedupedChain.sort((a, b) => getClass(b.id) - getClass(a.id))
     console.log('Subject:', subject);
     console.log('Concept found:', conceptId);
     console.log('Chain length:', chain.length);
