@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+
+
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -35,15 +35,17 @@ async function groqCall(prompt: string, maxTokens: number): Promise<string | nul
 }
 
 // Pull real NEET questions related to this concept from heatmap_data.json
-function findNEETQuestions(
+async function findNEETQuestions(
   conceptTitle: string,
   keyTerms: string[],
   chapterNum: number,
-  classNum: number
-): any[] {
+  classNum: number,
+  origin: string
+): Promise<any[]> {
   try {
-    const filePath = join(process.cwd(), 'public', 'heatmap_data.json');
-    const heatmapData = JSON.parse(readFileSync(filePath, 'utf-8'));
+    
+    const res = await fetch(`${origin}/heatmap_data.json`);
+    const heatmapData = await res.json();
 
     const allQuestions: any[] = [];
 
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Pull real NEET questions
-    const neetQuestions = findNEETQuestions(concept_title, key_terms ?? [], chapter, classNum);
+    const neetQuestions = await findNEETQuestions(concept_title, key_terms ?? [], chapter, classNum, req.nextUrl.origin);
     const neetCount = neetQuestions.length;
     const generateCount = Math.max(3 - neetCount, 1) + (batch ?? 0);
 
