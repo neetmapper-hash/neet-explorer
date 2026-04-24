@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChapterEntry, Question, Subject, AVAILABLE_YEARS } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
+import { groupChaptersByTopic } from '@/lib/topics';
+
+type ViewMode = 'chapter' | 'topic';
 
 export default function HeatmapPage() {
   const router = useRouter();
@@ -15,6 +18,8 @@ export default function HeatmapPage() {
   const [selectedChapter, setSelectedChapter] = useState<ChapterEntry | null>(null);
   const [expandedQuestion, setExpandedQuestion] = useState<Question | null>(null);
   const [activeYearFilter, setActiveYearFilter] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('chapter');
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function load() {
@@ -31,22 +36,20 @@ export default function HeatmapPage() {
     load();
   }, []);
 
-  // Auto-select first chapter when subject changes
   useEffect(() => {
     setSelectedChapter(null);
     setExpandedQuestion(null);
+    setExpandedTopics(new Set());
   }, [subject]);
 
   const subjectData = heatmapData[subject] ?? {};
 
-  // Sort chapters by total count descending
   const sortedChapters = Object.values(subjectData).sort(
     (a, b) => (b.total_count ?? 0) - (a.total_count ?? 0)
   );
 
   const maxCount = sortedChapters[0]?.total_count ?? 1;
 
-  // Questions for selected chapter filtered by selected years
   const filteredQuestions: Question[] = selectedChapter
     ? (selectedChapter.questions ?? []).filter(
         (q) => (!q.year || selectedYears.includes(q.year)) &&
@@ -54,7 +57,6 @@ export default function HeatmapPage() {
       )
     : [];
 
-  // Year cards: only years that have questions
   const yearCards = selectedChapter
     ? selectedYears
         .map((yr) => ({
@@ -77,6 +79,21 @@ export default function HeatmapPage() {
     0
   );
 
+  const toggleTopic = (topic: string) => {
+    setExpandedTopics(prev => {
+      const next = new Set(prev);
+      if (next.has(topic)) next.delete(topic);
+      else next.add(topic);
+      return next;
+    });
+  };
+
+  const handleChapterClick = (chapter: ChapterEntry) => {
+    setSelectedChapter(chapter);
+    setExpandedQuestion(null);
+    setActiveYearFilter(null);
+  };
+
   function intensityColor(count: number, max: number) {
     const ratio = max > 0 ? count / max : 0;
     if (ratio === 0) return '#1a1a1a';
@@ -94,6 +111,173 @@ export default function HeatmapPage() {
     if (ratio < 0.7) return '#86efac';
     return '#ff6b6b';
   }
+
+  // ── CHAPTER LIST (existing view) ──────────────────────────────────────────
+  const renderChapterList = () => (
+    <>
+      {sortedChapters.map((chapter, i) => {
+        const isActive = selectedChapter?.chapter_name === chapter.chapter_name;
+        const pct = Math.round(((chapter.total_count ?? 0) / maxCount) * 100);
+        return (
+          <div
+            key={`${subject}-${chapter.chapter_name}`}
+            onClick={() => handleChapterClick(chapter)}
+            className="px-4 py-3 cursor-pointer border-b border-[#0f0f0f] transition-all relative"
+            style={{
+              background: isActive ? '#1a1a1a' : 'transparent',
+              borderLeft: isActive ? '2px solid #ff4b4b' : '2px solid transparent',
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-20 pointer-events-none"
+              style={{
+                background: isActive
+                  ? `linear-gradient(90deg, #ff4b4b15 0%, transparent ${pct}%)`
+                  : `linear-gradient(90deg, #ffffff05 0%, transparent ${pct}%)`,
+              }}
+            />
+            <div className="flex items-center gap-2 relative z-10">
+              <span
+                className="text-[10px] font-mono w-5 flex-shrink-0"
+                style={{ color: i < 3 ? '#ff4b4b88' : '#2a2a2a' }}
+              >
+                {i + 1}
+              </span>
+              <span
+                className="text-[11px] flex-1 leading-tight"
+                style={{ color: isActive ? '#f0f0f0' : '#777' }}
+              >
+                {chapter.chapter_name}
+              </span>
+              <span
+                className="text-[10px] font-mono font-bold flex-shrink-0"
+                style={{ color: isActive ? '#ff4b4b' : '#333' }}
+              >
+                {chapter.total_count}
+              </span>
+            </div>
+            <div className="mt-1.5 h-[2px] bg-[#1a1a1a] rounded relative z-10 ml-7">
+              <div
+                className="h-full rounded transition-all duration-500"
+                style={{
+                  width: `${pct}%`,
+                  background: isActive
+                    ? 'linear-gradient(90deg, #ff4b4b, #ff8c00)'
+                    : '#2a2a2a',
+                }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+
+  // ── TOPIC LIST (new view) ─────────────────────────────────────────────────
+  const renderTopicList = () => {
+    const chaptersWithMeta = sortedChapters.map(ch => ({
+      ...ch,
+      chapter_name: ch.chapter_name,
+      filteredTotal: ch.total_count ?? 0,
+    }));
+
+    const topicGroups = groupChaptersByTopic(chaptersWithMeta, subject);
+    const maxTopicTotal = Math.max(...topicGroups.map(g => g.total));
+
+    return (
+      <>
+        {topicGroups.map(({ topic, chapters, total }) => {
+          const isExpanded = expandedTopics.has(topic);
+          const topicPct = Math.round((total / maxTopicTotal) * 100);
+          const hasActiveChapter = chapters.some(
+            (ch: any) => selectedChapter?.chapter_name === ch.chapter_name
+          );
+
+          return (
+            <div key={topic} className="border-b border-[#0f0f0f]">
+              {/* Topic header */}
+              <div
+                onClick={() => toggleTopic(topic)}
+                className="flex items-center gap-2 px-4 py-3 cursor-pointer transition-all"
+                style={{
+                  background: hasActiveChapter ? '#161616' : 'transparent',
+                  borderLeft: hasActiveChapter ? '2px solid #ff4b4b66' : '2px solid transparent',
+                }}
+              >
+                <span className="text-[#333] text-[9px] w-3 flex-shrink-0">
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+                <span
+                  className="text-[11px] font-semibold flex-1 leading-tight"
+                  style={{ color: hasActiveChapter ? '#f0f0f0' : '#888' }}
+                >
+                  {topic}
+                </span>
+                <span className="text-[9px] font-mono text-[#333] mr-1">
+                  {chapters.length}ch
+                </span>
+                <span
+                  className="text-[10px] font-mono font-bold flex-shrink-0"
+                  style={{ color: hasActiveChapter ? '#ff4b4b' : '#444' }}
+                >
+                  {total}
+                </span>
+              </div>
+
+              {/* Topic frequency bar */}
+              <div className="mx-4 mb-1">
+                <div className="h-[2px] bg-[#1a1a1a] rounded">
+                  <div
+                    className="h-full rounded"
+                    style={{
+                      width: `${topicPct}%`,
+                      background: 'linear-gradient(90deg, #ff4b4b88, #ff8c0088)',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Expanded chapters */}
+              {isExpanded && (
+                <div className="bg-[#0a0a0a]">
+                  {chapters
+                    .sort((a: any, b: any) => (b.total_count ?? 0) - (a.total_count ?? 0))
+                    .map((chapter: any, i: number) => {
+                      const isActive = selectedChapter?.chapter_name === chapter.chapter_name;
+                      const pct = Math.round(((chapter.total_count ?? 0) / maxCount) * 100);
+                      return (
+                        <div
+                          key={chapter.chapter_name}
+                          onClick={() => handleChapterClick(chapter)}
+                          className="flex items-center gap-2 pl-8 pr-4 py-2.5 cursor-pointer border-b border-[#0f0f0f] transition-all"
+                          style={{
+                            background: isActive ? '#1a1a1a' : 'transparent',
+                            borderLeft: isActive ? '2px solid #ff4b4b' : '2px solid transparent',
+                          }}
+                        >
+                          <span
+                            className="text-[10px] flex-1 leading-tight"
+                            style={{ color: isActive ? '#f0f0f0' : '#666' }}
+                          >
+                            {chapter.chapter_name}
+                          </span>
+                          <span
+                            className="text-[10px] font-mono font-bold flex-shrink-0"
+                            style={{ color: isActive ? '#ff4b4b' : '#333' }}
+                          >
+                            {chapter.total_count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-[#080808]">
@@ -132,76 +316,42 @@ export default function HeatmapPage() {
         ) : (
           <div className="flex flex-1 overflow-hidden">
 
-            {/* ── LEFT PANEL: Chapter List ── */}
+            {/* ── LEFT PANEL ── */}
             <div
-              className="flex-shrink-0 overflow-y-auto border-r border-[#1a1a1a]"
+              className="flex-shrink-0 overflow-y-auto border-r border-[#1a1a1a] flex flex-col"
               style={{ width: '260px' }}
             >
-              <div className="px-3 py-2 border-b border-[#111] sticky top-0 bg-[#0d0d0d] z-10">
+              {/* View toggle */}
+              <div className="px-3 py-2 border-b border-[#111] sticky top-0 bg-[#0d0d0d] z-10 flex items-center justify-between">
                 <span className="text-[9px] font-mono text-[#333] uppercase tracking-widest">
-                  Ranked by frequency
+                  {viewMode === 'chapter' ? 'Ranked by frequency' : 'By topic'}
                 </span>
-              </div>
-              {sortedChapters.map((chapter, i) => {
-                const isActive = selectedChapter?.chapter_name === chapter.chapter_name;
-                const pct = Math.round(((chapter.total_count ?? 0) / maxCount) * 100);
-                return (
-                  <div
-                    key={`${subject}-${chapter.chapter_name}`}
-                    onClick={() => {
-                      setSelectedChapter(chapter);
-                      setExpandedQuestion(null);
-                    }}
-                    className="px-4 py-3 cursor-pointer border-b border-[#0f0f0f] transition-all relative"
+                <div className="flex gap-1 bg-[#111] border border-[#1e1e1e] rounded p-0.5">
+                  <button
+                    onClick={() => setViewMode('chapter')}
+                    className="px-2 py-0.5 rounded text-[9px] font-mono transition-colors"
                     style={{
-                      background: isActive ? '#1a1a1a' : 'transparent',
-                      borderLeft: isActive ? '2px solid #ff4b4b' : '2px solid transparent',
+                      background: viewMode === 'chapter' ? '#1e1e1e' : 'transparent',
+                      color: viewMode === 'chapter' ? '#f0f0f0' : '#444',
                     }}
                   >
-                    {/* Fill bar background */}
-                    <div
-                      className="absolute inset-0 opacity-20 pointer-events-none"
-                      style={{
-                        background: isActive
-                          ? `linear-gradient(90deg, #ff4b4b15 0%, transparent ${pct}%)`
-                          : `linear-gradient(90deg, #ffffff05 0%, transparent ${pct}%)`,
-                      }}
-                    />
-                    <div className="flex items-center gap-2 relative z-10">
-                      <span
-                        className="text-[10px] font-mono w-5 flex-shrink-0"
-                        style={{ color: i < 3 ? '#ff4b4b88' : '#2a2a2a' }}
-                      >
-                        {i + 1}
-                      </span>
-                      <span
-                        className="text-[11px] flex-1 leading-tight"
-                        style={{ color: isActive ? '#f0f0f0' : '#777' }}
-                      >
-                        {chapter.chapter_name}
-                      </span>
-                      <span
-                        className="text-[10px] font-mono font-bold flex-shrink-0"
-                        style={{ color: isActive ? '#ff4b4b' : '#333' }}
-                      >
-                        {chapter.total_count}
-                      </span>
-                    </div>
-                    {/* Mini bar */}
-                    <div className="mt-1.5 h-[2px] bg-[#1a1a1a] rounded relative z-10 ml-7">
-                      <div
-                        className="h-full rounded transition-all duration-500"
-                        style={{
-                          width: `${pct}%`,
-                          background: isActive
-                            ? 'linear-gradient(90deg, #ff4b4b, #ff8c00)'
-                            : '#2a2a2a',
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                    Chapter
+                  </button>
+                  <button
+                    onClick={() => setViewMode('topic')}
+                    className="px-2 py-0.5 rounded text-[9px] font-mono transition-colors"
+                    style={{
+                      background: viewMode === 'topic' ? '#1e1e1e' : 'transparent',
+                      color: viewMode === 'topic' ? '#ff4b4b' : '#444',
+                    }}
+                  >
+                    Topic
+                  </button>
+                </div>
+              </div>
+
+              {/* Chapter or Topic list */}
+              {viewMode === 'chapter' ? renderChapterList() : renderTopicList()}
             </div>
 
             {/* ── RIGHT PANEL ── */}
@@ -230,14 +380,13 @@ export default function HeatmapPage() {
                     </div>
                   </div>
 
-                  {/* Year cards — only non-zero */}
+                  {/* Year cards */}
                   {yearCards.length > 0 && (
                     <div className="mb-6">
                       <div className="text-[9px] font-mono text-[#333] uppercase tracking-widest mb-3">
                         Year breakdown
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {/* Select All pill */}
                         <div
                           onClick={() => setActiveYearFilter(null)}
                           className="flex flex-col items-center px-3 py-2 rounded-lg border cursor-pointer transition-all"
@@ -302,12 +451,9 @@ export default function HeatmapPage() {
                                 borderColor: isExpanded ? '#ff4b4b33' : '#1a1a1a',
                               }}
                             >
-                              {/* Question row */}
                               <div
                                 className="flex items-start gap-3 px-4 py-3 cursor-pointer"
-                                onClick={() =>
-                                  setExpandedQuestion(isExpanded ? null : q)
-                                }
+                                onClick={() => setExpandedQuestion(isExpanded ? null : q)}
                               >
                                 {q.year && (
                                   <span className="text-[9px] font-mono text-[#ff4b4b66] flex-shrink-0 mt-0.5 pt-[1px]">
@@ -328,15 +474,12 @@ export default function HeatmapPage() {
                                 </span>
                               </div>
 
-                              {/* Expanded: options + ancestry */}
                               {isExpanded && (
                                 <div className="px-4 pb-4 border-t border-[#1e1e1e]">
-                                  {/* Options */}
                                   {q.options && Object.keys(q.options).length > 0 && (
                                     <div className="flex flex-col gap-2 mt-3">
                                       {Object.entries(q.options).map(([num, text]) => {
-                                        const isCorrect =
-                                          String(num) === String(q.correct_answer);
+                                        const isCorrect = String(num) === String(q.correct_answer);
                                         return (
                                           <div
                                             key={num}
@@ -352,17 +495,13 @@ export default function HeatmapPage() {
                                             </span>
                                             <span className="flex-1 leading-relaxed">{text}</span>
                                             {isCorrect && (
-                                              <span className="text-green-400 flex-shrink-0 text-[10px]">
-                                                ✓
-                                              </span>
+                                              <span className="text-green-400 flex-shrink-0 text-[10px]">✓</span>
                                             )}
                                           </div>
                                         );
                                       })}
                                     </div>
                                   )}
-
-                                  {/* Find Ancestry button */}
                                   <button
                                     onClick={() => handleFindAncestry(q)}
                                     className="mt-3 w-full py-2.5 rounded-lg text-[11px] font-semibold transition-colors"
