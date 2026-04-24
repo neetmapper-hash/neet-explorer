@@ -1,10 +1,8 @@
-// lib/topics.ts
-
 import type { Subject } from '@/lib/types';
 
 export interface TopicGroup {
   topic: string;
-  chapters: string[]; // must match chapter_name values in your heatmap data
+  chapters: string[];
 }
 
 export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
@@ -16,6 +14,7 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Biological Classification',
         'Plant Kingdom',
         'Animal Kingdom',
+        'Diversity in Living Organisms',
       ],
     },
     {
@@ -32,7 +31,7 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Mineral Nutrition',
         'Photosynthesis in Higher Plants',
         'Respiration in Plants',
-        'Plant Growth and Development',
+        'Life Processes',
       ],
     },
     {
@@ -41,6 +40,8 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Cell - The Unit of Life',
         'Biomolecules',
         'Cell Cycle and Cell Division',
+        'Fundamental Unit of Life',
+        'Tissues',
       ],
     },
     {
@@ -55,10 +56,11 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Digestion and Absorption',
         'Breathing and Exchange of Gases',
         'Body Fluids and Circulation',
-        'Excretory Products and their Elimination',
+        'Excretory Products and Elimination',
         'Locomotion and Movement',
         'Neural Control and Coordination',
         'Chemical Coordination and Integration',
+        'Control and Coordination',
       ],
     },
     {
@@ -67,6 +69,8 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Sexual Reproduction in Flowering Plants',
         'Human Reproduction',
         'Reproductive Health',
+        'Reproduction in Organisms',
+        'How do Organisms Reproduce',
       ],
     },
     {
@@ -75,6 +79,7 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Principles of Inheritance and Variation',
         'Molecular Basis of Inheritance',
         'Evolution',
+        'Heredity and Evolution',
       ],
     },
     {
@@ -83,13 +88,14 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Organisms and Populations',
         'Ecosystem',
         'Biodiversity and Conservation',
+        'Our Environment',
       ],
     },
     {
       topic: 'Applied Biology',
       chapters: [
         'Microbes in Human Welfare',
-        'Biotechnology: Principles and Processes',
+        'Biotechnology - Principles and Processes',
         'Biotechnology and its Applications',
         'Human Health and Disease',
         'Strategies for Enhancement in Food Production',
@@ -102,16 +108,19 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
       topic: 'Basic Concepts',
       chapters: [
         'Some Basic Concepts of Chemistry',
-        'States of Matter',
         'Thermodynamics',
         'Equilibrium',
+        'Atoms and Molecules',
+        'Is Matter Around Us Pure',
+        'Chemical Reactions and Equations',
       ],
     },
     {
       topic: 'Atomic Structure & Periodicity',
       chapters: [
         'Structure of Atom',
-        'Classification of Elements and Periodicity in Properties',
+        'Structure of the Atom',
+        'Classification of Elements and Periodicity',
       ],
     },
     {
@@ -131,21 +140,19 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
       topic: 'Solutions',
       chapters: [
         'Solutions',
+        'Acids, Bases and Salts',
       ],
     },
     {
       topic: 'Redox Reactions',
       chapters: [
         'Redox Reactions',
+        'Metals and Non-metals',
       ],
     },
     {
       topic: 'Block Elements',
       chapters: [
-        'Hydrogen',
-        's-Block Elements',
-        'p-Block Elements',
-        'The p-Block Elements',
         'd and f Block Elements',
         'Coordination Compounds',
       ],
@@ -153,10 +160,9 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
     {
       topic: 'Organic Chemistry Basics',
       chapters: [
-        'Organic Chemistry - Some Basic Principles and Techniques',
+        'Organic Chemistry - Basic Principles',
         'Hydrocarbons',
-        'Haloalkanes and Haloarenes',
-        'Environmental Chemistry',
+        'Carbon and its Compounds',
       ],
     },
     {
@@ -187,6 +193,7 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
         'Motion in a Plane',
         'Laws of Motion',
         'Work, Energy and Power',
+        'Work and Energy',
         'System of Particles and Rotational Motion',
         'Gravitation',
       ],
@@ -238,6 +245,7 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
       chapters: [
         'Electromagnetic Induction',
         'Alternating Current',
+        'Electromagnetic Waves',
       ],
     },
     {
@@ -245,6 +253,8 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
       chapters: [
         'Ray Optics and Optical Instruments',
         'Wave Optics',
+        'Light - Reflection and Refraction',
+        'Human Eye and Colourful World',
       ],
     },
     {
@@ -258,32 +268,13 @@ export const TOPIC_GROUPS: Record<Subject, TopicGroup[]> = {
     {
       topic: 'Semiconductor & Communication',
       chapters: [
-        'Semiconductor Electronics: Materials, Devices and Simple Circuits',
+        'Semiconductor Electronics',
         'Communication Systems',
       ],
     },
   ],
 };
 
-// Helper: given a chapter name and subject, return its topic
-export function getTopicForChapter(
-  chapterName: string,
-  subject: Subject
-): string | null {
-  const groups = TOPIC_GROUPS[subject];
-  for (const group of groups) {
-    if (group.chapters.some(c =>
-      c.toLowerCase() === chapterName.toLowerCase() ||
-      chapterName.toLowerCase().includes(c.toLowerCase()) ||
-      c.toLowerCase().includes(chapterName.toLowerCase())
-    )) {
-      return group.topic;
-    }
-  }
-  return null;
-}
-
-// Helper: group a list of chapter entries by topic
 export function groupChaptersByTopic<T extends { chapter_name: string }>(
   chapters: T[],
   subject: Subject
@@ -295,9 +286,7 @@ export function groupChaptersByTopic<T extends { chapter_name: string }>(
   for (const group of groups) {
     const matched = chapters.filter(ch =>
       group.chapters.some(name =>
-        name.toLowerCase() === ch.chapter_name.toLowerCase() ||
-        ch.chapter_name.toLowerCase().includes(name.toLowerCase()) ||
-        name.toLowerCase().includes(ch.chapter_name.toLowerCase())
+        name.toLowerCase() === ch.chapter_name.toLowerCase()
       )
     );
     if (matched.length > 0) {
@@ -306,20 +295,19 @@ export function groupChaptersByTopic<T extends { chapter_name: string }>(
         topic: group.topic,
         chapters: matched,
         total: matched.reduce((sum: number, ch: any) =>
-          sum + (ch.filteredTotal ?? ch.total ?? 0), 0
+          sum + (ch.filteredTotal ?? ch.total_count ?? ch.total ?? 0), 0
         ),
       });
     }
   }
 
-  // Any chapters not matched to a topic go into Uncategorised
   const unmatched = chapters.filter(ch => !assigned.has(ch.chapter_name));
   if (unmatched.length > 0) {
     result.push({
       topic: 'Uncategorised',
       chapters: unmatched,
       total: unmatched.reduce((sum: number, ch: any) =>
-        sum + (ch.filteredTotal ?? ch.total ?? 0), 0
+        sum + (ch.filteredTotal ?? ch.total_count ?? ch.total ?? 0), 0
       ),
     });
   }
