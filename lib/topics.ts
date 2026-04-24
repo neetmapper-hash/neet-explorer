@@ -1,6 +1,6 @@
 // lib/topics.ts
 
-export type Subject = 'Biology' | 'Physics' | 'Chemistry';
+import type { Subject } from '@/lib/types';
 
 export interface TopicGroup {
   topic: string;
