@@ -20,9 +20,9 @@ const SAMPLES: Record<Subject, string[]> = {
     'Which type of bond is present in NaCl?',
   ],
   Biology: [
-    'Which enzyme joins DNA fragments in recombinant DNA technology?',
-    'What is the role of ribosome in protein synthesis?',
-    'How does transpiration help in ascent of sap?',
+    'What is Plasma Membrane?',
+    'What is Nomenclature?',
+    'What is Autotrophic Nutrition?',
     'What is the significance of meiosis in reproduction?',
   ],
 };
