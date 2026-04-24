@@ -84,13 +84,103 @@ function buildChapterIndex(data: any): Record<string, Concept[]> {
   return index;
 }
 
-// Chapter name index: chapterKey → chapter_name
+// Real NCERT chapter titles keyed by class/chapter path
+const CHAPTER_TITLES: Record<string, string> = {
+  // ── BIOLOGY Class 9 ──────────────────────────────────────────────────────
+  'class_9_chapter_5_part1': 'Cell - The Unit of Life',
+  'class_9_chapter_6_part1': 'Tissues in Living Organisms',
+  'class_9_chapter_12_part1': 'Food Security and Agriculture',
+
+  // ── BIOLOGY Class 10 ─────────────────────────────────────────────────────
+  'class_10_chapter_5_part1': 'Life Processes - Nutrition Respiration Transport',
+  'class_10_chapter_6_part1': 'Control and Coordination - Nervous Hormonal',
+  'class_10_chapter_7_part1': 'Reproduction in Organisms',
+  'class_10_chapter_8_part1': 'Heredity Evolution Genetics Variation',
+  'class_10_chapter_13_part1': 'Environment and Ecosystem',
+
+  // ── BIOLOGY Class 11 ─────────────────────────────────────────────────────
+  'class_11_chapter_1_part1': 'The Living World - Biodiversity Taxonomy',
+  'class_11_chapter_2_part1': 'Biological Classification - Kingdoms',
+  'class_11_chapter_3_part1': 'Plant Kingdom - Algae Bryophytes Pteridophytes',
+  'class_11_chapter_4_part1': 'Animal Kingdom - Classification Levels',
+  'class_11_chapter_5_part1': 'Morphology of Flowering Plants',
+  'class_11_chapter_6_part1': 'Anatomy of Plants - Tissues',
+  'class_11_chapter_7_part1': 'Structural Organisation in Animals - Tissues Organs',
+  'class_11_chapter_8_part1': 'Cell - The Unit of Life - Organelles Membrane',
+  'class_11_chapter_9_part1': 'Biomolecules - Proteins Enzymes Carbohydrates Lipids',
+  'class_11_chapter_10_part1': 'Cell Cycle and Cell Division - Mitosis Meiosis',
+  'class_11_chapter_11_part1': 'Photosynthesis in Higher Plants',
+  'class_11_chapter_12_part1': 'Respiration in Plants - ATP Energy',
+  'class_11_chapter_13_part1': 'Plant Growth and Development - Hormones',
+  'class_11_chapter_14_part1': 'Digestion and Absorption',
+  'class_11_chapter_15_part1': 'Body Fluids and Circulation - Blood Heart',
+  'class_11_chapter_16_part1': 'Excretory Products and Elimination - Kidney Nephron',
+  'class_11_chapter_17_part1': 'Locomotion and Movement - Muscles Joints',
+  'class_11_chapter_18_part1': 'Neural Control and Coordination - Nervous System Brain',
+  'class_11_chapter_19_part1': 'Chemical Coordination - Endocrine Hormones Insulin',
+
+  // ── BIOLOGY Class 12 ─────────────────────────────────────────────────────
+  'class_12_chapter_2_part1': 'Sexual Reproduction in Flowering Plants',
+  'class_12_chapter_3_part1': 'Human Reproduction - Male Female Reproductive System',
+  'class_12_chapter_4_part1': 'Molecular Basis of Inheritance - DNA RNA Replication',
+  'class_12_chapter_5_part1': 'Principles of Inheritance - Genetics Mendel',
+  'class_12_chapter_6_part1': 'Evolution - Origin of Life Natural Selection',
+  'class_12_chapter_7_part1': 'Human Health and Disease - Immunity Innate Acquired Pathogens Cancer AIDS',
+  'class_12_chapter_8_part1': 'Microbes in Human Welfare - Biotechnology Applications',
+  'class_12_chapter_9_part1': 'Biotechnology Principles and Processes - Recombinant DNA',
+  'class_12_chapter_10_part1': 'Biotechnology and its Applications',
+  'class_12_chapter_11_part1': 'Organisms and Populations - Ecology',
+  'class_12_chapter_12_part1': 'Ecosystem - Food Chain Energy Flow',
+  'class_12_chapter_13_part1': 'Biodiversity and Conservation',
+
+  // ── CHEMISTRY Class 9 ────────────────────────────────────────────────────
+  'class_9_chapter_1_part1': 'Matter - Particles States of Matter',
+  'class_9_chapter_2_part1': 'Is Matter Around Us Pure - Mixtures Solutions',
+  'class_9_chapter_3_part1': 'Atoms and Molecules - Dalton Laws Chemical Combination',
+  'class_9_chapter_4_part1': 'Structure of the Atom - Electrons Protons Neutrons',
+
+  // ── CHEMISTRY Class 10 ───────────────────────────────────────────────────
+  'class_10_chapter_1_part1': 'Chemical Reactions and Equations',
+  'class_10_chapter_2_part1': 'Acids Bases and Salts - pH Neutralisation',
+  'class_10_chapter_3_part1': 'Metals and Non-metals - Reactivity Series',
+  'class_10_chapter_4_part1': 'Carbon and its Compounds - Covalent Bonding Organic',
+
+  // ── CHEMISTRY Class 11 Part 1 ────────────────────────────────────────────
+  'class_11_chapter_1_part1': 'Some Basic Concepts of Chemistry - Mole Stoichiometry',
+  'class_11_chapter_2_part1': 'Structure of Atom - Orbitals Quantum Numbers',
+  'class_11_chapter_3_part1': 'Classification of Elements and Periodicity',
+  'class_11_chapter_4_part1': 'Chemical Bonding and Molecular Structure',
+  'class_11_chapter_5_part1': 'Thermodynamics - Enthalpy Entropy Gibbs Energy',
+  'class_11_chapter_6_part1': 'Equilibrium - Le Chatelier Kp Kc Ionic',
+
+  // ── CHEMISTRY Class 11 Part 2 ────────────────────────────────────────────
+  'class_11_chapter_1_part2': 'Redox Reactions - Oxidation Reduction',
+  'class_11_chapter_2_part2': 'Organic Chemistry Basic Principles and Techniques',
+  'class_11_chapter_3_part2': 'Hydrocarbons - Alkanes Alkenes Alkynes Benzene',
+
+  // ── CHEMISTRY Class 12 Part 1 ────────────────────────────────────────────
+  'class_12_chapter_1_part1': 'Solutions - Concentration Colligative Properties',
+  'class_12_chapter_2_part1': 'Electrochemistry - Galvanic Electrolytic Cells Nernst',
+  'class_12_chapter_3_part1': 'Chemical Kinetics - Rate Laws Activation Energy',
+  'class_12_chapter_4_part1': 'd and f Block Elements - Transition Metals',
+  'class_12_chapter_5_part1': 'Coordination Compounds - Ligands CFSE Werner',
+
+  // ── CHEMISTRY Class 12 Part 2 ────────────────────────────────────────────
+  'class_12_chapter_1_part2': 'Haloalkanes and Haloarenes',
+  'class_12_chapter_2_part2': 'Alcohols Phenols and Ethers',
+  'class_12_chapter_3_part2': 'Aldehydes Ketones and Carboxylic Acids',
+  'class_12_chapter_4_part2': 'Amines - Classification Properties Reactions',
+  'class_12_chapter_5_part2': 'Biomolecules - Carbohydrates Proteins Nucleic Acids',
+};
+
+// Chapter name index: chapterKey → real title or fallback
 function buildChapterNames(data: any): Record<string, string> {
   const names: Record<string, string> = {};
   for (const [classKey, classData] of Object.entries(data.classes) as any[]) {
     for (const [chapterKey, chapterData] of Object.entries((classData as any).chapters) as any[]) {
       const key = `${classKey}_${chapterKey}`;
-      names[key] = (chapterData as any).chapter_name ?? chapterKey;
+      // Use real NCERT title if available, otherwise fallback to stored name
+      names[key] = CHAPTER_TITLES[key] ?? (chapterData as any).chapter_name ?? chapterKey;
     }
   }
   return names;
