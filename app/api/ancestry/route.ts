@@ -122,26 +122,29 @@ async function generateAnswer(
   correctAnswer?: string
 ): Promise<string> {
   const context = `${concept.concept_title}: ${concept.description}`;
-  const optionsBlock = options && Object.keys(options).length > 0
-    ? `OPTIONS:\n${Object.entries(options).map(([k, v]) => `(${k}) ${v}`).join('\n')}`
-    : '';
-  const correctLine = correctAnswer
-    ? `THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options?.[correctAnswer] ?? ''}`
-    : '';
+  const hasOptions = options && Object.keys(options).length > 0 && correctAnswer;
 
-  const prompt = `You are a NEET expert. Explain this question to a student.
-- The correct answer is already known — do NOT guess it
-- Start with: "The correct option is (${correctAnswer ?? 'X'})..."
+  const prompt = hasOptions
+    ? `You are a NEET expert. Explain this question to a student.
+- Start with: "The correct option is (${correctAnswer})..."
 - Explain WHY that option is correct in 2-3 sentences using the background concept
 - Say briefly why the other options are wrong
 - Max 5 sentences total, no bullet points, no markdown
-- Speak directly as a teacher
 
 BACKGROUND: ${context}
 QUESTION: ${question}
-${optionsBlock}
-${correctLine}
-EXPLANATION:`;
+OPTIONS:
+${Object.entries(options!).map(([k, v]) => `(${k}) ${v}`).join('\n')}
+THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options![correctAnswer!] ?? ''}
+EXPLANATION:`
+    : `You are a NEET expert. Answer this question for a student in 3-4 sentences.
+- Answer directly and clearly, no mention of options
+- Use the background concept to explain
+- No bullet points, no markdown, speak as a teacher
+
+BACKGROUND: ${context}
+QUESTION: ${question}
+ANSWER:`;
 
   return await groqCall(prompt, 300, 0.3) ?? '';
 }
