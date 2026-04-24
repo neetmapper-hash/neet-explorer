@@ -153,6 +153,41 @@ No explanation.`;
   return null;
 }
 
+async function detectSubjectFromQuestion(question: string): Promise<string> {
+  const prompt = `You are a NEET exam expert. Which subject does this question belong to?
+Question: ${question}
+Reply with exactly one word — Biology, Chemistry, or Physics. Nothing else.`;
+
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 5,
+        temperature: 0,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const result = data.choices[0].message.content.trim();
+      if (['Biology', 'Chemistry', 'Physics'].includes(result)) return result;
+      if (result.toLowerCase().includes('bio')) return 'Biology';
+      if (result.toLowerCase().includes('chem')) return 'Chemistry';
+      if (result.toLowerCase().includes('phys')) return 'Physics';
+    }
+  } catch (e) {
+    console.error('Subject detection failed:', e);
+  }
+
+  return 'Biology';
+}
+
 export async function POST(req: NextRequest) {
   try {
     console.log(
@@ -161,14 +196,18 @@ export async function POST(req: NextRequest) {
       'length:',
       GROQ_API_KEY.length
     );
-    const { question, subject, options, correctAnswer } = await req.json();
+    const { question, subject: providedSubject, options, correctAnswer } = await req.json();
 
-    if (!question || !subject) {
+    if (!question) {
       return NextResponse.json(
-        { error: 'question and subject are required' },
+        { error: 'question is required' },
         { status: 400 }
       );
     }
+
+    // Auto-detect subject if not provided (free-text questions)
+    const subject = providedSubject ?? await detectSubjectFromQuestion(question);
+    console.log('Subject:', subject, '| Source:', providedSubject ? 'provided' : 'auto-detected');
 
     // Load concept data
     let conceptData: any;
