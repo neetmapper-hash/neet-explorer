@@ -210,15 +210,20 @@ function buildTree(
     for (const parentId of concept.builds_upon || []) traverseUp(parentId, visited)
   }
 
-  function traverseDown(id: string, visited = new Set<string>()) {
-    if (visited.has(id)) return
-    visited.add(id); includedIds.add(id)
-    for (const childId of (reverseIndex.get(id) || [])) traverseDown(childId, visited)
+  // Only direct children (one level down) — not recursive
+  // This prevents Class 9 chapters pulling in unrelated Class 12 concepts
+  // A concept shows as child only if it DIRECTLY builds_upon a selected concept
+  function getDirectChildren(id: string): string[] {
+    return reverseIndex.get(id) || []
   }
 
   for (const concept of selectedConcepts) {
     traverseUp(concept.concept_id)
-    traverseDown(concept.concept_id)
+    includedIds.add(concept.concept_id)
+    // One level down only — direct children regardless of class
+    for (const childId of getDirectChildren(concept.concept_id)) {
+      includedIds.add(childId)
+    }
   }
 
   const NODE_W = 240
