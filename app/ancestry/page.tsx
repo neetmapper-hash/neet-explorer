@@ -102,13 +102,14 @@ export default function AncestryPage() {
   }, [question]);
 
   return (
-    <div className="flex min-h-screen bg-[#0f0f0f]">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar
         currentPage="ancestry"
         subject={subject}
         selectedYears={[2021, 2022, 2023, 2024, 2025]}
         onPageChange={(page) => {
           if (page === 'heatmap') router.push('/heatmap');
+          if (page === 'concept-map') router.push('/concept-map');
         }}
         onSubjectChange={(s) => {
           setSubject(s);
@@ -124,17 +125,17 @@ export default function AncestryPage() {
       <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-3xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-slate-800">
             🧬 NEET Concept Ancestry
           </h1>
-          <p className="text-[#888] text-sm mt-1">
+          <p className="text-slate-400 text-sm mt-1">
             Trace any NEET question back to its foundation
           </p>
         </div>
 
         {/* Sample questions */}
         <div className="mb-4">
-          <div className="text-xs text-[#555] uppercase tracking-wider mb-2">
+          <div className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">
             Try a sample
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -146,7 +147,7 @@ export default function AncestryPage() {
                   setCorrectAnswer('');
                   handleSearch(sample);
                 }}
-                className="text-left text-xs px-3 py-2 rounded-lg bg-[#1a1a1a] text-[#888] hover:text-white hover:bg-[#222] transition-colors"
+                className="text-left text-xs px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 hover:shadow-sm transition-all"
               >
                 {sample.length > 55 ? sample.slice(0, 55) + '…' : sample}
               </button>
@@ -161,7 +162,7 @@ export default function AncestryPage() {
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={`Enter your NEET ${subject} question here...`}
             rows={3}
-            className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl px-4 py-3 text-[#f0f0f0] text-sm placeholder-[#444] resize-none focus:outline-none focus:border-[#ff4b4b] transition-colors"
+            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm placeholder-slate-300 resize-none focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-50 transition-all shadow-sm"
           />
 
           {/* Options if available */}
@@ -174,14 +175,14 @@ export default function AncestryPage() {
                     key={num}
                     className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
                     style={{
-                      background: isCorrect ? '#1a4a1a' : '#1e1e1e',
-                      borderColor: isCorrect ? '#2ca02c' : '#2a2a2a',
-                      color: '#f0f0f0',
+                      background: isCorrect ? '#f0fdf4' : '#ffffff',
+                      borderColor: isCorrect ? '#86efac' : '#e2e8f0',
+                      color: '#1e293b',
                     }}
                   >
-                    <span className="text-[#888] shrink-0">({num})</span>
+                    <span className="text-slate-400 shrink-0">({num})</span>
                     <span className="flex-1">{text}</span>
-                    {isCorrect && <span className="text-green-400 shrink-0">✓</span>}
+                    {isCorrect && <span className="text-emerald-500 shrink-0">✓</span>}
                   </div>
                 )
               })}
@@ -191,7 +192,7 @@ export default function AncestryPage() {
           <button
             onClick={() => handleSearch()}
             disabled={isLoading || !question.trim()}
-            className="mt-2 w-full bg-[#ff4b4b] hover:bg-[#ff3333] disabled:bg-[#333] disabled:text-[#666] text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            className="mt-2 w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold py-3 rounded-xl transition-colors text-sm shadow-sm"
           >
             {isLoading ? 'Searching…' : '🔍 Find Concept Ancestry'}
           </button>
