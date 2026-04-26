@@ -1,18 +1,22 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { ReactFlow,
+import {
+  ReactFlow,
   Node,
   Edge,
   Background,
   Controls,
   MiniMap,
-  useNodesState,
-  useEdgesState,
+  Handle,
   Position,
   MarkerType,
+  useNodesState,
+  useEdgesState,
 } from '@xyflow/react'
 import '@xyflow/react/dist/base.css'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Concept {
   concept_id: string
@@ -40,6 +44,8 @@ interface MappingData {
   mappings: Mapping[]
 }
 
+// ─── Colors ───────────────────────────────────────────────────────────────────
+
 const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; tag: string; tagText: string }> = {
   9:  { bg: '#f0fdf4', border: '#16a34a', text: '#14532d', tag: '#dcfce7', tagText: '#166534' },
   10: { bg: '#eff6ff', border: '#2563eb', text: '#1e3a8a', tag: '#dbeafe', tagText: '#1d4ed8' },
@@ -51,101 +57,133 @@ const CLASS_LABELS: Record<number, string> = {
   9: 'Class IX', 10: 'Class X', 11: 'Class XI', 12: 'Class XII',
 }
 
-// ─── Nodes ────────────────────────────────────────────────────────────────────
+// ─── Custom Nodes WITH Handles ────────────────────────────────────────────────
 
 function ConceptNode({ data }: { data: any }) {
-  const colors = CLASS_COLORS[data.classNum]
+  const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[9]
   const isSelected = data.isSelected
+
   return (
-    <div
-      onClick={() => data.onNodeClick && data.onNodeClick(data)}
-      style={{
-        background: isSelected ? colors.border : colors.bg,
-        border: `2.5px solid ${colors.border}`,
-        borderRadius: '10px',
-        padding: '14px 16px',
-        width: '280px',
-        cursor: 'pointer',
-        boxShadow: isSelected
-          ? `0 4px 16px ${colors.border}66`
-          : `0 2px 8px ${colors.border}22`,
-        transition: 'all 0.18s ease',
-      }}
+    <div style={{
+      background: isSelected ? colors.border : colors.bg,
+      border: `2.5px solid ${colors.border}`,
+      borderRadius: '12px',
+      padding: '16px 18px',
+      width: '240px',
+      cursor: 'pointer',
+      boxShadow: isSelected
+        ? `0 6px 20px ${colors.border}55`
+        : `0 2px 10px ${colors.border}22`,
+      position: 'relative',
+    }}
+    onClick={() => data.onNodeClick && data.onNodeClick(data)}
     >
+      {/* Left handle — target (incoming edges) */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: colors.border, width: 10, height: 10, border: `2px solid white` }}
+      />
+
       <div style={{
-        fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
+        fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em',
         color: isSelected ? 'rgba(255,255,255,0.8)' : colors.border,
-        marginBottom: '6px', textTransform: 'uppercase',
+        marginBottom: '8px', textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]}
       </div>
+
       <div style={{
-        fontSize: '15px', fontWeight: 600,
+        fontSize: '16px', fontWeight: 700,
         color: isSelected ? 'white' : colors.text,
         lineHeight: 1.4,
-        marginBottom: data.questionCount > 0 ? '8px' : 0,
+        marginBottom: data.questionCount > 0 ? '10px' : 0,
       }}>
         {data.label}
       </div>
+
       {data.questionCount > 0 && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '4px',
+          display: 'inline-flex', alignItems: 'center', gap: '5px',
           background: isSelected ? 'rgba(255,255,255,0.2)' : colors.tag,
-          borderRadius: '20px', padding: '3px 8px',
-          fontSize: '12px', color: isSelected ? 'white' : colors.tagText, fontWeight: 600,
+          borderRadius: '20px', padding: '4px 10px',
+          fontSize: '12px', color: isSelected ? 'white' : colors.tagText, fontWeight: 700,
         }}>
           📝 {data.questionCount}Q
         </div>
       )}
+
+      {/* Right handle — source (outgoing edges) */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: colors.border, width: 10, height: 10, border: `2px solid white` }}
+      />
     </div>
   )
 }
 
 function ChapterNode({ data }: { data: any }) {
-  const colors = CLASS_COLORS[data.classNum]
+  const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[12]
+
   return (
     <div style={{
       background: colors.border,
       border: `3px solid ${colors.text}`,
-      borderRadius: '12px',
-      padding: '16px 20px',
-      width: '280px',
-      boxShadow: `0 4px 20px ${colors.border}66`,
+      borderRadius: '14px',
+      padding: '18px 22px',
+      width: '260px',
+      boxShadow: `0 6px 24px ${colors.border}66`,
+      position: 'relative',
     }}>
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: 'white', width: 10, height: 10, border: `2px solid ${colors.border}` }}
+      />
+
       <div style={{
-        fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
-        color: 'rgba(255,255,255,0.75)', marginBottom: '6px', textTransform: 'uppercase',
+        fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em',
+        color: 'rgba(255,255,255,0.75)', marginBottom: '8px', textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]} · {data.conceptCount} concepts
       </div>
+
       <div style={{
-        fontSize: '16px', fontWeight: 700, color: 'white',
-        lineHeight: 1.4, marginBottom: data.questionCount > 0 ? '9px' : 0,
+        fontSize: '18px', fontWeight: 800, color: 'white',
+        lineHeight: 1.3, marginBottom: data.questionCount > 0 ? '10px' : 0,
       }}>
         {data.label}
       </div>
+
       {data.questionCount > 0 && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '4px',
+          display: 'inline-flex', alignItems: 'center', gap: '5px',
           background: 'rgba(255,255,255,0.2)', borderRadius: '20px',
-          padding: '3px 9px', fontSize: '11px', color: 'white', fontWeight: 600,
+          padding: '4px 10px', fontSize: '12px', color: 'white', fontWeight: 700,
         }}>
           📝 {data.questionCount}Q in NEET
         </div>
       )}
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: 'white', width: 10, height: 10, border: `2px solid ${colors.border}` }}
+      />
     </div>
   )
 }
 
 const nodeTypes = { conceptNode: ConceptNode, chapterNode: ChapterNode }
 
-// ─── Tree Builder — Horizontal Band Layout ────────────────────────────────────
+// ─── Tree Builder ─────────────────────────────────────────────────────────────
 
 function buildTree(
   selectedConcepts: Concept[],
   allConcepts: Concept[],
   questionCounts: Record<string, number>,
-  direction: 'ltr' | 'rtl',   // ltr = IX→XII left to right, rtl = XII→IX left to right
+  direction: 'ltr' | 'rtl',
   onNodeClick: (data: any) => void,
   isAllMode: boolean,
   selectedChapterName: string,
@@ -156,7 +194,6 @@ function buildTree(
   const selectedIds = new Set(selectedConcepts.map(c => c.concept_id))
   const includedIds = new Set<string>()
 
-  // Build reverse index
   const reverseIndex = new Map<string, string[]>()
   for (const c of allConcepts) {
     for (const parentId of c.builds_upon || []) {
@@ -184,15 +221,11 @@ function buildTree(
     traverseDown(concept.concept_id)
   }
 
-  // Layout: horizontal bands per class
-  // Each class = one vertical column
-  // Nodes within a column stacked vertically
-  const NODE_W = 280
-  const NODE_H = 140
-  const V_GAP = 32    // gap between nodes in same column
-  const H_GAP = 180   // gap between class columns
+  const NODE_W = 240
+  const NODE_H = 130
+  const V_GAP = 40
+  const H_GAP = 200
 
-  // Class order left to right
   const classOrderLTR = [9, 10, 11, 12]
   const classOrder = direction === 'ltr' ? classOrderLTR : [12, 11, 10, 9]
 
@@ -200,26 +233,26 @@ function buildTree(
   const edges: Edge[] = []
   const edgeSet = new Set<string>()
 
-  const makeEdge = (fromId: string, toId: string, classNum: number, isHighlighted = false) => {
+  const makeEdge = (fromId: string, toId: string, colorClass: number, highlighted = false) => {
     const key = `${fromId}→${toId}`
     if (edgeSet.has(key)) return
     edgeSet.add(key)
-    const colors = CLASS_COLORS[classNum]
+    const colors = CLASS_COLORS[colorClass] || CLASS_COLORS[9]
     edges.push({
       id: `e-${fromId}-${toId}`,
       source: fromId,
       target: toId,
-      type: 'default',
-      animated: isHighlighted,
+      type: 'smoothstep',
+      animated: highlighted,
       style: {
         stroke: colors.border,
-        strokeWidth: isHighlighted ? 4 : 3,
-        opacity: isHighlighted ? 1 : 0.85,
+        strokeWidth: highlighted ? 4 : 3,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        width: 24,
-        height: 24,
+        width: 20,
+        height: 20,
+        color: colors.border,
       },
     })
   }
@@ -228,7 +261,6 @@ function buildTree(
     const CHAPTER_ID = `chapter_${selectedClassNum}_sel`
     const chapterQCount = selectedConcepts.reduce((s, c) => s + (questionCounts[c.concept_id] || 0), 0)
 
-    // Collect non-selected included concepts grouped by class
     const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
     for (const id of Array.from(includedIds)) {
       if (selectedIds.has(id)) continue
@@ -236,21 +268,19 @@ function buildTree(
       if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
     }
 
-    // Only show classes that have nodes
     const presentClasses = classOrder.filter(cls =>
       cls === selectedClassNum || (byClass[cls] && byClass[cls].length > 0)
     )
 
-    // Assign x position per class column
+    // X position per class column
     const classX: Record<number, number> = {}
-    presentClasses.forEach((cls, idx) => {
-      classX[cls] = idx * (NODE_W + H_GAP)
-    })
+    presentClasses.forEach((cls, idx) => { classX[cls] = idx * (NODE_W + H_GAP) })
 
     presentClasses.forEach(classNum => {
       const x = classX[classNum]
 
       if (classNum === selectedClassNum) {
+        // Chapter node — centered vertically at y=0
         nodes.push({
           id: CHAPTER_ID,
           type: 'chapterNode',
@@ -261,17 +291,18 @@ function buildTree(
             conceptCount: selectedConcepts.length,
             questionCount: chapterQCount,
           },
-          sourcePosition: Position.Right,
-          targetPosition: Position.Left,
         })
       } else {
         const concepts = byClass[classNum] || []
+        // Center the column vertically
+        const totalHeight = concepts.length * NODE_H + (concepts.length - 1) * V_GAP
+        const startY = -totalHeight / 2
+
         concepts.forEach((concept, idx) => {
-          const y = idx * (NODE_H + V_GAP)
           nodes.push({
             id: concept.concept_id,
             type: 'conceptNode',
-            position: { x, y },
+            position: { x, y: startY + idx * (NODE_H + V_GAP) },
             data: {
               label: concept.concept_name,
               classNum: concept.class,
@@ -282,45 +313,31 @@ function buildTree(
               questionCount: questionCounts[concept.concept_id] || 0,
               onNodeClick,
             },
-            sourcePosition: Position.Right,
-            targetPosition: Position.Left,
           })
         })
       }
     })
 
-    // Edges: prereqs → chapter node
+    // Edges: prereqs → chapter
     for (const selConcept of selectedConcepts) {
       for (const parentId of selConcept.builds_upon || []) {
         if (!includedIds.has(parentId) || selectedIds.has(parentId)) continue
         const pc = conceptMap.get(parentId)
-        if (direction === 'ltr') {
-          makeEdge(parentId, CHAPTER_ID, pc?.class || 9, true)
-        } else {
-          makeEdge(CHAPTER_ID, parentId, selectedClassNum, true)
-        }
+        makeEdge(parentId, CHAPTER_ID, pc?.class || 9, true)
       }
     }
 
-    // Edges: chapter node → descendants
+    // Edges: chapter → descendants + between non-selected
     for (const id of Array.from(includedIds)) {
       if (selectedIds.has(id)) continue
       const concept = conceptMap.get(id)
       if (!concept) continue
       for (const parentId of concept.builds_upon || []) {
         if (selectedIds.has(parentId)) {
-          if (direction === 'ltr') {
-            makeEdge(CHAPTER_ID, id, selectedClassNum, true)
-          } else {
-            makeEdge(id, CHAPTER_ID, concept.class, true)
-          }
+          makeEdge(CHAPTER_ID, id, selectedClassNum, true)
         } else if (includedIds.has(parentId) && !selectedIds.has(parentId)) {
           const pc = conceptMap.get(parentId)
-          if (direction === 'ltr') {
-            makeEdge(parentId, id, pc?.class || 9)
-          } else {
-            makeEdge(id, parentId, concept.class)
-          }
+          makeEdge(parentId, id, pc?.class || 9)
         }
       }
     }
@@ -340,13 +357,15 @@ function buildTree(
     presentClasses.forEach(classNum => {
       const concepts = byClass[classNum] || []
       const x = classX[classNum]
+      const totalHeight = concepts.length * NODE_H + (concepts.length - 1) * V_GAP
+      const startY = -totalHeight / 2
+
       concepts.forEach((concept, idx) => {
-        const y = idx * (NODE_H + V_GAP)
         const isSel = selectedIds.has(concept.concept_id)
         nodes.push({
           id: concept.concept_id,
           type: 'conceptNode',
-          position: { x, y },
+          position: { x, y: startY + idx * (NODE_H + V_GAP) },
           data: {
             label: concept.concept_name,
             classNum: concept.class,
@@ -357,13 +376,10 @@ function buildTree(
             questionCount: questionCounts[concept.concept_id] || 0,
             onNodeClick,
           },
-          sourcePosition: Position.Right,
-          targetPosition: Position.Left,
         })
       })
     })
 
-    // Edges
     for (const id of Array.from(includedIds)) {
       const concept = conceptMap.get(id)
       if (!concept) continue
@@ -371,11 +387,7 @@ function buildTree(
         if (!includedIds.has(parentId)) continue
         const pc = conceptMap.get(parentId)
         const highlighted = selectedIds.has(id) || selectedIds.has(parentId)
-        if (direction === 'ltr') {
-          makeEdge(parentId, id, pc?.class || 9, highlighted)
-        } else {
-          makeEdge(id, parentId, concept.class, highlighted)
-        }
+        makeEdge(parentId, id, pc?.class || 9, highlighted)
       }
     }
   }
@@ -426,13 +438,11 @@ export default function ConceptMapPage() {
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
-  // Pending selections
   const [pendingClass, setPendingClass] = useState<number>(12)
   const [pendingChapter, setPendingChapter] = useState<string | null>(null)
   const [pendingConcept, setPendingConcept] = useState<string>('all')
   const [pendingDirection, setPendingDirection] = useState<'ltr' | 'rtl'>('ltr')
 
-  // Applied selections
   const [appliedClass, setAppliedClass] = useState<number | null>(null)
   const [appliedChapter, setAppliedChapter] = useState<string | null>(null)
   const [appliedConcept, setAppliedConcept] = useState<string>('all')
@@ -534,20 +544,18 @@ export default function ConceptMapPage() {
   }, [appliedChapter, appliedConcept, appliedDirection, appliedClass, concepts, questionCounts, appliedConceptsForChapter, appliedChapterName])
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '14px' }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '16px' }}>
       Loading concept map...
     </div>
   )
 
-  const SIDEBAR_W = 240
-
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
 
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <div style={{
-        width: sidebarOpen ? `${SIDEBAR_W}px` : '44px',
-        minWidth: sidebarOpen ? `${SIDEBAR_W}px` : '44px',
+        width: sidebarOpen ? '248px' : '44px',
+        minWidth: sidebarOpen ? '248px' : '44px',
         background: 'white',
         borderRight: '1px solid #e2e8f0',
         display: 'flex',
@@ -555,35 +563,16 @@ export default function ConceptMapPage() {
         transition: 'width 0.22s ease, min-width 0.22s ease',
         overflow: 'hidden',
         boxShadow: '1px 0 6px rgba(0,0,0,0.05)',
-        position: 'relative',
         zIndex: 10,
       }}>
-
-        {/* Toggle row */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: sidebarOpen ? 'space-between' : 'center',
-          padding: sidebarOpen ? '14px 14px 10px' : '14px 0',
-          borderBottom: '1px solid #f1f5f9',
-        }}>
-          {sidebarOpen && (
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Filters</span>
-          )}
-          <button
-            onClick={() => setSidebarOpen(o => !o)}
-            title={sidebarOpen ? 'Collapse' : 'Expand'}
-            style={{
-              background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '7px',
-              width: '30px', height: '30px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', cursor: 'pointer', color: '#64748b', fontSize: '12px', flexShrink: 0,
-            }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #f1f5f9' }}>
+          {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Filters</span>}
+          <button onClick={() => setSidebarOpen(o => !o)}
+            style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '7px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b', fontSize: '12px', flexShrink: 0 }}>
             {sidebarOpen ? '◀' : '▶'}
           </button>
         </div>
 
-        {/* Controls — only when open */}
         {sidebarOpen && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
@@ -597,17 +586,8 @@ export default function ConceptMapPage() {
                   return (
                     <button key={cls}
                       onClick={() => { setPendingClass(cls); setPendingChapter(null); setPendingConcept('all') }}
-                      style={{
-                        background: isActive ? colors.bg : 'transparent',
-                        border: `1.5px solid ${isActive ? colors.border : '#e2e8f0'}`,
-                        borderRadius: '8px', padding: '8px 10px', textAlign: 'left',
-                        cursor: 'pointer', color: isActive ? colors.text : '#64748b',
-                        fontSize: '13px', fontWeight: isActive ? 600 : 400,
-                        fontFamily: 'inherit', transition: 'all 0.12s',
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                      }}
-                    >
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? colors.border : '#cbd5e1', flexShrink: 0, transition: 'background 0.12s' }} />
+                      style={{ background: isActive ? colors.bg : 'transparent', border: `1.5px solid ${isActive ? colors.border : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? colors.text : '#64748b', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? colors.border : '#cbd5e1', flexShrink: 0 }} />
                       {CLASS_LABELS[cls]}
                     </button>
                   )
@@ -647,14 +627,7 @@ export default function ConceptMapPage() {
               <div style={{ display: 'flex', gap: '6px' }}>
                 {([['ltr', '→ IX to XII'], ['rtl', '← XII to IX']] as const).map(([d, label]) => (
                   <button key={d} onClick={() => setPendingDirection(d)}
-                    style={{
-                      flex: 1, background: pendingDirection === d ? '#0f172a' : '#f8fafc',
-                      border: `1.5px solid ${pendingDirection === d ? '#0f172a' : '#e2e8f0'}`,
-                      borderRadius: '8px', padding: '7px 4px',
-                      color: pendingDirection === d ? 'white' : '#64748b',
-                      cursor: 'pointer', fontSize: '11px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s',
-                    }}
-                  >
+                    style={{ flex: 1, background: pendingDirection === d ? '#0f172a' : '#f8fafc', border: `1.5px solid ${pendingDirection === d ? '#0f172a' : '#e2e8f0'}`, borderRadius: '8px', padding: '7px 4px', color: pendingDirection === d ? 'white' : '#64748b', cursor: 'pointer', fontSize: '11px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s' }}>
                     {label}
                   </button>
                 ))}
@@ -662,37 +635,22 @@ export default function ConceptMapPage() {
             </div>
 
             {/* Go */}
-            <button
-              onClick={handleGo}
-              disabled={!pendingChapter}
-              style={{
-                background: pendingChapter ? '#2563eb' : '#e2e8f0',
-                border: 'none', borderRadius: '10px', padding: '12px',
-                color: pendingChapter ? 'white' : '#94a3b8',
-                cursor: pendingChapter ? 'pointer' : 'not-allowed',
-                fontSize: '14px', fontWeight: 700, fontFamily: 'inherit',
-                transition: 'all 0.15s', letterSpacing: '0.02em',
-                boxShadow: pendingChapter ? '0 4px 12px rgba(37,99,235,0.3)' : 'none',
-              }}
-            >
+            <button onClick={handleGo} disabled={!pendingChapter}
+              style={{ background: pendingChapter ? '#2563eb' : '#e2e8f0', border: 'none', borderRadius: '10px', padding: '12px', color: pendingChapter ? 'white' : '#94a3b8', cursor: pendingChapter ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s', boxShadow: pendingChapter ? '0 4px 12px rgba(37,99,235,0.3)' : 'none' }}>
               Generate Map →
             </button>
+
           </div>
         )}
       </div>
 
-      {/* ── Main ── */}
+      {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-        {/* Top bar */}
         <div style={{ padding: '11px 20px', borderBottom: '1px solid #e2e8f0', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
             <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>
-              Chemistry ·{' '}
-              {appliedChapter
-                ? `${appliedChapterName} › ${appliedConcept !== 'all' ? (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '') : 'All concepts'}`
-                : 'Select a chapter and click Generate Map'}
+              Chemistry · {appliedChapter ? `${appliedChapterName} › ${appliedConcept !== 'all' ? (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '') : 'All concepts'}` : 'Select a chapter and click Generate Map'}
             </p>
           </div>
           {nodes.length > 0 && (
@@ -702,17 +660,14 @@ export default function ConceptMapPage() {
           )}
         </div>
 
-        {/* Tree */}
         <div style={{ flex: 1, position: 'relative' }}>
           {nodes.length === 0 ? (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-              <div style={{ fontSize: '48px', opacity: 0.12 }}>🗺</div>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: '#94a3b8' }}>
-                {appliedChapter ? 'No concept chain found for this selection' : 'Select a chapter and click Generate Map'}
+              <div style={{ fontSize: '52px', opacity: 0.12 }}>🗺</div>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#94a3b8' }}>
+                {appliedChapter ? 'No concept chain found' : 'Select a chapter and click Generate Map'}
               </div>
-              {!appliedChapter && (
-                <div style={{ fontSize: '12px', color: '#cbd5e1' }}>Use the sidebar on the left to choose class, chapter and concept</div>
-              )}
+              {!appliedChapter && <div style={{ fontSize: '13px', color: '#cbd5e1' }}>Use the sidebar on the left</div>}
             </div>
           ) : (
             <ReactFlow
@@ -723,14 +678,8 @@ export default function ConceptMapPage() {
               nodeTypes={nodeTypes}
               fitView
               fitViewOptions={{ padding: 0.15 }}
-              minZoom={0.15}
+              minZoom={0.1}
               maxZoom={2}
-              elevateEdgesOnSelect
-              defaultEdgeOptions={{
-                type: 'default',
-                markerEnd: { type: MarkerType.ArrowClosed, width: 24, height: 24 },
-                style: { strokeWidth: 3 },
-              }}
               style={{ background: '#f8fafc' }}
             >
               <Background color="#e2e8f0" gap={28} size={1} />
