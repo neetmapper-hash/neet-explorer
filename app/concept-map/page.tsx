@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   ReactFlow,
   Node,
   Edge,
   Background,
   Controls,
-  MiniMap,
   Handle,
   Position,
   MarkerType,
@@ -15,8 +14,6 @@ import {
   useEdgesState,
 } from '@xyflow/react'
 import '@xyflow/react/dist/base.css'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Concept {
   concept_id: string
@@ -27,24 +24,9 @@ interface Concept {
   summary: string
   builds_upon: string[]
 }
-
-interface ConceptsData {
-  subject: string
-  concepts: Concept[]
-}
-
-interface Mapping {
-  year: number
-  question_number: number
-  concept_id: string | null
-  status: string
-}
-
-interface MappingData {
-  mappings: Mapping[]
-}
-
-// ─── Colors ───────────────────────────────────────────────────────────────────
+interface ConceptsData { subject: string; concepts: Concept[] }
+interface Mapping { year: number; question_number: number; concept_id: string | null; status: string }
+interface MappingData { mappings: Mapping[] }
 
 const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; tag: string; tagText: string }> = {
   9:  { bg: '#f0fdf4', border: '#16a34a', text: '#14532d', tag: '#dcfce7', tagText: '#166534' },
@@ -52,132 +34,133 @@ const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; t
   11: { bg: '#faf5ff', border: '#9333ea', text: '#581c87', tag: '#f3e8ff', tagText: '#7e22ce' },
   12: { bg: '#fff7ed', border: '#ea580c', text: '#7c2d12', tag: '#ffedd5', tagText: '#c2410c' },
 }
-
 const CLASS_LABELS: Record<number, string> = {
   9: 'Class IX', 10: 'Class X', 11: 'Class XI', 12: 'Class XII',
 }
 
-// ─── Custom Nodes WITH Handles ────────────────────────────────────────────────
+// ── Dynamic node components ───────────────────────────────────────────────────
+// nodeW is passed via data so nodes can render at the right size
 
 function ConceptNode({ data }: { data: any }) {
   const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[9]
   const isSelected = data.isSelected
+  const w = data.nodeW || 260
+  const fs = data.fontSize || 15
 
   return (
-    <div style={{
-      background: isSelected ? colors.border : colors.bg,
-      border: `2.5px solid ${colors.border}`,
-      borderRadius: '12px',
-      padding: '16px 18px',
-      width: '240px',
-      cursor: 'pointer',
-      boxShadow: isSelected
-        ? `0 6px 20px ${colors.border}55`
-        : `0 2px 10px ${colors.border}22`,
-      position: 'relative',
-    }}
-    onClick={() => data.onNodeClick && data.onNodeClick(data)}
+    <div
+      onClick={() => data.onNodeClick && data.onNodeClick(data)}
+      style={{
+        background: isSelected ? colors.border : colors.bg,
+        border: `2.5px solid ${colors.border}`,
+        borderRadius: '12px',
+        padding: `${Math.round(w * 0.06)}px ${Math.round(w * 0.07)}px`,
+        width: `${w}px`,
+        cursor: 'pointer',
+        boxShadow: isSelected ? `0 6px 20px ${colors.border}55` : `0 2px 10px ${colors.border}22`,
+        position: 'relative',
+      }}
     >
-      {/* Left handle — target (incoming edges) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: colors.border, width: 10, height: 10, border: `2px solid white` }}
-      />
+      <Handle type="target" position={Position.Left}
+        style={{ background: colors.border, width: 12, height: 12, border: '2px solid white' }} />
 
       <div style={{
-        fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em',
+        fontSize: `${Math.max(10, Math.round(fs * 0.65))}px`,
+        fontWeight: 800, letterSpacing: '0.08em',
         color: isSelected ? 'rgba(255,255,255,0.8)' : colors.border,
-        marginBottom: '8px', textTransform: 'uppercase',
+        marginBottom: `${Math.round(w * 0.03)}px`,
+        textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]}
       </div>
 
       <div style={{
-        fontSize: '16px', fontWeight: 700,
+        fontSize: `${fs}px`,
+        fontWeight: 700,
         color: isSelected ? 'white' : colors.text,
         lineHeight: 1.4,
-        marginBottom: data.questionCount > 0 ? '10px' : 0,
+        marginBottom: data.questionCount > 0 ? `${Math.round(w * 0.04)}px` : 0,
       }}>
         {data.label}
       </div>
 
       {data.questionCount > 0 && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '5px',
+          display: 'inline-flex', alignItems: 'center', gap: '4px',
           background: isSelected ? 'rgba(255,255,255,0.2)' : colors.tag,
-          borderRadius: '20px', padding: '4px 10px',
-          fontSize: '12px', color: isSelected ? 'white' : colors.tagText, fontWeight: 700,
+          borderRadius: '20px',
+          padding: `${Math.round(w * 0.02)}px ${Math.round(w * 0.04)}px`,
+          fontSize: `${Math.max(11, Math.round(fs * 0.75))}px`,
+          color: isSelected ? 'white' : colors.tagText, fontWeight: 700,
         }}>
           📝 {data.questionCount}Q
         </div>
       )}
 
-      {/* Right handle — source (outgoing edges) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{ background: colors.border, width: 10, height: 10, border: `2px solid white` }}
-      />
+      <Handle type="source" position={Position.Right}
+        style={{ background: colors.border, width: 12, height: 12, border: '2px solid white' }} />
     </div>
   )
 }
 
 function ChapterNode({ data }: { data: any }) {
   const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[12]
+  const w = data.nodeW || 280
+  const fs = data.fontSize || 16
 
   return (
     <div style={{
       background: colors.border,
       border: `3px solid ${colors.text}`,
       borderRadius: '14px',
-      padding: '18px 22px',
-      width: '260px',
+      padding: `${Math.round(w * 0.06)}px ${Math.round(w * 0.08)}px`,
+      width: `${w}px`,
       boxShadow: `0 6px 24px ${colors.border}66`,
       position: 'relative',
     }}>
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: 'white', width: 10, height: 10, border: `2px solid ${colors.border}` }}
-      />
+      <Handle type="target" position={Position.Left}
+        style={{ background: 'white', width: 12, height: 12, border: `2px solid ${colors.border}` }} />
 
       <div style={{
-        fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em',
-        color: 'rgba(255,255,255,0.75)', marginBottom: '8px', textTransform: 'uppercase',
+        fontSize: `${Math.max(10, Math.round(fs * 0.65))}px`,
+        fontWeight: 800, letterSpacing: '0.08em',
+        color: 'rgba(255,255,255,0.75)',
+        marginBottom: `${Math.round(w * 0.03)}px`,
+        textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]} · {data.conceptCount} concepts
       </div>
 
       <div style={{
-        fontSize: '18px', fontWeight: 800, color: 'white',
-        lineHeight: 1.3, marginBottom: data.questionCount > 0 ? '10px' : 0,
+        fontSize: `${fs}px`,
+        fontWeight: 800, color: 'white',
+        lineHeight: 1.35,
+        marginBottom: data.questionCount > 0 ? `${Math.round(w * 0.04)}px` : 0,
       }}>
         {data.label}
       </div>
 
       {data.questionCount > 0 && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '5px',
+          display: 'inline-flex', alignItems: 'center', gap: '4px',
           background: 'rgba(255,255,255,0.2)', borderRadius: '20px',
-          padding: '4px 10px', fontSize: '12px', color: 'white', fontWeight: 700,
+          padding: `${Math.round(w * 0.02)}px ${Math.round(w * 0.04)}px`,
+          fontSize: `${Math.max(11, Math.round(fs * 0.75))}px`,
+          color: 'white', fontWeight: 700,
         }}>
           📝 {data.questionCount}Q in NEET
         </div>
       )}
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{ background: 'white', width: 10, height: 10, border: `2px solid ${colors.border}` }}
-      />
+      <Handle type="source" position={Position.Right}
+        style={{ background: 'white', width: 12, height: 12, border: `2px solid ${colors.border}` }} />
     </div>
   )
 }
 
 const nodeTypes = { conceptNode: ConceptNode, chapterNode: ChapterNode }
 
-// ─── Tree Builder ─────────────────────────────────────────────────────────────
+// ── Tree builder with dynamic sizing ─────────────────────────────────────────
 
 function buildTree(
   selectedConcepts: Concept[],
@@ -188,6 +171,8 @@ function buildTree(
   isAllMode: boolean,
   selectedChapterName: string,
   selectedClassNum: number,
+  availableW: number,
+  availableH: number,
 ): { nodes: Node[]; edges: Edge[] } {
 
   const conceptMap = new Map(allConcepts.map(c => [c.concept_id, c]))
@@ -210,9 +195,6 @@ function buildTree(
     for (const parentId of concept.builds_upon || []) traverseUp(parentId, visited)
   }
 
-  // Only direct children (one level down) — not recursive
-  // This prevents Class 9 chapters pulling in unrelated Class 12 concepts
-  // A concept shows as child only if it DIRECTLY builds_upon a selected concept
   function getDirectChildren(id: string): string[] {
     return reverseIndex.get(id) || []
   }
@@ -220,19 +202,49 @@ function buildTree(
   for (const concept of selectedConcepts) {
     traverseUp(concept.concept_id)
     includedIds.add(concept.concept_id)
-    // One level down only — direct children regardless of class
     for (const childId of getDirectChildren(concept.concept_id)) {
       includedIds.add(childId)
     }
   }
 
-  const NODE_W = 240
-  const NODE_H = 130
-  const V_GAP = 40
-  const H_GAP = 200
+  // Group by class
+  const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
+  for (const id of Array.from(includedIds)) {
+    if (isAllMode && selectedIds.has(id)) continue
+    const c = conceptMap.get(id)
+    if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
+  }
 
   const classOrderLTR = [9, 10, 11, 12]
   const classOrder = direction === 'ltr' ? classOrderLTR : [12, 11, 10, 9]
+
+  // Determine which classes are present
+  const presentClasses = isAllMode
+    ? classOrder.filter(cls => cls === selectedClassNum || (byClass[cls] && byClass[cls].length > 0))
+    : classOrder.filter(cls => byClass[cls] && byClass[cls].length > 0)
+
+  const numCols = presentClasses.length
+  if (numCols === 0) return { nodes: [], edges: [] }
+
+  // Max nodes in any column
+  const maxNodesInCol = Math.max(
+    ...presentClasses.map(cls =>
+      cls === selectedClassNum && isAllMode ? 1 : (byClass[cls]?.length || 0)
+    )
+  )
+
+  // Dynamic sizing: fill available space
+  const H_GAP = Math.max(60, availableW * 0.06)  // horizontal gap between columns
+  const V_GAP = Math.max(20, availableH * 0.03)  // vertical gap between nodes in column
+
+  // Node width: divide available space evenly across columns
+  const NODE_W = Math.max(180, Math.floor((availableW - (numCols - 1) * H_GAP) / numCols))
+
+  // Node height: divide available vertical space
+  const NODE_H = Math.max(90, Math.floor((availableH - (maxNodesInCol - 1) * V_GAP) / maxNodesInCol))
+
+  // Font size: proportional to node size
+  const FONT_SIZE = Math.max(13, Math.min(22, Math.round(NODE_W / 14)))
 
   const nodes: Node[] = []
   const edges: Edge[] = []
@@ -249,64 +261,41 @@ function buildTree(
       target: toId,
       type: 'smoothstep',
       animated: highlighted,
-      style: {
-        stroke: colors.border,
-        strokeWidth: highlighted ? 4 : 3,
-      },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        width: 20,
-        height: 20,
-        color: colors.border,
-      },
+      style: { stroke: colors.border, strokeWidth: highlighted ? 4 : 3 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: colors.border },
     })
   }
+
+  // X position per class column
+  const classX: Record<number, number> = {}
+  presentClasses.forEach((cls, idx) => { classX[cls] = idx * (NODE_W + H_GAP) })
 
   if (isAllMode) {
     const CHAPTER_ID = `chapter_${selectedClassNum}_sel`
     const chapterQCount = selectedConcepts.reduce((s, c) => s + (questionCounts[c.concept_id] || 0), 0)
 
-    const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
-    for (const id of Array.from(includedIds)) {
-      if (selectedIds.has(id)) continue
-      const c = conceptMap.get(id)
-      if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
-    }
-
-    const presentClasses = classOrder.filter(cls =>
-      cls === selectedClassNum || (byClass[cls] && byClass[cls].length > 0)
-    )
-
-    // X position per class column
-    const classX: Record<number, number> = {}
-    presentClasses.forEach((cls, idx) => { classX[cls] = idx * (NODE_W + H_GAP) })
-
     presentClasses.forEach(classNum => {
       const x = classX[classNum]
-
       if (classNum === selectedClassNum) {
-        // Chapter node — centered vertically at y=0
         nodes.push({
-          id: CHAPTER_ID,
-          type: 'chapterNode',
+          id: CHAPTER_ID, type: 'chapterNode',
           position: { x, y: 0 },
           data: {
             label: selectedChapterName,
             classNum: selectedClassNum,
             conceptCount: selectedConcepts.length,
             questionCount: chapterQCount,
+            nodeW: NODE_W + 20,
+            fontSize: FONT_SIZE + 2,
           },
         })
       } else {
         const concepts = byClass[classNum] || []
-        // Center the column vertically
         const totalHeight = concepts.length * NODE_H + (concepts.length - 1) * V_GAP
         const startY = -totalHeight / 2
-
         concepts.forEach((concept, idx) => {
           nodes.push({
-            id: concept.concept_id,
-            type: 'conceptNode',
+            id: concept.concept_id, type: 'conceptNode',
             position: { x, y: startY + idx * (NODE_H + V_GAP) },
             data: {
               label: concept.concept_name,
@@ -317,13 +306,15 @@ function buildTree(
               isSelected: false,
               questionCount: questionCounts[concept.concept_id] || 0,
               onNodeClick,
+              nodeW: NODE_W,
+              fontSize: FONT_SIZE,
             },
           })
         })
       }
     })
 
-    // Edges: prereqs → chapter
+    // Edges
     for (const selConcept of selectedConcepts) {
       for (const parentId of selConcept.builds_upon || []) {
         if (!includedIds.has(parentId) || selectedIds.has(parentId)) continue
@@ -331,8 +322,6 @@ function buildTree(
         makeEdge(parentId, CHAPTER_ID, pc?.class || 9, true)
       }
     }
-
-    // Edges: chapter → descendants + between non-selected
     for (const id of Array.from(includedIds)) {
       if (selectedIds.has(id)) continue
       const concept = conceptMap.get(id)
@@ -348,28 +337,15 @@ function buildTree(
     }
 
   } else {
-    // Single concept mode
-    const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
-    for (const id of Array.from(includedIds)) {
-      const c = conceptMap.get(id)
-      if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
-    }
-
-    const presentClasses = classOrder.filter(cls => byClass[cls] && byClass[cls].length > 0)
-    const classX: Record<number, number> = {}
-    presentClasses.forEach((cls, idx) => { classX[cls] = idx * (NODE_W + H_GAP) })
-
     presentClasses.forEach(classNum => {
       const concepts = byClass[classNum] || []
       const x = classX[classNum]
       const totalHeight = concepts.length * NODE_H + (concepts.length - 1) * V_GAP
       const startY = -totalHeight / 2
-
       concepts.forEach((concept, idx) => {
         const isSel = selectedIds.has(concept.concept_id)
         nodes.push({
-          id: concept.concept_id,
-          type: 'conceptNode',
+          id: concept.concept_id, type: 'conceptNode',
           position: { x, y: startY + idx * (NODE_H + V_GAP) },
           data: {
             label: concept.concept_name,
@@ -380,11 +356,12 @@ function buildTree(
             isSelected: isSel,
             questionCount: questionCounts[concept.concept_id] || 0,
             onNodeClick,
+            nodeW: NODE_W,
+            fontSize: FONT_SIZE,
           },
         })
       })
     })
-
     for (const id of Array.from(includedIds)) {
       const concept = conceptMap.get(id)
       if (!concept) continue
@@ -400,7 +377,7 @@ function buildTree(
   return { nodes, edges }
 }
 
-// ─── Popup ────────────────────────────────────────────────────────────────────
+// ── Popup ─────────────────────────────────────────────────────────────────────
 
 function ExplanationPopup({ concept, onClose }: { concept: Concept & { questionCount: number }; onClose: () => void }) {
   const colors = CLASS_COLORS[concept.class]
@@ -435,9 +412,12 @@ function ExplanationPopup({ concept, onClose }: { concept: Concept & { questionC
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ConceptMapPage() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 1200, height: 700 })
+
   const [concepts, setConcepts] = useState<Concept[]>([])
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -456,6 +436,20 @@ export default function ConceptMapPage() {
   const [popupConcept, setPopupConcept] = useState<(Concept & { questionCount: number }) | null>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
+
+  // Track container size for dynamic node sizing
+  useEffect(() => {
+    const obs = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContainerSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        })
+      }
+    })
+    if (containerRef.current) obs.observe(containerRef.current)
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -530,6 +524,7 @@ export default function ConceptMapPage() {
     setAppliedDirection(pendingDirection)
   }, [pendingClass, pendingChapter, pendingConcept, pendingDirection])
 
+  // Rebuild tree when applied values or container size changes
   useEffect(() => {
     if (!appliedChapter || appliedConceptsForChapter.length === 0 || appliedClass === null) {
       setNodes([] as any); setEdges([] as any); return
@@ -539,14 +534,17 @@ export default function ConceptMapPage() {
       ? appliedConceptsForChapter
       : appliedConceptsForChapter.filter(c => c.concept_id === appliedConcept)
     if (selConcepts.length === 0) return
+
     const { nodes: n, edges: e } = buildTree(
       selConcepts, concepts, questionCounts, appliedDirection,
       handleNodeClick, isAllMode, appliedChapterName, appliedClass,
+      containerSize.width, containerSize.height,
     )
     setNodes(n as any)
     setEdges(e as any)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedChapter, appliedConcept, appliedDirection, appliedClass, concepts, questionCounts, appliedConceptsForChapter, appliedChapterName])
+  }, [appliedChapter, appliedConcept, appliedDirection, appliedClass, concepts, questionCounts,
+      appliedConceptsForChapter, appliedChapterName, containerSize])
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '16px' }}>
@@ -554,21 +552,19 @@ export default function ConceptMapPage() {
     </div>
   )
 
+  const SIDEBAR_W = 248
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
 
       {/* Sidebar */}
       <div style={{
-        width: sidebarOpen ? '248px' : '44px',
-        minWidth: sidebarOpen ? '248px' : '44px',
-        background: 'white',
-        borderRight: '1px solid #e2e8f0',
-        display: 'flex',
-        flexDirection: 'column',
+        width: sidebarOpen ? `${SIDEBAR_W}px` : '44px',
+        minWidth: sidebarOpen ? `${SIDEBAR_W}px` : '44px',
+        background: 'white', borderRight: '1px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column',
         transition: 'width 0.22s ease, min-width 0.22s ease',
-        overflow: 'hidden',
-        boxShadow: '1px 0 6px rgba(0,0,0,0.05)',
-        zIndex: 10,
+        overflow: 'hidden', boxShadow: '1px 0 6px rgba(0,0,0,0.05)', zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #f1f5f9' }}>
           {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Filters</span>}
@@ -581,7 +577,6 @@ export default function ConceptMapPage() {
         {sidebarOpen && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
-            {/* Class */}
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -600,7 +595,6 @@ export default function ConceptMapPage() {
               </div>
             </div>
 
-            {/* Chapter */}
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Chapter</div>
               <select value={pendingChapter || ''} onChange={e => { setPendingChapter(e.target.value || null); setPendingConcept('all') }}
@@ -612,7 +606,6 @@ export default function ConceptMapPage() {
               </select>
             </div>
 
-            {/* Concept */}
             {pendingChapter && conceptsForChapter.length > 0 && (
               <div>
                 <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Concept</div>
@@ -626,7 +619,6 @@ export default function ConceptMapPage() {
               </div>
             )}
 
-            {/* Direction */}
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Direction</div>
               <div style={{ display: 'flex', gap: '6px' }}>
@@ -639,23 +631,23 @@ export default function ConceptMapPage() {
               </div>
             </div>
 
-            {/* Go */}
             <button onClick={handleGo} disabled={!pendingChapter}
               style={{ background: pendingChapter ? '#2563eb' : '#e2e8f0', border: 'none', borderRadius: '10px', padding: '12px', color: pendingChapter ? 'white' : '#94a3b8', cursor: pendingChapter ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s', boxShadow: pendingChapter ? '0 4px 12px rgba(37,99,235,0.3)' : 'none' }}>
               Generate Map →
             </button>
-
           </div>
         )}
       </div>
 
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ padding: '11px 20px', borderBottom: '1px solid #e2e8f0', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div style={{ padding: '11px 20px', borderBottom: '1px solid #e2e8f0', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', flexShrink: 0 }}>
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
             <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>
-              Chemistry · {appliedChapter ? `${appliedChapterName} › ${appliedConcept !== 'all' ? (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '') : 'All concepts'}` : 'Select a chapter and click Generate Map'}
+              Chemistry · {appliedChapter
+                ? `${appliedChapterName} › ${appliedConcept !== 'all' ? (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '') : 'All concepts'}`
+                : 'Select a chapter and click Generate Map'}
             </p>
           </div>
           {nodes.length > 0 && (
@@ -665,7 +657,8 @@ export default function ConceptMapPage() {
           )}
         </div>
 
-        <div style={{ flex: 1, position: 'relative' }}>
+        {/* Tree area — ref for size tracking */}
+        <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
           {nodes.length === 0 ? (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
               <div style={{ fontSize: '52px', opacity: 0.12 }}>🗺</div>
@@ -682,21 +675,13 @@ export default function ConceptMapPage() {
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
               fitView
-              fitViewOptions={{ padding: 0.15 }}
-              minZoom={0.1}
+              fitViewOptions={{ padding: 0.08 }}
+              minZoom={0.05}
               maxZoom={2}
               style={{ background: '#f8fafc' }}
             >
               <Background color="#e2e8f0" gap={28} size={1} />
               <Controls style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
-              <MiniMap
-                style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                nodeColor={(node) => {
-                  const d = node.data as { classNum?: number; isSelected?: boolean }
-                  const colors = CLASS_COLORS[d?.classNum || 9]
-                  return d?.isSelected ? colors.border : colors.bg
-                }}
-              />
             </ReactFlow>
           )}
         </div>
