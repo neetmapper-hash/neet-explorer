@@ -218,7 +218,6 @@ function buildTree(
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: colors.border,
         width: 24,
         height: 24,
       },
@@ -726,6 +725,12 @@ export default function ConceptMapPage() {
               fitViewOptions={{ padding: 0.15 }}
               minZoom={0.15}
               maxZoom={2}
+              elevateEdgesOnSelect
+              defaultEdgeOptions={{
+                type: 'default',
+                markerEnd: { type: MarkerType.ArrowClosed, width: 24, height: 24 },
+                style: { strokeWidth: 3 },
+              }}
               style={{ background: '#f8fafc' }}
             >
               <Background color="#e2e8f0" gap={28} size={1} />
