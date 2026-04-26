@@ -14,8 +14,6 @@ import { ReactFlow,
 } from '@xyflow/react'
 import '@xyflow/react/dist/base.css'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Concept {
   concept_id: string
   class: number
@@ -37,136 +35,91 @@ interface Mapping {
   question_number: number
   concept_id: string | null
   status: string
-  verified_class?: number
-  verified_chapter_number?: number
 }
 
 interface MappingData {
   mappings: Mapping[]
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; light: string }> = {
-  9:  { bg: '#064e3b', border: '#10b981', text: '#6ee7b7', light: '#d1fae5' },
-  10: { bg: '#1e3a5f', border: '#3b82f6', text: '#93c5fd', light: '#dbeafe' },
-  11: { bg: '#3b0764', border: '#a855f7', text: '#d8b4fe', light: '#f3e8ff' },
-  12: { bg: '#7c2d12', border: '#f97316', text: '#fdba74', light: '#ffedd5' },
+const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; tag: string; tagText: string }> = {
+  9:  { bg: '#f0fdf4', border: '#16a34a', text: '#14532d', tag: '#dcfce7', tagText: '#166534' },
+  10: { bg: '#eff6ff', border: '#2563eb', text: '#1e3a8a', tag: '#dbeafe', tagText: '#1d4ed8' },
+  11: { bg: '#faf5ff', border: '#9333ea', text: '#581c87', tag: '#f3e8ff', tagText: '#7e22ce' },
+  12: { bg: '#fff7ed', border: '#ea580c', text: '#7c2d12', tag: '#ffedd5', tagText: '#c2410c' },
 }
 
 const CLASS_LABELS: Record<number, string> = {
-  9: 'Class IX',
-  10: 'Class X',
-  11: 'Class XI',
-  12: 'Class XII',
+  9: 'Class IX', 10: 'Class X', 11: 'Class XI', 12: 'Class XII',
 }
-
-// ─── Custom Node ──────────────────────────────────────────────────────────────
 
 function ConceptNode({ data }: { data: any }) {
   const colors = CLASS_COLORS[data.classNum]
   const isSelected = data.isSelected
-  const questionCount = data.questionCount || 0
-
   return (
     <div
-      onClick={() => data.onNodeClick(data)}
+      onClick={() => data.onNodeClick && data.onNodeClick(data)}
       style={{
-        background: isSelected
-          ? `linear-gradient(135deg, ${colors.border}33, ${colors.bg})`
-          : colors.bg,
-        border: `2px solid ${isSelected ? colors.border : colors.border + '66'}`,
-        borderRadius: '12px',
-        padding: '12px 16px',
-        minWidth: '180px',
-        maxWidth: '220px',
+        background: isSelected ? colors.border : colors.bg,
+        border: `2px solid ${colors.border}`,
+        borderRadius: '10px',
+        padding: '10px 14px',
+        minWidth: '170px',
+        maxWidth: '210px',
         cursor: 'pointer',
-        boxShadow: isSelected
-          ? `0 0 20px ${colors.border}66, 0 4px 12px rgba(0,0,0,0.4)`
-          : '0 2px 8px rgba(0,0,0,0.3)',
-        transform: isSelected ? 'scale(1.05)' : 'scale(1)',
-        transition: 'all 0.2s ease',
-        position: 'relative',
+        boxShadow: isSelected ? `0 4px 16px ${colors.border}55` : '0 1px 4px rgba(0,0,0,0.10)',
+        transition: 'all 0.18s ease',
       }}
     >
-      {isSelected && (
-        <div style={{
-          position: 'absolute',
-          top: '-8px',
-          right: '-8px',
-          background: colors.border,
-          borderRadius: '50%',
-          width: '16px',
-          height: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{ color: 'white', fontSize: '10px' }}>★</span>
-        </div>
-      )}
-
-      <div style={{
-        fontSize: '9px',
-        fontWeight: 700,
-        letterSpacing: '0.1em',
-        color: colors.text,
-        marginBottom: '4px',
-        textTransform: 'uppercase',
-        opacity: 0.8,
-      }}>
-        {CLASS_LABELS[data.classNum]} · {data.chapterName}
+      <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: isSelected ? 'white' : colors.border, marginBottom: '4px', textTransform: 'uppercase' }}>
+        {CLASS_LABELS[data.classNum]}
       </div>
-
-      <div style={{
-        fontSize: '12px',
-        fontWeight: 600,
-        color: '#f1f5f9',
-        lineHeight: 1.3,
-        marginBottom: questionCount > 0 ? '8px' : 0,
-      }}>
+      <div style={{ fontSize: '12px', fontWeight: 600, color: isSelected ? 'white' : colors.text, lineHeight: 1.3, marginBottom: data.questionCount > 0 ? '7px' : 0 }}>
         {data.label}
       </div>
-
-      {questionCount > 0 && (
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: colors.border + '33',
-          border: `1px solid ${colors.border}66`,
-          borderRadius: '20px',
-          padding: '2px 8px',
-          fontSize: '10px',
-          color: colors.text,
-          fontWeight: 600,
-        }}>
-          <span>📝</span>
-          <span>{questionCount} NEET {questionCount === 1 ? 'question' : 'questions'}</span>
+      {data.questionCount > 0 && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: isSelected ? 'rgba(255,255,255,0.25)' : colors.tag, borderRadius: '20px', padding: '2px 7px', fontSize: '10px', color: isSelected ? 'white' : colors.tagText, fontWeight: 600 }}>
+          📝 {data.questionCount}Q
         </div>
       )}
     </div>
   )
 }
 
-const nodeTypes = { conceptNode: ConceptNode }
+function ChapterNode({ data }: { data: any }) {
+  const colors = CLASS_COLORS[data.classNum]
+  return (
+    <div style={{ background: colors.bg, border: `2.5px solid ${colors.border}`, borderRadius: '12px', padding: '12px 18px', minWidth: '200px', maxWidth: '260px', boxShadow: `0 2px 8px ${colors.border}33` }}>
+      <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: colors.border, marginBottom: '4px', textTransform: 'uppercase' }}>
+        {CLASS_LABELS[data.classNum]} · {data.conceptCount} concepts
+      </div>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: colors.text, lineHeight: 1.3, marginBottom: data.questionCount > 0 ? '8px' : 0 }}>
+        {data.label}
+      </div>
+      {data.questionCount > 0 && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: colors.tag, borderRadius: '20px', padding: '2px 8px', fontSize: '10px', color: colors.tagText, fontWeight: 600 }}>
+          📝 {data.questionCount}Q in NEET
+        </div>
+      )}
+    </div>
+  )
+}
 
-// ─── Tree Builder ─────────────────────────────────────────────────────────────
+const nodeTypes = { conceptNode: ConceptNode, chapterNode: ChapterNode }
 
 function buildTree(
   selectedConcepts: Concept[],
   allConcepts: Concept[],
   questionCounts: Record<string, number>,
   direction: 'top-down' | 'bottom-up',
-  onNodeClick: (data: any) => void
+  onNodeClick: (data: any) => void,
+  isAllMode: boolean,
+  selectedChapterName: string,
+  selectedClassNum: number,
 ): { nodes: Node[]; edges: Edge[] } {
   const conceptMap = new Map(allConcepts.map(c => [c.concept_id, c]))
   const selectedIds = new Set(selectedConcepts.map(c => c.concept_id))
-
-  // Collect all nodes needed — traverse up (builds_upon) and down (reverse)
   const includedIds = new Set<string>()
 
-  // Build reverse index for downward traversal
   const reverseIndex = new Map<string, string[]>()
   for (const c of allConcepts) {
     for (const parentId of c.builds_upon || []) {
@@ -175,27 +128,19 @@ function buildTree(
     }
   }
 
-  // Traverse upward from selected concepts (find prerequisites)
   function traverseUp(id: string, visited = new Set<string>()) {
     if (visited.has(id)) return
-    visited.add(id)
-    includedIds.add(id)
+    visited.add(id); includedIds.add(id)
     const concept = conceptMap.get(id)
     if (!concept) return
-    for (const parentId of concept.builds_upon || []) {
-      traverseUp(parentId, visited)
-    }
+    for (const parentId of concept.builds_upon || []) traverseUp(parentId, visited)
   }
 
-  // Traverse downward from selected concepts (find what builds on them)
   function traverseDown(id: string, visited = new Set<string>()) {
     if (visited.has(id)) return
-    visited.add(id)
-    includedIds.add(id)
+    visited.add(id); includedIds.add(id)
     const children = reverseIndex.get(id) || []
-    for (const childId of children) {
-      traverseDown(childId, visited)
-    }
+    for (const childId of children) traverseDown(childId, visited)
   }
 
   for (const concept of selectedConcepts) {
@@ -203,207 +148,151 @@ function buildTree(
     traverseDown(concept.concept_id)
   }
 
-  // Group by class for layout
-  const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
-  for (const id of Array.from(includedIds)) {
-    const c = conceptMap.get(id)
-    if (c && byClass[c.class]) {
-      byClass[c.class].push(c)
-    }
-  }
-
-  // Layout constants
-  const NODE_WIDTH = 220
-  const NODE_HEIGHT = 100
-  const H_GAP = 40
-  const V_GAP = 120
-
+  const NODE_W = 210, NODE_H = 90, H_GAP = 48, V_GAP = 110
   const classOrder = direction === 'top-down' ? [12, 11, 10, 9] : [9, 10, 11, 12]
-
   const nodes: Node[] = []
-  // Assign positions level by level
-  classOrder.forEach((classNum, levelIdx) => {
-    const concepts = byClass[classNum] || []
-    const totalWidth = concepts.length * (NODE_WIDTH + H_GAP) - H_GAP
-    const startX = -totalWidth / 2
-    const y = levelIdx * (NODE_HEIGHT + V_GAP)
-
-    concepts.forEach((concept, idx) => {
-      const x = startX + idx * (NODE_WIDTH + H_GAP)
-      nodes.push({
-        id: concept.concept_id,
-        type: 'conceptNode',
-        position: { x, y },
-        data: {
-          label: concept.concept_name,
-          classNum: concept.class,
-          chapterName: concept.chapter_name,
-          summary: concept.summary,
-          concept_id: concept.concept_id,
-          isSelected: selectedIds.has(concept.concept_id),
-          questionCount: questionCounts[concept.concept_id] || 0,
-          onNodeClick,
-        },
-        sourcePosition: direction === 'top-down' ? Position.Bottom : Position.Top,
-        targetPosition: direction === 'top-down' ? Position.Top : Position.Bottom,
-      })
-    })
-  })
-
-  // Build edges from builds_upon relationships
   const edges: Edge[] = []
   const edgeSet = new Set<string>()
 
-  for (const id of Array.from(includedIds)) {
-    const concept = conceptMap.get(id)
-    if (!concept) continue
-    for (const parentId of concept.builds_upon || []) {
-      if (!includedIds.has(parentId)) continue
-      const edgeKey = direction === 'top-down'
-        ? `${id}-${parentId}`  // child → parent (top-down: parent is above)
-        : `${parentId}-${id}`  // parent → child (bottom-up: parent is above)
+  const makeEdge = (from: string, to: string, classNum: number, animated = false) => {
+    const key = `${from}->${to}`
+    if (edgeSet.has(key)) return
+    edgeSet.add(key)
+    const colors = CLASS_COLORS[classNum]
+    edges.push({
+      id: `e-${from}-${to}`,
+      source: direction === 'top-down' ? from : to,
+      target: direction === 'top-down' ? to : from,
+      type: 'smoothstep',
+      animated,
+      style: { stroke: colors.border, strokeWidth: animated ? 2.5 : 1.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: colors.border, width: 14, height: 14 },
+    })
+  }
 
-      if (edgeSet.has(edgeKey)) continue
-      edgeSet.add(edgeKey)
+  if (isAllMode) {
+    const CHAPTER_ID = `chapter_${selectedClassNum}_selected`
+    const chapterQCount = selectedConcepts.reduce((s, c) => s + (questionCounts[c.concept_id] || 0), 0)
 
-      const parentConcept = conceptMap.get(parentId)
-      const colors = CLASS_COLORS[parentConcept?.class || 9]
+    const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
+    for (const id of Array.from(includedIds)) {
+      if (selectedIds.has(id)) continue
+      const c = conceptMap.get(id)
+      if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
+    }
 
-      edges.push({
-        id: `e-${id}-${parentId}`,
-        source: direction === 'top-down' ? parentId : id,
-        target: direction === 'top-down' ? id : parentId,
-        type: 'smoothstep',
-        animated: selectedIds.has(id) || selectedIds.has(parentId),
-        style: {
-          stroke: colors.border,
-          strokeWidth: selectedIds.has(id) || selectedIds.has(parentId) ? 2 : 1,
-          opacity: selectedIds.has(id) || selectedIds.has(parentId) ? 0.9 : 0.4,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: colors.border,
-          width: 12,
-          height: 12,
-        },
+    const presentClasses = classOrder.filter(cls => cls === selectedClassNum || (byClass[cls] && byClass[cls].length > 0))
+
+    presentClasses.forEach((classNum, levelIdx) => {
+      const y = levelIdx * (NODE_H + V_GAP)
+      if (classNum === selectedClassNum) {
+        nodes.push({
+          id: CHAPTER_ID, type: 'chapterNode',
+          position: { x: 0, y },
+          data: { label: selectedChapterName, classNum: selectedClassNum, conceptCount: selectedConcepts.length, questionCount: chapterQCount },
+          sourcePosition: direction === 'top-down' ? Position.Bottom : Position.Top,
+          targetPosition: direction === 'top-down' ? Position.Top : Position.Bottom,
+        })
+      } else {
+        const concepts = byClass[classNum] || []
+        const totalW = concepts.length * (NODE_W + H_GAP) - H_GAP
+        const startX = -totalW / 2
+        concepts.forEach((concept, idx) => {
+          nodes.push({
+            id: concept.concept_id, type: 'conceptNode',
+            position: { x: startX + idx * (NODE_W + H_GAP), y },
+            data: { label: concept.concept_name, classNum: concept.class, chapterName: concept.chapter_name, summary: concept.summary, concept_id: concept.concept_id, isSelected: false, questionCount: questionCounts[concept.concept_id] || 0, onNodeClick },
+            sourcePosition: direction === 'top-down' ? Position.Bottom : Position.Top,
+            targetPosition: direction === 'top-down' ? Position.Top : Position.Bottom,
+          })
+        })
+      }
+    })
+
+    // Edges
+    for (const selConcept of selectedConcepts) {
+      for (const parentId of selConcept.builds_upon || []) {
+        if (!includedIds.has(parentId) || selectedIds.has(parentId)) continue
+        const pc = conceptMap.get(parentId)
+        makeEdge(parentId, CHAPTER_ID, pc?.class || 9)
+      }
+    }
+    for (const id of Array.from(includedIds)) {
+      if (selectedIds.has(id)) continue
+      const concept = conceptMap.get(id)
+      if (!concept) continue
+      for (const parentId of concept.builds_upon || []) {
+        if (selectedIds.has(parentId)) {
+          makeEdge(CHAPTER_ID, id, selectedClassNum)
+        } else if (includedIds.has(parentId) && !selectedIds.has(parentId)) {
+          const pc = conceptMap.get(parentId)
+          makeEdge(parentId, id, pc?.class || 9)
+        }
+      }
+    }
+
+  } else {
+    const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
+    for (const id of Array.from(includedIds)) {
+      const c = conceptMap.get(id)
+      if (c && byClass[c.class] !== undefined) byClass[c.class].push(c)
+    }
+    const presentClasses = classOrder.filter(cls => byClass[cls] && byClass[cls].length > 0)
+    presentClasses.forEach((classNum, levelIdx) => {
+      const concepts = byClass[classNum] || []
+      const totalW = concepts.length * (NODE_W + H_GAP) - H_GAP
+      const startX = -totalW / 2
+      const y = levelIdx * (NODE_H + V_GAP)
+      concepts.forEach((concept, idx) => {
+        nodes.push({
+          id: concept.concept_id, type: 'conceptNode',
+          position: { x: startX + idx * (NODE_W + H_GAP), y },
+          data: { label: concept.concept_name, classNum: concept.class, chapterName: concept.chapter_name, summary: concept.summary, concept_id: concept.concept_id, isSelected: selectedIds.has(concept.concept_id), questionCount: questionCounts[concept.concept_id] || 0, onNodeClick },
+          sourcePosition: direction === 'top-down' ? Position.Bottom : Position.Top,
+          targetPosition: direction === 'top-down' ? Position.Top : Position.Bottom,
+        })
       })
+    })
+    for (const id of Array.from(includedIds)) {
+      const concept = conceptMap.get(id)
+      if (!concept) continue
+      for (const parentId of concept.builds_upon || []) {
+        if (!includedIds.has(parentId)) continue
+        const pc = conceptMap.get(parentId)
+        makeEdge(parentId, id, pc?.class || 9, selectedIds.has(id) || selectedIds.has(parentId))
+      }
     }
   }
 
   return { nodes, edges }
 }
 
-// ─── Explanation Popup ────────────────────────────────────────────────────────
-
-function ExplanationPopup({
-  concept,
-  onClose,
-}: {
-  concept: Concept & { questionCount: number }
-  onClose: () => void
-}) {
+function ExplanationPopup({ concept, onClose }: { concept: Concept & { questionCount: number }; onClose: () => void }) {
   const colors = CLASS_COLORS[concept.class]
-
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0,0,0,0.7)',
-      zIndex: 1000,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-    }} onClick={onClose}>
-      <div style={{
-        background: '#0f172a',
-        border: `2px solid ${colors.border}`,
-        borderRadius: '16px',
-        padding: '28px',
-        maxWidth: '520px',
-        width: '100%',
-        boxShadow: `0 0 40px ${colors.border}44`,
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '16px',
-        }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={onClose}>
+      <div style={{ background: 'white', border: `2px solid ${colors.border}`, borderRadius: '16px', padding: '28px', maxWidth: '520px', width: '100%', boxShadow: '0 8px 40px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
           <div>
-            <div style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              color: colors.text,
-              textTransform: 'uppercase',
-              marginBottom: '6px',
-            }}>
-              {CLASS_LABELS[concept.class]} · {concept.chapter_name}
-            </div>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: '#f1f5f9',
-              lineHeight: 1.3,
-              margin: 0,
-            }}>
-              {concept.concept_name}
-            </h2>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: colors.border, textTransform: 'uppercase', marginBottom: '6px' }}>{CLASS_LABELS[concept.class]} · {concept.chapter_name}</div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#111827', lineHeight: 1.3, margin: 0 }}>{concept.concept_name}</h2>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: '1px solid #334155',
-              borderRadius: '8px',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              padding: '6px 10px',
-              fontSize: '14px',
-            }}
-          >✕</button>
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', color: '#6b7280', cursor: 'pointer', padding: '6px 10px', fontSize: '14px' }}>✕</button>
         </div>
-
-        <p style={{
-          fontSize: '14px',
-          color: '#cbd5e1',
-          lineHeight: 1.7,
-          margin: '0 0 20px',
-        }}>
-          {concept.summary}
-        </p>
-
+        <p style={{ fontSize: '14px', color: '#374151', lineHeight: 1.7, margin: '0 0 20px' }}>{concept.summary}</p>
         {concept.questionCount > 0 && (
-          <div style={{
-            background: colors.bg,
-            border: `1px solid ${colors.border}44`,
-            borderRadius: '10px',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}>
+          <div style={{ background: colors.tag, border: `1px solid ${colors.border}44`, borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>📝</span>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: colors.text }}>
-                {concept.questionCount} NEET question{concept.questionCount !== 1 ? 's' : ''}
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>
-                asked on this concept (2021–2025)
-              </div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: colors.tagText }}>{concept.questionCount} NEET question{concept.questionCount !== 1 ? 's' : ''}</div>
+              <div style={{ fontSize: '11px', color: '#6b7280' }}>asked on this concept (2021–2025)</div>
             </div>
           </div>
         )}
-
-        {concept.builds_upon?.length > 0 && (
+        {(concept.builds_upon?.length > 0) && (
           <div style={{ marginTop: '16px' }}>
-            <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px', fontWeight: 600 }}>
-              BUILDS UPON
-            </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-              {concept.builds_upon.length} prerequisite concept{concept.builds_upon.length !== 1 ? 's' : ''}
-            </div>
+            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>BUILDS UPON</div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>{concept.builds_upon.length} prerequisite concept{concept.builds_upon.length !== 1 ? 's' : ''}</div>
           </div>
         )}
       </div>
@@ -411,458 +300,169 @@ function ExplanationPopup({
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function ConceptMapPage() {
   const [concepts, setConcepts] = useState<Concept[]>([])
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({})
   const [selectedClass, setSelectedClass] = useState<number>(12)
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null)
-  const [selectedConcept, setSelectedConcept] = useState<string | null>(null)
+  const [selectedConcept, setSelectedConcept] = useState<string>('all')
   const [direction, setDirection] = useState<'top-down' | 'bottom-up'>('top-down')
   const [popupConcept, setPopupConcept] = useState<(Concept & { questionCount: number }) | null>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [loading, setLoading] = useState(true)
 
-  // Load data
   useEffect(() => {
     async function load() {
       try {
-        const [conceptsRes, mappingRes] = await Promise.all([
-          fetch('/chemistry_concepts_new.json'),
-          fetch('/chemistry_question_mapping.json'),
-        ])
-        const conceptsData: ConceptsData = await conceptsRes.json()
-        const mappingData: MappingData = await mappingRes.json()
-
-        // Build question counts per concept
+        const [cRes, mRes] = await Promise.all([fetch('/chemistry_concepts_new.json'), fetch('/chemistry_question_mapping.json')])
+        const cData: ConceptsData = await cRes.json()
+        const mData: MappingData = await mRes.json()
         const counts: Record<string, number> = {}
-        for (const m of mappingData.mappings) {
-          if (m.concept_id && m.concept_id !== "NONE" && m.status !== "uncertain") {
-            counts[m.concept_id] = (counts[m.concept_id] || 0) + 1
-          }
+        for (const m of mData.mappings) {
+          if (m.concept_id && m.concept_id !== 'NONE' && m.status !== 'uncertain') counts[m.concept_id] = (counts[m.concept_id] || 0) + 1
         }
-
-        setConcepts(conceptsData.concepts.filter(c => c.concept_name))
+        setConcepts(cData.concepts.filter(c => c.concept_name))
         setQuestionCounts(counts)
         setLoading(false)
       } catch (err) {
-        console.error('Failed to load data:', err)
+        console.error(err)
         setLoading(false)
       }
     }
     load()
   }, [])
 
-  // Get chapters for selected class
   const chaptersForClass = useMemo(() => {
-    const chapterMap = new Map<string, { name: string; count: number; conceptCount: number }>()
+    const map = new Map<string, { name: string; count: number; conceptCount: number }>()
     for (const c of concepts) {
       if (c.class !== selectedClass) continue
       const key = `${c.class}_${c.chapter_number}`
-      if (!chapterMap.has(key)) {
-        chapterMap.set(key, {
-          name: c.chapter_name,
-          count: 0,
-          conceptCount: 0,
-        })
-      }
-      const ch = chapterMap.get(key)!
+      if (!map.has(key)) map.set(key, { name: c.chapter_name, count: 0, conceptCount: 0 })
+      const ch = map.get(key)!
       ch.conceptCount++
       ch.count += questionCounts[c.concept_id] || 0
     }
-    return Array.from(chapterMap.entries())
-      .map(([key, val]) => ({ key, ...val }))
-      .sort((a, b) => {
-        const numA = parseInt(a.key.split('_')[1])
-        const numB = parseInt(b.key.split('_')[1])
-        return numA - numB
-      })
+    return Array.from(map.entries()).map(([key, val]) => ({ key, ...val })).sort((a, b) => parseInt(a.key.split('_')[1]) - parseInt(b.key.split('_')[1]))
   }, [concepts, selectedClass, questionCounts])
 
-  // Get concepts for selected chapter
   const conceptsForChapter = useMemo(() => {
     if (!selectedChapter) return []
     const [cls, chNum] = selectedChapter.split('_').map(Number)
     return concepts.filter(c => c.class === cls && c.chapter_number === chNum)
   }, [concepts, selectedChapter])
 
-  // Handle node click
+  const selectedChapterInfo = useMemo(() => chaptersForClass.find(c => c.key === selectedChapter) || null, [chaptersForClass, selectedChapter])
+
   const handleNodeClick = useCallback((data: any) => {
     const concept = concepts.find(c => c.concept_id === data.concept_id)
     if (!concept) return
     setPopupConcept({ ...concept, questionCount: questionCounts[data.concept_id] || 0 })
   }, [concepts, questionCounts])
 
-  // Build tree when selection changes
   useEffect(() => {
-    if (!selectedChapter && !selectedConcept) {
-      setNodes([] as any)
-      setEdges([] as any)
-      return
+    if (!selectedChapter || conceptsForChapter.length === 0) {
+      setNodes([] as any); setEdges([] as any); return
     }
-
-    let selectedConcepts: Concept[] = []
-
-    if (selectedConcept) {
-      const concept = concepts.find(c => c.concept_id === selectedConcept)
-      if (concept) selectedConcepts = [concept]
-    } else if (selectedChapter) {
-      selectedConcepts = conceptsForChapter
-    }
-
-    if (selectedConcepts.length === 0) return
-
-    const { nodes: newNodes, edges: newEdges } = buildTree(
-      selectedConcepts,
-      concepts,
-      questionCounts,
-      direction,
-      handleNodeClick
-    )
-    setNodes(newNodes as any)
-    setEdges(newEdges as any)
+    const isAllMode = selectedConcept === 'all'
+    const selConcepts = isAllMode ? conceptsForChapter : conceptsForChapter.filter(c => c.concept_id === selectedConcept)
+    if (selConcepts.length === 0) return
+    const { nodes: n, edges: e } = buildTree(selConcepts, concepts, questionCounts, direction, handleNodeClick, isAllMode, selectedChapterInfo?.name || '', selectedClass)
+    setNodes(n as any)
+    setEdges(e as any)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChapter, selectedConcept, concepts, questionCounts, direction, handleNodeClick, conceptsForChapter])
+  }, [selectedChapter, selectedConcept, concepts, questionCounts, direction, handleNodeClick, conceptsForChapter, selectedChapterInfo, selectedClass])
 
-  // Handle chapter selection
-  const handleChapterSelect = (key: string) => {
-    setSelectedChapter(key === selectedChapter ? null : key)
-    setSelectedConcept(null)
-  }
-
-  // Handle concept selection
-  const handleConceptSelect = (conceptId: string) => {
-    setSelectedConcept(conceptId === selectedConcept ? null : conceptId)
-  }
-
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#020817',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#64748b',
-        fontFamily: 'monospace',
-        fontSize: '14px',
-      }}>
-        Loading concept map...
-      </div>
-    )
-  }
+  if (loading) return <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '14px' }}>Loading concept map...</div>
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#020817',
-      display: 'flex',
-      flexDirection: 'column',
-      fontFamily: "'DM Sans', system-ui, sans-serif",
-    }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Header */}
-      <div style={{
-        padding: '20px 28px',
-        borderBottom: '1px solid #1e293b',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div>
-          <h1 style={{
-            fontSize: '22px',
-            fontWeight: 700,
-            color: '#f1f5f9',
-            margin: 0,
-            letterSpacing: '-0.02em',
-          }}>
-            Concept Map
-          </h1>
-          <p style={{ fontSize: '13px', color: '#475569', margin: '4px 0 0', }}>
-            Chemistry · Select a chapter or concept to explore its ancestry chain
-          </p>
-        </div>
+      <div style={{ padding: '14px 24px', borderBottom: '1px solid #e2e8f0', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
+            <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>Chemistry · Ancestry chains</p>
+          </div>
 
-        {/* Direction toggle */}
-        <button
-          onClick={() => setDirection(d => d === 'top-down' ? 'bottom-up' : 'top-down')}
-          style={{
-            background: '#0f172a',
-            border: '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '8px 16px',
-            color: '#94a3b8',
-            cursor: 'pointer',
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontFamily: 'inherit',
-          }}
-        >
-          <span>{direction === 'top-down' ? '⬇' : '⬆'}</span>
-          <span>{direction === 'top-down' ? 'Class XII at top' : 'Class IX at top'}</span>
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Left panel */}
-        <div style={{
-          width: '280px',
-          minWidth: '280px',
-          background: '#0a0f1e',
-          borderRight: '1px solid #1e293b',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
           {/* Class selector */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '8px',
-            padding: '16px',
-            borderBottom: '1px solid #1e293b',
-          }}>
+          <div style={{ display: 'flex', gap: '3px', background: '#f1f5f9', borderRadius: '9px', padding: '3px' }}>
             {[9, 10, 11, 12].map(cls => {
               const colors = CLASS_COLORS[cls]
               const isActive = selectedClass === cls
               return (
-                <button
-                  key={cls}
-                  onClick={() => {
-                    setSelectedClass(cls)
-                    setSelectedChapter(null)
-                    setSelectedConcept(null)
-                  }}
-                  style={{
-                    background: isActive ? colors.bg : 'transparent',
-                    border: `1px solid ${isActive ? colors.border : '#1e293b'}`,
-                    borderRadius: '8px',
-                    padding: '8px',
-                    color: isActive ? colors.text : '#475569',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    fontFamily: 'inherit',
-                    transition: 'all 0.15s',
-                  }}
-                >
+                <button key={cls} onClick={() => { setSelectedClass(cls); setSelectedChapter(null); setSelectedConcept('all') }}
+                  style={{ background: isActive ? colors.border : 'transparent', border: 'none', borderRadius: '6px', padding: '5px 12px', color: isActive ? 'white' : '#64748b', cursor: 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.15s' }}>
                   {CLASS_LABELS[cls]}
                 </button>
               )
             })}
           </div>
 
-          {/* Chapter list */}
-          <div style={{ padding: '12px 0', flex: 1 }}>
-            <div style={{
-              fontSize: '10px',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              color: '#334155',
-              padding: '0 16px 8px',
-              textTransform: 'uppercase',
-            }}>
-              Chapters
-            </div>
+          {/* Chapter select */}
+          <select value={selectedChapter || ''} onChange={e => { setSelectedChapter(e.target.value || null); setSelectedConcept('all') }}
+            style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', color: '#374151', cursor: 'pointer', fontFamily: 'inherit', minWidth: '210px', outline: 'none' }}>
+            <option value=''>— Select a chapter —</option>
+            {chaptersForClass.map(ch => (
+              <option key={ch.key} value={ch.key}>{ch.name}{ch.count > 0 ? ` (${ch.count}Q)` : ''}</option>
+            ))}
+          </select>
 
-            {chaptersForClass.map(({ key, name, count, conceptCount }) => {
-              const isActive = selectedChapter === key
-              const colors = CLASS_COLORS[selectedClass]
-
-              return (
-                <div key={key}>
-                  <button
-                    onClick={() => handleChapterSelect(key)}
-                    style={{
-                      width: '100%',
-                      background: isActive ? colors.bg + '88' : 'transparent',
-                      border: 'none',
-                      borderLeft: `3px solid ${isActive ? colors.border : 'transparent'}`,
-                      padding: '10px 16px',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      color: isActive ? '#f1f5f9' : '#94a3b8',
-                      fontSize: '13px',
-                      fontFamily: 'inherit',
-                      transition: 'all 0.15s',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span style={{ lineHeight: 1.3 }}>{name}</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-                      {count > 0 && (
-                        <span style={{
-                          fontSize: '10px',
-                          background: colors.border + '33',
-                          color: colors.text,
-                          borderRadius: '4px',
-                          padding: '1px 5px',
-                          fontWeight: 600,
-                        }}>
-                          {count}Q
-                        </span>
-                      )}
-                      <span style={{ fontSize: '10px', color: '#334155' }}>
-                        {conceptCount}c
-                      </span>
-                    </div>
-                  </button>
-
-                  {/* Concept list inside chapter */}
-                  {isActive && conceptsForChapter.length > 0 && (
-                    <div style={{
-                      background: '#0d1424',
-                      borderBottom: '1px solid #1e293b',
-                    }}>
-                      {conceptsForChapter.map(concept => {
-                        const isConceptActive = selectedConcept === concept.concept_id
-                        const qCount = questionCounts[concept.concept_id] || 0
-                        return (
-                          <button
-                            key={concept.concept_id}
-                            onClick={() => handleConceptSelect(concept.concept_id)}
-                            style={{
-                              width: '100%',
-                              background: isConceptActive ? colors.bg : 'transparent',
-                              border: 'none',
-                              borderLeft: `3px solid ${isConceptActive ? colors.border : '#1e293b'}`,
-                              padding: '8px 16px 8px 24px',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              color: isConceptActive ? '#f1f5f9' : '#64748b',
-                              fontSize: '12px',
-                              fontFamily: 'inherit',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              gap: '8px',
-                            }}
-                          >
-                            <span style={{ lineHeight: 1.3 }}>{concept.concept_name}</span>
-                            {qCount > 0 && (
-                              <span style={{
-                                fontSize: '10px',
-                                background: colors.border + '22',
-                                color: colors.text,
-                                borderRadius: '4px',
-                                padding: '1px 5px',
-                                fontWeight: 600,
-                                flexShrink: 0,
-                              }}>
-                                {qCount}Q
-                              </span>
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Right panel — tree */}
-        <div style={{ flex: 1, position: 'relative', background: '#020817' }}>
-          {nodes.length === 0 ? (
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1e293b',
-              gap: '16px',
-            }}>
-              <div style={{ fontSize: '64px', opacity: 0.3 }}>🗺</div>
-              <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155' }}>
-                Select a chapter to explore its concept map
-              </div>
-              <div style={{ fontSize: '13px', color: '#1e293b' }}>
-                Then click a concept to highlight its ancestry chain
-              </div>
-
-              {/* Legend */}
-              <div style={{
-                display: 'flex',
-                gap: '16px',
-                marginTop: '24px',
-                background: '#0a0f1e',
-                border: '1px solid #1e293b',
-                borderRadius: '12px',
-                padding: '16px 24px',
-              }}>
-                {[9, 10, 11, 12].map(cls => {
-                  const colors = CLASS_COLORS[cls]
-                  return (
-                    <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '3px',
-                        background: colors.bg,
-                        border: `2px solid ${colors.border}`,
-                      }} />
-                      <span style={{ fontSize: '12px', color: '#475569' }}>{CLASS_LABELS[cls]}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : (
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              nodeTypes={nodeTypes}
-              fitView
-              fitViewOptions={{ padding: 0.2 }}
-              minZoom={0.3}
-              maxZoom={2}
-              style={{ background: '#020817' }}
-            >
-              <Background color="#1e293b" gap={24} size={1} />
-              <Controls
-                style={{
-                  background: '#0a0f1e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '8px',
-                }}
-              />
-              <MiniMap
-                style={{
-                  background: '#0a0f1e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '8px',
-                }}
-                nodeColor={(node) => {
-                  const data = node.data as { classNum?: number; isSelected?: boolean }
-                  const colors = CLASS_COLORS[data?.classNum || 9]
-                  return data?.isSelected ? colors.border : colors.bg
-                }}
-              />
-            </ReactFlow>
+          {/* Concept select */}
+          {selectedChapter && conceptsForChapter.length > 0 && (
+            <select value={selectedConcept} onChange={e => setSelectedConcept(e.target.value)}
+              style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', color: '#374151', cursor: 'pointer', fontFamily: 'inherit', minWidth: '200px', outline: 'none' }}>
+              <option value='all'>All concepts</option>
+              {conceptsForChapter.map(c => (
+                <option key={c.concept_id} value={c.concept_id}>{c.concept_name}{questionCounts[c.concept_id] ? ` (${questionCounts[c.concept_id]}Q)` : ''}</option>
+              ))}
+            </select>
           )}
         </div>
+
+        {/* Direction toggle */}
+        <button onClick={() => setDirection(d => d === 'top-down' ? 'bottom-up' : 'top-down')}
+          style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '6px 14px', color: '#374151', cursor: 'pointer', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+          {direction === 'top-down' ? '⬇ XII at top' : '⬆ IX at top'}
+        </button>
       </div>
 
-      {/* Popup */}
-      {popupConcept && (
-        <ExplanationPopup
-          concept={popupConcept}
-          onClose={() => setPopupConcept(null)}
-        />
-      )}
+      {/* Tree */}
+      <div style={{ flex: 1, position: 'relative' }}>
+        {nodes.length === 0 ? (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <div style={{ fontSize: '52px', opacity: 0.18 }}>🗺</div>
+            <div style={{ fontSize: '15px', fontWeight: 600, color: '#94a3b8' }}>Select a chapter to explore its concept map</div>
+            <div style={{ fontSize: '12px', color: '#cbd5e1' }}>Then choose a specific concept or view all at once</div>
+            <div style={{ display: 'flex', gap: '20px', marginTop: '16px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              {[9, 10, 11, 12].map(cls => {
+                const colors = CLASS_COLORS[cls]
+                return (
+                  <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors.bg, border: `2px solid ${colors.border}` }} />
+                    <span style={{ fontSize: '12px', color: '#475569', fontWeight: 500 }}>{CLASS_LABELS[cls]}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.25 }} minZoom={0.2} maxZoom={2} style={{ background: '#f8fafc' }}>
+            <Background color="#e2e8f0" gap={24} size={1} />
+            <Controls style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+            <MiniMap
+              style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+              nodeColor={(node) => {
+                const d = node.data as { classNum?: number; isSelected?: boolean }
+                const colors = CLASS_COLORS[d?.classNum || 9]
+                return d?.isSelected ? colors.border : colors.bg
+              }}
+            />
+          </ReactFlow>
+        )}
+      </div>
+
+      {popupConcept && <ExplanationPopup concept={popupConcept} onClose={() => setPopupConcept(null)} />}
     </div>
   )
 }
