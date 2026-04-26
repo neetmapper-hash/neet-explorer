@@ -221,8 +221,6 @@ function buildTree(
   const classOrder = direction === 'top-down' ? [12, 11, 10, 9] : [9, 10, 11, 12]
 
   const nodes: Node[] = []
-  const nodePositions = new Map<string, { x: number; y: number }>()
-
   // Assign positions level by level
   classOrder.forEach((classNum, levelIdx) => {
     const concepts = byClass[classNum] || []
@@ -232,8 +230,6 @@ function buildTree(
 
     concepts.forEach((concept, idx) => {
       const x = startX + idx * (NODE_WIDTH + H_GAP)
-      nodePositions.set(concept.concept_id, { x, y })
-
       nodes.push({
         id: concept.concept_id,
         type: 'conceptNode',
@@ -425,8 +421,8 @@ export default function ConceptMapPage() {
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null)
   const [direction, setDirection] = useState<'top-down' | 'bottom-up'>('top-down')
   const [popupConcept, setPopupConcept] = useState<(Concept & { questionCount: number }) | null>(null)
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+  const [nodes, setNodes, onNodesChange] = useNodesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [loading, setLoading] = useState(true)
 
   // Load data
@@ -502,8 +498,8 @@ export default function ConceptMapPage() {
   // Build tree when selection changes
   useEffect(() => {
     if (!selectedChapter && !selectedConcept) {
-      setNodes([])
-      setEdges([])
+      setNodes([] as any)
+      setEdges([] as any)
       return
     }
 
@@ -525,8 +521,8 @@ export default function ConceptMapPage() {
       direction,
       handleNodeClick
     )
-    setNodes(newNodes)
-    setEdges(newEdges)
+    setNodes(newNodes as any)
+    setEdges(newEdges as any)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChapter, selectedConcept, concepts, questionCounts, direction, handleNodeClick, conceptsForChapter])
 
@@ -850,8 +846,9 @@ export default function ConceptMapPage() {
                   borderRadius: '8px',
                 }}
                 nodeColor={(node) => {
-                  const colors = CLASS_COLORS[node.data?.classNum || 9]
-                  return node.data?.isSelected ? colors.border : colors.bg
+                  const data = node.data as { classNum?: number; isSelected?: boolean }
+                  const colors = CLASS_COLORS[data?.classNum || 9]
+                  return data?.isSelected ? colors.border : colors.bg
                 }}
               />
             </ReactFlow>
