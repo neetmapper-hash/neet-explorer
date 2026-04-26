@@ -425,8 +425,8 @@ export default function ConceptMapPage() {
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null)
   const [direction, setDirection] = useState<'top-down' | 'bottom-up'>('top-down')
   const [popupConcept, setPopupConcept] = useState<(Concept & { questionCount: number }) | null>(null)
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [loading, setLoading] = useState(true)
 
   // Load data
