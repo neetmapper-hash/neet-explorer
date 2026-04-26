@@ -205,7 +205,7 @@ function buildTree(
 
   // Group by class for layout
   const byClass: Record<number, Concept[]> = { 9: [], 10: [], 11: [], 12: [] }
-  for (const id of includedIds) {
+  for (const id of Array.from(includedIds)) {
     const c = conceptMap.get(id)
     if (c && byClass[c.class]) {
       byClass[c.class].push(c)
@@ -258,7 +258,7 @@ function buildTree(
   const edges: Edge[] = []
   const edgeSet = new Set<string>()
 
-  for (const id of includedIds) {
+  for (const id of Array.from(includedIds)) {
     const concept = conceptMap.get(id)
     if (!concept) continue
     for (const parentId of concept.builds_upon || []) {
@@ -527,6 +527,7 @@ export default function ConceptMapPage() {
     )
     setNodes(newNodes)
     setEdges(newEdges)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChapter, selectedConcept, concepts, questionCounts, direction, handleNodeClick, conceptsForChapter])
 
   // Handle chapter selection
