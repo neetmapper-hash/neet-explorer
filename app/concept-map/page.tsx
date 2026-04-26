@@ -285,7 +285,7 @@ function buildChapterTree(
   const includedKeys = new Set<string>()
 
   // Traverse upward through chapter dependencies
-  function traverseUp(key: string, visited = new Set<string>()) {
+  const traverseUp = (key: string, visited = new Set<string>()): void => {
     if (visited.has(key) || !registry[key]) return
     visited.add(key); includedKeys.add(key)
     for (const depKey of Array.from(registry[key].dependsOn)) {
@@ -294,7 +294,7 @@ function buildChapterTree(
   }
 
   // Find chapters that depend on this chapter (downward)
-  function getDirectChildChapters(key: string): string[] {
+  const getDirectChildChapters = (key: string): string[] => {
     return Object.keys(registry).filter(k =>
       registry[k].dependsOn.has(key) && k !== key
     )
@@ -397,7 +397,7 @@ function buildChapterTree(
           const conceptMap = new Map(
             Object.values(registry).flatMap(r => r.concepts).map(c => [c.concept_id, c])
           )
-          function findAncestors(id: string) {
+          const findAncestors = (id: string): void => {
             if (visited.has(id)) return
             visited.add(id)
             const c = conceptMap.get(id)
