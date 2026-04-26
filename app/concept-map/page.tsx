@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import ReactFlow, {
+import { ReactFlow,
   Node,
   Edge,
   Background,
@@ -11,8 +11,8 @@ import ReactFlow, {
   useEdgesState,
   Position,
   MarkerType,
-} from 'reactflow'
-import 'reactflow/dist/style.css'
+} from '@xyflow/react'
+import '@xyflow/react/dist/base.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
