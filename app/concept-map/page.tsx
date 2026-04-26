@@ -288,7 +288,7 @@ function buildChapterTree(
   function traverseUp(key: string, visited = new Set<string>()) {
     if (visited.has(key) || !registry[key]) return
     visited.add(key); includedKeys.add(key)
-    for (const depKey of registry[key].dependsOn) {
+    for (const depKey of Array.from(registry[key].dependsOn)) {
       traverseUp(depKey, visited)
     }
   }
@@ -344,7 +344,7 @@ function buildChapterTree(
       type: 'smoothstep',
       animated: highlighted,
       style: { stroke: colors.border, strokeWidth: highlighted ? 4 : 3 },
-      markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: colors.border },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
     })
   }
 
@@ -437,7 +437,7 @@ function buildChapterTree(
   for (const key of Array.from(includedKeys)) {
     const ch = registry[key]
     if (!ch) continue
-    for (const depKey of ch.dependsOn) {
+    for (const depKey of Array.from(ch.dependsOn)) {
       if (!includedKeys.has(depKey)) continue
       const depCh = registry[depKey]
       if (!depCh) continue
@@ -782,7 +782,7 @@ export default function ConceptMapPage() {
           </div>
           {nodes.length > 0 && (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ fontSize: '11px', color: '#94a3b8', background: mode === 'chapter' ? '#eff6ff' : '#faf5ff', border: `1px solid ${mode === 'chapter' ? '#bfdbfe' : '#e9d5ff'}`, borderRadius: '6px', padding: '3px 10px', fontWeight: 600, color: mode === 'chapter' ? '#1d4ed8' : '#7e22ce' }}>
+              <div style={{ fontSize: '11px', background: mode === 'chapter' ? '#eff6ff' : '#faf5ff', border: `1px solid ${mode === 'chapter' ? '#bfdbfe' : '#e9d5ff'}`, borderRadius: '6px', padding: '3px 10px', fontWeight: 600, color: mode === 'chapter' ? '#1d4ed8' : '#7e22ce' }}>
                 {mode === 'chapter' ? '📚 Chapter view' : '💡 Concept view'}
               </div>
               <div style={{ fontSize: '12px', color: '#94a3b8', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '3px 10px' }}>
