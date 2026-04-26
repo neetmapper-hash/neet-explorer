@@ -63,8 +63,8 @@ function ConceptNode({ data }: { data: any }) {
         background: isSelected ? colors.border : colors.bg,
         border: `2.5px solid ${colors.border}`,
         borderRadius: '10px',
-        padding: '10px 14px',
-        width: '200px',
+        padding: '14px 16px',
+        width: '280px',
         cursor: 'pointer',
         boxShadow: isSelected
           ? `0 4px 16px ${colors.border}66`
@@ -73,16 +73,16 @@ function ConceptNode({ data }: { data: any }) {
       }}
     >
       <div style={{
-        fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
+        fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
         color: isSelected ? 'rgba(255,255,255,0.8)' : colors.border,
-        marginBottom: '5px', textTransform: 'uppercase',
+        marginBottom: '6px', textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]}
       </div>
       <div style={{
-        fontSize: '13px', fontWeight: 600,
+        fontSize: '15px', fontWeight: 600,
         color: isSelected ? 'white' : colors.text,
-        lineHeight: 1.35,
+        lineHeight: 1.4,
         marginBottom: data.questionCount > 0 ? '8px' : 0,
       }}>
         {data.label}
@@ -92,7 +92,7 @@ function ConceptNode({ data }: { data: any }) {
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           background: isSelected ? 'rgba(255,255,255,0.2)' : colors.tag,
           borderRadius: '20px', padding: '3px 8px',
-          fontSize: '11px', color: isSelected ? 'white' : colors.tagText, fontWeight: 600,
+          fontSize: '12px', color: isSelected ? 'white' : colors.tagText, fontWeight: 600,
         }}>
           📝 {data.questionCount}Q
         </div>
@@ -108,19 +108,19 @@ function ChapterNode({ data }: { data: any }) {
       background: colors.border,
       border: `3px solid ${colors.text}`,
       borderRadius: '12px',
-      padding: '14px 18px',
-      width: '220px',
+      padding: '16px 20px',
+      width: '280px',
       boxShadow: `0 4px 20px ${colors.border}66`,
     }}>
       <div style={{
-        fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
-        color: 'rgba(255,255,255,0.75)', marginBottom: '5px', textTransform: 'uppercase',
+        fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
+        color: 'rgba(255,255,255,0.75)', marginBottom: '6px', textTransform: 'uppercase',
       }}>
         {CLASS_LABELS[data.classNum]} · {data.conceptCount} concepts
       </div>
       <div style={{
-        fontSize: '14px', fontWeight: 700, color: 'white',
-        lineHeight: 1.3, marginBottom: data.questionCount > 0 ? '9px' : 0,
+        fontSize: '16px', fontWeight: 700, color: 'white',
+        lineHeight: 1.4, marginBottom: data.questionCount > 0 ? '9px' : 0,
       }}>
         {data.label}
       </div>
@@ -187,10 +187,10 @@ function buildTree(
   // Layout: horizontal bands per class
   // Each class = one vertical column
   // Nodes within a column stacked vertically
-  const NODE_W = 220
-  const NODE_H = 100
-  const V_GAP = 20    // gap between nodes in same column
-  const H_GAP = 120   // gap between class columns
+  const NODE_W = 280
+  const NODE_H = 140
+  const V_GAP = 32    // gap between nodes in same column
+  const H_GAP = 180   // gap between class columns
 
   // Class order left to right
   const classOrderLTR = [9, 10, 11, 12]
@@ -209,18 +209,18 @@ function buildTree(
       id: `e-${fromId}-${toId}`,
       source: fromId,
       target: toId,
-      type: 'smoothstep',
+      type: 'default',
       animated: isHighlighted,
       style: {
-        stroke: isHighlighted ? colors.border : colors.border,
-        strokeWidth: isHighlighted ? 3 : 2,
-        opacity: isHighlighted ? 1 : 0.7,
+        stroke: colors.border,
+        strokeWidth: isHighlighted ? 4 : 3,
+        opacity: isHighlighted ? 1 : 0.85,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         color: colors.border,
-        width: 18,
-        height: 18,
+        width: 24,
+        height: 24,
       },
     })
   }
