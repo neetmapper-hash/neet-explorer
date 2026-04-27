@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   ReactFlow,
   Node,
@@ -133,8 +132,14 @@ function ConceptMapNode({ data }: { data: any }) {
   const isSelected = data.isSelected
   const w = data.nodeW || 260
   const fs = data.fontSize || 15
-  const concepts: string[] = data.conceptNames || []
+  const concepts: Concept[] = data.conceptObjects || []
   const extra = concepts.length > 2 ? concepts.length - 2 : 0
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const toggleConcept = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpandedId(prev => prev === id ? null : id)
+  }
 
   return (
     <div
@@ -144,7 +149,7 @@ function ConceptMapNode({ data }: { data: any }) {
         borderRadius: '12px',
         padding: `${Math.round(w * 0.06)}px ${Math.round(w * 0.07)}px`,
         width: `${w}px`,
-        cursor: extra > 0 ? 'default' : 'pointer',
+        cursor: 'pointer',
         boxShadow: isSelected ? `0 6px 24px ${colors.border}66` : `0 2px 8px ${colors.border}22`,
         position: 'relative',
       }}
@@ -178,19 +183,59 @@ function ConceptMapNode({ data }: { data: any }) {
         marginBottom: '8px',
       }} />
 
-      {/* Concept list — max 2 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {concepts.slice(0, 2).map((name, i) => (
-          <div key={i} style={{
-            fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`,
-            color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text,
-            lineHeight: 1.3,
-            display: 'flex', alignItems: 'flex-start', gap: '5px',
-          }}>
-            <span style={{ color: isSelected ? 'rgba(255,255,255,0.5)' : colors.border, flexShrink: 0, marginTop: '1px' }}>•</span>
-            <span>{name}</span>
-          </div>
-        ))}
+      {/* Concept list — accordion, max 2 shown */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {concepts.slice(0, 2).map((concept) => {
+          const isOpen = expandedId === concept.concept_id
+          return (
+            <div key={concept.concept_id}>
+              {/* Concept row */}
+              <div
+                onClick={(e) => toggleConcept(concept.concept_id, e)}
+                style={{
+                  fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`,
+                  color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text,
+                  lineHeight: 1.3,
+                  display: 'flex', alignItems: 'flex-start', gap: '5px',
+                  cursor: 'pointer',
+                  padding: '3px 4px',
+                  borderRadius: '6px',
+                  background: isOpen
+                    ? (isSelected ? 'rgba(255,255,255,0.15)' : `${colors.border}12`)
+                    : 'transparent',
+                  transition: 'background 0.12s',
+                }}
+              >
+                <span style={{
+                  color: isSelected ? 'rgba(255,255,255,0.5)' : colors.border,
+                  flexShrink: 0, marginTop: '1px', fontSize: '10px',
+                  transition: 'transform 0.15s',
+                  display: 'inline-block',
+                  transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}>▶</span>
+                <span>{concept.concept_name}</span>
+              </div>
+
+              {/* Expanded summary */}
+              {isOpen && concept.summary && (
+                <div style={{
+                  marginLeft: '16px',
+                  marginTop: '4px',
+                  marginBottom: '4px',
+                  padding: '6px 8px',
+                  background: isSelected ? 'rgba(255,255,255,0.12)' : `${colors.border}0d`,
+                  borderLeft: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : colors.border}`,
+                  borderRadius: '0 6px 6px 0',
+                  fontSize: `${Math.max(10, Math.round(fs * 0.72))}px`,
+                  color: isSelected ? 'rgba(255,255,255,0.85)' : colors.text,
+                  lineHeight: 1.5,
+                }}>
+                  {concept.summary}
+                </div>
+              )}
+            </div>
+          )
+        })}
 
         {/* "+ N more" button */}
         {extra > 0 && (
@@ -378,22 +423,19 @@ function buildChapterTree(
             fontSize: FONT_SIZE,
             chapterKey: key,
             concepts: ch.concepts,
-            onNodeClick: isSelected ? undefined : onChapterClick,
+            onNodeClick: onChapterClick,
           },
         })
       } else {
         // In concept mode — show which concepts from this chapter are relevant
         // For selected chapter: show the selected concept
         // For ancestor chapters: show concepts that are prerequisites of selected concept
-        let relevantConcepts: string[] = []
+        let relevantConcepts: Concept[] = []
 
         if (isSelected && selectedConceptId) {
           const sc = ch.concepts.find(c => c.concept_id === selectedConceptId)
-          relevantConcepts = sc ? [sc.concept_name] : []
+          relevantConcepts = sc ? [sc] : []
         } else if (selectedConceptId) {
-          // Find concepts in this chapter that are in the ancestry chain
-          const sc = ch.concepts.find(c => c.concept_id === selectedConceptId)
-          // Walk builds_upon chain to find which concepts from this chapter are ancestors
           const visited = new Set<string>()
           const conceptMap = new Map(
             Object.values(registry).flatMap(r => r.concepts).map(c => [c.concept_id, c])
@@ -405,12 +447,12 @@ function buildChapterTree(
             if (!c) return
             for (const pid of c.builds_upon || []) findAncestors(pid)
           }
+          const sc = ch.concepts.find(c => c.concept_id === selectedConceptId)
           if (sc) findAncestors(sc.concept_id)
           relevantConcepts = ch.concepts
             .filter(c => visited.has(c.concept_id) && c.concept_id !== selectedConceptId)
-            .map(c => c.concept_name)
         } else {
-          relevantConcepts = ch.concepts.slice(0, 3).map(c => c.concept_name)
+          relevantConcepts = ch.concepts.slice(0, 3)
         }
 
         nodes.push({
@@ -419,7 +461,7 @@ function buildChapterTree(
           data: {
             chapterName: ch.chapter_name,
             classNum: ch.class,
-            conceptNames: relevantConcepts,
+            conceptObjects: relevantConcepts,
             isSelected,
             nodeW: NODE_W,
             fontSize: FONT_SIZE,
@@ -560,18 +602,9 @@ function MoreConceptsPopup({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type Subject = 'Chemistry' | 'Physics'
-
-const SUBJECT_FILES: Record<Subject, { concepts: string; mapping: string }> = {
-  Chemistry: { concepts: '/chemistry_concepts_new.json', mapping: '/chemistry_question_mapping.json' },
-  Physics:   { concepts: '/physics_concepts_new.json',   mapping: '/physics_question_mapping.json' },
-}
-
 export default function ConceptMapPage() {
-  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerSize, setContainerSize] = useState({ width: 1200, height: 700 })
-  const [subject, setSubject] = useState<Subject>('Chemistry')
   const [concepts, setConcepts] = useState<Concept[]>([])
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -603,24 +636,13 @@ export default function ConceptMapPage() {
     return () => obs.disconnect()
   }, [])
 
-  // Load data — reloads when subject changes
+  // Load data
   useEffect(() => {
-    setLoading(true)
-    setConcepts([])
-    setQuestionCounts({})
-    setPendingChapter(null)
-    setPendingConcept('all')
-    setAppliedChapter(null)
-    setAppliedConcept('all')
-    setNodes([] as any)
-    setEdges([] as any)
-
     async function load() {
       try {
-        const files = SUBJECT_FILES[subject]
         const [cRes, mRes] = await Promise.all([
-          fetch(files.concepts),
-          fetch(files.mapping),
+          fetch('/chemistry_concepts_new.json'),
+          fetch('/chemistry_question_mapping.json'),
         ])
         const cData: ConceptsData = await cRes.json()
         const mData: MappingData = await mRes.json()
@@ -638,8 +660,7 @@ export default function ConceptMapPage() {
       }
     }
     load()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subject])
+  }, [])
 
   // Build chapter registry
   const registry = useMemo(() => buildChapterRegistry(concepts), [concepts])
@@ -671,7 +692,7 @@ export default function ConceptMapPage() {
     setMorePopup({
       chapterName: data.chapterName,
       classNum: data.classNum,
-      concepts: data.conceptNames || [],
+      concepts: (data.conceptObjects || []).map((c: Concept) => c.concept_name),
     })
   }, [])
 
@@ -725,42 +746,6 @@ export default function ConceptMapPage() {
         {sidebarOpen && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
-            {/* Navigation */}
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {([
-                  { label: '🔥 Topic Heatmap', href: '/heatmap' },
-                  { label: '🧬 Find Ancestry', href: '/ancestry' },
-                  { label: '🗺 Concept Map', href: '/concept-map' },
-                ] as const).map(({ label, href }) => {
-                  const isActive = href === '/concept-map'
-                  return (
-                    <button key={href} onClick={() => router.push(href)}
-                      style={{ background: isActive ? '#f0fdf4' : 'transparent', border: `1.5px solid ${isActive ? '#16a34a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#14532d' : '#64748b', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
-                      {label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Subject */}
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Subject</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {(['Chemistry', 'Physics'] as Subject[]).map(s => {
-                  const isActive = subject === s
-                  const emoji = s === 'Chemistry' ? '⚗️' : '⚡'
-                  return (
-                    <button key={s} onClick={() => setSubject(s)}
-                      style={{ background: isActive ? '#f8fafc' : 'transparent', border: `1.5px solid ${isActive ? '#0f172a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#0f172a' : '#64748b', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
-                      {emoji} {s}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
             {/* Class */}
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
@@ -833,7 +818,7 @@ export default function ConceptMapPage() {
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
             <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>
-              {subject} · {appliedChapter
+              Chemistry · {appliedChapter
                 ? `${appliedChapterName} › ${mode === 'chapter' ? 'Chapter dependencies' : (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '')}`
                 : 'Select a chapter and click Generate Map'}
             </p>
