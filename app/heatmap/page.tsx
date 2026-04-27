@@ -96,23 +96,23 @@ export default function HeatmapPage() {
 
   function intensityColor(count: number, max: number) {
     const ratio = max > 0 ? count / max : 0;
-    if (ratio === 0) return '#1a1a1a';
-    if (ratio < 0.2) return '#1a3a1a';
-    if (ratio < 0.4) return '#1f5a1a';
-    if (ratio < 0.6) return '#2d7a1a';
-    if (ratio < 0.8) return '#16a34a22';
+    if (ratio === 0) return '#1a1a2e';
+    if (ratio < 0.2) return '#16213e';
+    if (ratio < 0.4) return '#0f3460';
+    if (ratio < 0.6) return '#16a34a22';
+    if (ratio < 0.8) return '#16a34a33';
     return '#16a34a44';
   }
 
   function intensityText(count: number, max: number) {
     const ratio = max > 0 ? count / max : 0;
-    if (ratio === 0) return '#333';
+    if (ratio === 0) return '#4b5563';
     if (ratio < 0.4) return '#4ade80';
     if (ratio < 0.7) return '#86efac';
-    return '#ff6b6b';
+    return '#4ade80';
   }
 
-  // ── CHAPTER LIST (existing view) ──────────────────────────────────────────
+  // ── CHAPTER LIST ──────────────────────────────────────────────────────────
   const renderChapterList = () => (
     <>
       {sortedChapters.map((chapter, i) => {
@@ -122,48 +122,41 @@ export default function HeatmapPage() {
           <div
             key={`${subject}-${chapter.chapter_name}`}
             onClick={() => handleChapterClick(chapter)}
-            className="px-4 py-3 cursor-pointer border-b border-slate-100 transition-all relative"
+            className="px-4 py-3 cursor-pointer transition-all relative"
             style={{
-              background: isActive ? '#1a1a1a' : 'transparent',
-              borderLeft: isActive ? '2px solid #16a34a' : '2px solid transparent',
+              background: isActive ? '#0f2218' : 'transparent',
+              borderLeft: isActive ? '3px solid #16a34a' : '3px solid transparent',
+              borderBottom: '1px solid #1e1e1e',
             }}
           >
-            <div
-              className="absolute inset-0 opacity-20 pointer-events-none"
-              style={{
-                background: isActive
-                  ? `linear-gradient(90deg, #16a34a15 0%, transparent ${pct}%)`
-                  : `linear-gradient(90deg, #ffffff05 0%, transparent ${pct}%)`,
-              }}
-            />
             <div className="flex items-center gap-2 relative z-10">
               <span
                 className="text-[10px] font-mono w-5 flex-shrink-0"
-                style={{ color: i < 3 ? '#16a34a88' : '#2a2a2a' }}
+                style={{ color: i < 3 ? '#16a34a' : '#374151' }}
               >
                 {i + 1}
               </span>
               <span
-                className="text-[11px] flex-1 leading-tight"
-                style={{ color: isActive ? '#f0f0f0' : '#777' }}
+                className="text-[12px] flex-1 leading-tight"
+                style={{ color: isActive ? '#f0fdf4' : '#9ca3af' }}
               >
                 {chapter.chapter_name}
               </span>
               <span
-                className="text-[10px] font-mono font-bold flex-shrink-0"
-                style={{ color: isActive ? '#16a34a' : '#333' }}
+                className="text-[11px] font-mono font-bold flex-shrink-0"
+                style={{ color: isActive ? '#4ade80' : '#4b5563' }}
               >
                 {chapter.total_count}
               </span>
             </div>
-            <div className="mt-1.5 h-[2px] bg-slate-100 rounded relative z-10 ml-7">
+            <div className="mt-1.5 h-[2px] rounded relative z-10 ml-7" style={{ background: '#1e1e1e' }}>
               <div
                 className="h-full rounded transition-all duration-500"
                 style={{
                   width: `${pct}%`,
                   background: isActive
-                    ? 'linear-gradient(90deg, #16a34a, #84cc16)'
-                    : '#2a2a2a',
+                    ? 'linear-gradient(90deg, #16a34a, #4ade80)'
+                    : '#2d2d2d',
                 }}
               />
             </div>
@@ -173,7 +166,7 @@ export default function HeatmapPage() {
     </>
   );
 
-  // ── TOPIC LIST (new view) ─────────────────────────────────────────────────
+  // ── TOPIC LIST ────────────────────────────────────────────────────────────
   const renderTopicList = () => {
     const chaptersWithMeta = sortedChapters.map(ch => ({
       ...ch,
@@ -194,76 +187,68 @@ export default function HeatmapPage() {
           );
 
           return (
-            <div key={topic} className="border-b border-slate-100">
-              {/* Topic header */}
+            <div key={topic} style={{ borderBottom: '1px solid #1e1e1e' }}>
               <div
                 onClick={() => toggleTopic(topic)}
                 className="flex items-center gap-2 px-4 py-3 cursor-pointer transition-all"
                 style={{
-                  background: hasActiveChapter ? '#161616' : 'transparent',
-                  borderLeft: hasActiveChapter ? '2px solid #16a34a66' : '2px solid transparent',
+                  background: hasActiveChapter ? '#0f2218' : 'transparent',
+                  borderLeft: hasActiveChapter ? '3px solid #16a34a66' : '3px solid transparent',
                 }}
               >
-                <span className="text-slate-200 text-[9px] w-3 flex-shrink-0">
+                <span className="text-[9px] w-3 flex-shrink-0" style={{ color: '#4b5563' }}>
                   {isExpanded ? '▼' : '▶'}
                 </span>
                 <span
-                  className="text-[11px] font-semibold flex-1 leading-tight"
-                  style={{ color: hasActiveChapter ? '#f0f0f0' : '#888' }}
+                  className="text-[12px] font-semibold flex-1 leading-tight"
+                  style={{ color: hasActiveChapter ? '#f0fdf4' : '#6b7280' }}
                 >
                   {topic}
                 </span>
-                <span className="text-[9px] font-mono text-slate-200 mr-1">
+                <span className="text-[9px] font-mono mr-1" style={{ color: '#4b5563' }}>
                   {chapters.length}ch
                 </span>
                 <span
-                  className="text-[10px] font-mono font-bold flex-shrink-0"
-                  style={{ color: hasActiveChapter ? '#16a34a' : '#444' }}
+                  className="text-[11px] font-mono font-bold flex-shrink-0"
+                  style={{ color: hasActiveChapter ? '#4ade80' : '#4b5563' }}
                 >
                   {total}
                 </span>
               </div>
-
-              {/* Topic frequency bar */}
               <div className="mx-4 mb-1">
-                <div className="h-[2px] bg-slate-100 rounded">
+                <div className="h-[2px] rounded" style={{ background: '#1e1e1e' }}>
                   <div
                     className="h-full rounded"
-                    style={{
-                      width: `${topicPct}%`,
-                      background: 'linear-gradient(90deg, #16a34a88, #84cc1688)',
-                    }}
+                    style={{ width: `${topicPct}%`, background: 'linear-gradient(90deg, #16a34a88, #4ade8044)' }}
                   />
                 </div>
               </div>
-
-              {/* Expanded chapters */}
               {isExpanded && (
-                <div className="bg-slate-50">
+                <div style={{ background: '#0d0d0d' }}>
                   {chapters
                     .sort((a: any, b: any) => (b.total_count ?? 0) - (a.total_count ?? 0))
-                    .map((chapter: any, i: number) => {
+                    .map((chapter: any) => {
                       const isActive = selectedChapter?.chapter_name === chapter.chapter_name;
-                      const pct = Math.round(((chapter.total_count ?? 0) / maxCount) * 100);
                       return (
                         <div
                           key={chapter.chapter_name}
                           onClick={() => handleChapterClick(chapter)}
-                          className="flex items-center gap-2 pl-8 pr-4 py-2.5 cursor-pointer border-b border-slate-100 transition-all"
+                          className="flex items-center gap-2 pl-8 pr-4 py-2.5 cursor-pointer transition-all"
                           style={{
-                            background: isActive ? '#1a1a1a' : 'transparent',
-                            borderLeft: isActive ? '2px solid #16a34a' : '2px solid transparent',
+                            background: isActive ? '#0f2218' : 'transparent',
+                            borderLeft: isActive ? '3px solid #16a34a' : '3px solid transparent',
+                            borderBottom: '1px solid #1a1a1a',
                           }}
                         >
                           <span
-                            className="text-[10px] flex-1 leading-tight"
-                            style={{ color: isActive ? '#f0f0f0' : '#666' }}
+                            className="text-[11px] flex-1 leading-tight"
+                            style={{ color: isActive ? '#f0fdf4' : '#6b7280' }}
                           >
                             {chapter.chapter_name}
                           </span>
                           <span
                             className="text-[10px] font-mono font-bold flex-shrink-0"
-                            style={{ color: isActive ? '#16a34a' : '#333' }}
+                            style={{ color: isActive ? '#4ade80' : '#4b5563' }}
                           >
                             {chapter.total_count}
                           </span>
@@ -280,7 +265,7 @@ export default function HeatmapPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen" style={{ background: '#0a0a0a' }}>
       <Sidebar
         currentPage="heatmap"
         subject={subject}
@@ -294,17 +279,17 @@ export default function HeatmapPage() {
       <main className="flex-1 flex flex-col overflow-hidden" style={{ height: '100vh' }}>
 
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid #1e1e1e' }}>
           <div>
-            <h1 className="text-lg font-bold text-slate-800 tracking-tight">
+            <h1 className="text-lg font-bold tracking-tight" style={{ color: '#f9fafb' }}>
               📊 {subject} Heatmap
             </h1>
-            <p className="text-[10px] text-slate-300 mt-0.5 font-mono">
+            <p className="text-[10px] mt-0.5 font-mono" style={{ color: '#4b5563' }}>
               {sortedChapters.length} chapters · {selectedYears.length} years selected
             </p>
           </div>
           {selectedChapter && (
-            <div className="text-[10px] font-mono text-slate-400">
+            <div className="text-[10px] font-mono" style={{ color: '#4b5563' }}>
               {totalFiltered} questions in view
             </div>
           )}
@@ -319,21 +304,23 @@ export default function HeatmapPage() {
 
             {/* ── LEFT PANEL ── */}
             <div
-              className="flex-shrink-0 overflow-y-auto border-r border-slate-200 flex flex-col"
-              style={{ width: '260px' }}
+              className="flex-shrink-0 overflow-y-auto flex flex-col"
+              style={{ width: '260px', borderRight: '1px solid #1e1e1e' }}
             >
               {/* View toggle */}
-              <div className="px-3 py-2 border-b border-[#111] sticky top-0 bg-white z-10 flex items-center justify-between">
-                <span className="text-[9px] font-mono text-slate-200 uppercase tracking-widest">
+              <div className="px-3 py-2 sticky top-0 z-10 flex items-center justify-between"
+                style={{ background: '#0a0a0a', borderBottom: '1px solid #1e1e1e' }}>
+                <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: '#4b5563' }}>
                   {viewMode === 'chapter' ? 'Ranked by frequency' : 'By topic'}
                 </span>
-                <div className="flex gap-1 bg-white border border-slate-200 rounded p-0.5">
+                <div className="flex gap-1 rounded p-0.5" style={{ background: '#141414', border: '1px solid #1e1e1e' }}>
                   <button
                     onClick={() => setViewMode('chapter')}
                     className="px-2 py-0.5 rounded text-[9px] font-mono transition-colors"
                     style={{
-                      background: viewMode === 'chapter' ? '#1e1e1e' : 'transparent',
-                      color: viewMode === 'chapter' ? '#f0f0f0' : '#444',
+                      background: viewMode === 'chapter' ? '#16a34a22' : 'transparent',
+                      color: viewMode === 'chapter' ? '#4ade80' : '#4b5563',
+                      border: viewMode === 'chapter' ? '1px solid #16a34a44' : '1px solid transparent',
                     }}
                   >
                     Chapter
@@ -342,8 +329,9 @@ export default function HeatmapPage() {
                     onClick={() => setViewMode('topic')}
                     className="px-2 py-0.5 rounded text-[9px] font-mono transition-colors"
                     style={{
-                      background: viewMode === 'topic' ? '#1e1e1e' : 'transparent',
-                      color: viewMode === 'topic' ? '#16a34a' : '#444',
+                      background: viewMode === 'topic' ? '#16a34a22' : 'transparent',
+                      color: viewMode === 'topic' ? '#4ade80' : '#4b5563',
+                      border: viewMode === 'topic' ? '1px solid #16a34a44' : '1px solid transparent',
                     }}
                   >
                     Topic
@@ -351,31 +339,30 @@ export default function HeatmapPage() {
                 </div>
               </div>
 
-              {/* Chapter or Topic list */}
               {viewMode === 'chapter' ? renderChapterList() : renderTopicList()}
             </div>
 
             {/* ── RIGHT PANEL ── */}
-            <div key={subject} className="flex-1 overflow-y-auto bg-white">
+            <div key={subject} className="flex-1 overflow-y-auto" style={{ background: '#0d0d0d' }}>
               {!selectedChapter ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="text-4xl opacity-20">←</div>
-                  <p className="text-slate-200 text-sm font-mono">Select a chapter to explore</p>
+                  <p className="text-sm font-mono" style={{ color: '#4b5563' }}>Select a chapter to explore</p>
                 </div>
               ) : (
                 <div className="p-6">
 
                   {/* Chapter header */}
                   <div className="mb-6">
-                    <h2 className="text-xl font-bold text-slate-800 mb-1">
+                    <h2 className="text-xl font-bold mb-1" style={{ color: '#f9fafb' }}>
                       {selectedChapter.chapter_name}
                     </h2>
-                    <div className="flex items-center gap-4 text-[10px] font-mono text-slate-300">
+                    <div className="flex items-center gap-4 text-[10px] font-mono" style={{ color: '#4b5563' }}>
                       <span>{selectedChapter.total_count} total questions</span>
                       <span>·</span>
                       <span>{yearCards.length} active years</span>
                       <span>·</span>
-                      <span className="text-[#16a34a88]">
+                      <span style={{ color: '#16a34a' }}>
                         avg {((selectedChapter.total_count ?? 0) / Math.max(selectedYears.length, 1)).toFixed(1)}/yr
                       </span>
                     </div>
@@ -384,7 +371,7 @@ export default function HeatmapPage() {
                   {/* Year cards */}
                   {yearCards.length > 0 && (
                     <div className="mb-6">
-                      <div className="text-[9px] font-mono text-slate-200 uppercase tracking-widest mb-3">
+                      <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: '#374151' }}>
                         Year breakdown
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -392,13 +379,15 @@ export default function HeatmapPage() {
                           onClick={() => setActiveYearFilter(null)}
                           className="flex flex-col items-center px-3 py-2 rounded-lg border cursor-pointer transition-all"
                           style={{
-                            background: activeYearFilter === null ? '#16a34a22' : '#141414',
+                            background: activeYearFilter === null ? '#16a34a18' : '#141414',
                             borderColor: activeYearFilter === null ? '#16a34a55' : '#1e1e1e',
                             minWidth: '52px',
                           }}
                         >
-                          <span className="text-[9px] font-mono mb-1" style={{ color: activeYearFilter === null ? '#ff6b6b' : '#333' }}>ALL</span>
-                          <span className="text-sm font-bold font-mono" style={{ color: activeYearFilter === null ? '#16a34a' : '#444' }}>
+                          <span className="text-[9px] font-mono mb-1"
+                            style={{ color: activeYearFilter === null ? '#4ade80' : '#4b5563' }}>ALL</span>
+                          <span className="text-sm font-bold font-mono"
+                            style={{ color: activeYearFilter === null ? '#4ade80' : '#6b7280' }}>
                             {yearCards.reduce((s, y) => s + y.count, 0)}
                           </span>
                         </div>
@@ -411,17 +400,15 @@ export default function HeatmapPage() {
                               onClick={() => setActiveYearFilter(isActive ? null : year)}
                               className="flex flex-col items-center px-4 py-3 rounded-lg border cursor-pointer transition-all"
                               style={{
-                                background: isActive ? intensityColor(count, maxYr) : '#111',
+                                background: isActive ? '#16a34a18' : '#141414',
                                 borderColor: isActive ? '#16a34a55' : '#1e1e1e',
                                 minWidth: '60px',
-                                opacity: activeYearFilter !== null && !isActive ? 0.4 : 1,
+                                opacity: activeYearFilter !== null && !isActive ? 0.35 : 1,
                               }}
                             >
-                              <span className="text-[9px] font-mono text-slate-400 mb-1">{year}</span>
-                              <span
-                                className="text-lg font-bold font-mono"
-                                style={{ color: isActive ? intensityText(count, maxYr) : '#444' }}
-                              >
+                              <span className="text-[9px] font-mono mb-1" style={{ color: '#4b5563' }}>{year}</span>
+                              <span className="text-lg font-bold font-mono"
+                                style={{ color: isActive ? intensityText(count, maxYr) : '#6b7280' }}>
                                 {count}
                               </span>
                             </div>
@@ -433,12 +420,12 @@ export default function HeatmapPage() {
 
                   {/* Questions list */}
                   <div>
-                    <div className="text-[9px] font-mono text-slate-200 uppercase tracking-widest mb-3">
+                    <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: '#374151' }}>
                       Questions ({filteredQuestions.length})
                     </div>
 
                     {filteredQuestions.length === 0 ? (
-                      <p className="text-slate-200 text-sm font-mono">No questions for selected years.</p>
+                      <p className="text-sm font-mono" style={{ color: '#4b5563' }}>No questions for selected years.</p>
                     ) : (
                       <div className="flex flex-col gap-2">
                         {filteredQuestions.map((q, qi) => {
@@ -448,8 +435,8 @@ export default function HeatmapPage() {
                               key={`${subject}-${qi}`}
                               className="rounded-xl border transition-all duration-200"
                               style={{
-                                background: isExpanded ? '#161616' : '#111',
-                                borderColor: isExpanded ? '#16a34a33' : '#1a1a1a',
+                                background: isExpanded ? '#111827' : '#111',
+                                borderColor: isExpanded ? '#16a34a33' : '#1e1e1e',
                               }}
                             >
                               <div
@@ -457,17 +444,18 @@ export default function HeatmapPage() {
                                 onClick={() => setExpandedQuestion(isExpanded ? null : q)}
                               >
                                 {q.year && (
-                                  <span className="text-[9px] font-mono text-[#16a34a66] flex-shrink-0 mt-0.5 pt-[1px]">
+                                  <span className="text-[9px] font-mono flex-shrink-0 mt-0.5 pt-[1px]"
+                                    style={{ color: '#16a34a' }}>
                                     {q.year}
                                   </span>
                                 )}
-                                <span className="text-[12px] text-slate-600 flex-1 leading-relaxed">
+                                <span className="text-[13px] flex-1 leading-relaxed" style={{ color: '#d1d5db' }}>
                                   {q.question}
                                 </span>
                                 <span
                                   className="text-[10px] flex-shrink-0 mt-0.5 transition-transform duration-200"
                                   style={{
-                                    color: '#333',
+                                    color: '#4b5563',
                                     transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                                   }}
                                 >
@@ -476,7 +464,7 @@ export default function HeatmapPage() {
                               </div>
 
                               {isExpanded && (
-                                <div className="px-4 pb-4 border-t border-slate-200">
+                                <div className="px-4 pb-4" style={{ borderTop: '1px solid #1e1e1e' }}>
                                   {q.options && Object.keys(q.options).length > 0 && (
                                     <div className="flex flex-col gap-2 mt-3">
                                       {Object.entries(q.options).map(([num, text]) => {
@@ -484,19 +472,20 @@ export default function HeatmapPage() {
                                         return (
                                           <div
                                             key={num}
-                                            className="flex items-start gap-3 px-3 py-2.5 rounded-lg border text-[11px]"
+                                            className="flex items-start gap-3 px-3 py-2.5 rounded-lg border text-[12px]"
                                             style={{
-                                              background: isCorrect ? '#f0fdf4' : '#141414',
-                                              borderColor: isCorrect ? '#86efac' : '#1e1e1e',
-                                              color: isCorrect ? '#86efac' : '#666',
+                                              background: isCorrect ? '#052e16' : '#141414',
+                                              borderColor: isCorrect ? '#16a34a66' : '#1e1e1e',
+                                              color: isCorrect ? '#4ade80' : '#9ca3af',
                                             }}
                                           >
-                                            <span className="text-slate-300 flex-shrink-0 font-mono text-[10px]">
+                                            <span className="flex-shrink-0 font-mono text-[10px]"
+                                              style={{ color: isCorrect ? '#16a34a' : '#374151' }}>
                                               ({num})
                                             </span>
                                             <span className="flex-1 leading-relaxed">{text}</span>
                                             {isCorrect && (
-                                              <span className="text-green-400 flex-shrink-0 text-[10px]">✓</span>
+                                              <span className="flex-shrink-0 text-[10px]" style={{ color: '#4ade80' }}>✓</span>
                                             )}
                                           </div>
                                         );
@@ -505,17 +494,17 @@ export default function HeatmapPage() {
                                   )}
                                   <button
                                     onClick={() => handleFindAncestry(q)}
-                                    className="mt-3 w-full py-2.5 rounded-lg text-[11px] font-semibold transition-colors"
+                                    className="mt-3 w-full py-2.5 rounded-lg text-[12px] font-semibold transition-all"
                                     style={{
-                                      background: '#16a34a18',
-                                      color: '#ff6b6b',
-                                      border: '1px solid #16a34a33',
+                                      background: '#052e16',
+                                      color: '#4ade80',
+                                      border: '1px solid #16a34a44',
                                     }}
                                     onMouseEnter={(e) => {
-                                      (e.target as HTMLElement).style.background = '#16a34a30';
+                                      (e.target as HTMLElement).style.background = '#14532d';
                                     }}
                                     onMouseLeave={(e) => {
-                                      (e.target as HTMLElement).style.background = '#16a34a18';
+                                      (e.target as HTMLElement).style.background = '#052e16';
                                     }}
                                   >
                                     🧬 Find Concept Ancestry
