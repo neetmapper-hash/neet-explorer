@@ -161,7 +161,6 @@ export default function AncestryPage() {
               width: '100%', background: '#111', border: '1px solid #1e1e1e',
               borderRadius: '12px', padding: '12px 16px',
               color: '#f9fafb', fontSize: '14px',
-              placeholder: '#374151',
               resize: 'none', outline: 'none',
               fontFamily: 'inherit', lineHeight: 1.5,
               boxSizing: 'border-box',
