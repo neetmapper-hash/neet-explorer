@@ -135,12 +135,6 @@ function ConceptMapNode({ data }: { data: any }) {
   const fs = data.fontSize || 15
   const concepts: Concept[] = data.conceptObjects || []
   const extra = concepts.length > 2 ? concepts.length - 2 : 0
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-
-  const toggleConcept = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setExpandedId(prev => prev === id ? null : id)
-  }
 
   return (
     <div
@@ -184,59 +178,26 @@ function ConceptMapNode({ data }: { data: any }) {
         marginBottom: '8px',
       }} />
 
-      {/* Concept list — accordion, max 2 shown */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        {concepts.slice(0, 2).map((concept) => {
-          const isOpen = expandedId === concept.concept_id
-          return (
-            <div key={concept.concept_id}>
-              {/* Concept row */}
-              <div
-                onClick={(e) => toggleConcept(concept.concept_id, e)}
-                style={{
-                  fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`,
-                  color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text,
-                  lineHeight: 1.3,
-                  display: 'flex', alignItems: 'flex-start', gap: '5px',
-                  cursor: 'pointer',
-                  padding: '3px 4px',
-                  borderRadius: '6px',
-                  background: isOpen
-                    ? (isSelected ? 'rgba(255,255,255,0.15)' : `${colors.border}12`)
-                    : 'transparent',
-                  transition: 'background 0.12s',
-                }}
-              >
-                <span style={{
-                  color: isSelected ? 'rgba(255,255,255,0.5)' : colors.border,
-                  flexShrink: 0, marginTop: '1px', fontSize: '10px',
-                  transition: 'transform 0.15s',
-                  display: 'inline-block',
-                  transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                }}>▶</span>
-                <span>{concept.concept_name}</span>
+      {/* Concept list — native details/summary, no JS state */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {concepts.slice(0, 2).map((concept) => (
+          <details
+            key={concept.concept_id}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`, color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text, lineHeight: 1.3 }}
+          >
+            <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '4px', padding: '2px 0' }}>
+              <span>• {concept.concept_name}</span>
+              <span style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.6)' : colors.border, marginLeft: '4px' }}>+</span>
+            </summary>
+            {concept.summary && (
+              <div style={{ marginTop: '4px', marginLeft: '10px', padding: '5px 8px', background: isSelected ? 'rgba(255,255,255,0.12)' : `${colors.border}0d`, borderLeft: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : colors.border}`, borderRadius: '0 6px 6px 0', fontSize: `${Math.max(10, Math.round(fs * 0.72))}px`, lineHeight: 1.5 }}>
+                {concept.summary}
               </div>
-
-              {/* Expanded summary */}
-              {isOpen && concept.summary && (
-                <div style={{
-                  marginLeft: '16px',
-                  marginTop: '4px',
-                  marginBottom: '4px',
-                  padding: '6px 8px',
-                  background: isSelected ? 'rgba(255,255,255,0.12)' : `${colors.border}0d`,
-                  borderLeft: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : colors.border}`,
-                  borderRadius: '0 6px 6px 0',
-                  fontSize: `${Math.max(10, Math.round(fs * 0.72))}px`,
-                  color: isSelected ? 'rgba(255,255,255,0.85)' : colors.text,
-                  lineHeight: 1.5,
-                }}>
-                  {concept.summary}
-                </div>
-              )}
-            </div>
-          )
-        })}
+            )}
+          </details>
+        ))}
 
         {/* "+ N more" button */}
         {extra > 0 && (
@@ -324,6 +285,8 @@ function buildChapterTree(
   availableH: number,
   mode: 'chapter' | 'concept',
   selectedConceptId: string | null,
+  expandedConceptId: string | null,
+  onToggleConcept: (id: string) => void,
 ): { nodes: Node[]; edges: Edge[] } {
 
   const selectedChapter = registry[selectedChapterKey]
@@ -471,6 +434,8 @@ function buildChapterTree(
             questionCount: chapterQCount,
             onShowMore: onShowMore,
             onNodeClick: onChapterClick,
+            expandedConceptId,
+            onToggleConcept,
           },
         })
       }
@@ -631,6 +596,7 @@ export default function ConceptMapPage() {
 
   const [chapterPopup, setChapterPopup] = useState<ChapterInfo | null>(null)
   const [morePopup, setMorePopup] = useState<{ chapterName: string; classNum: number; concepts: string[] } | null>(null)
+  const [expandedConceptId, setExpandedConceptId] = useState<string | null>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
@@ -726,6 +692,10 @@ export default function ConceptMapPage() {
 
   const mode: 'chapter' | 'concept' = appliedConcept === 'all' ? 'chapter' : 'concept'
 
+  const handleToggleConcept = useCallback((id: string) => {
+    setExpandedConceptId(prev => prev === id ? null : id)
+  }, [])
+
   // Build tree
   useEffect(() => {
     if (!appliedChapter || !registry[appliedChapter]) {
@@ -737,11 +707,13 @@ export default function ConceptMapPage() {
       containerSize.width, containerSize.height,
       mode,
       appliedConcept === 'all' ? null : appliedConcept,
+      expandedConceptId,
+      handleToggleConcept,
     )
     setNodes(n as any)
     setEdges(e as any)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedChapter, appliedConcept, appliedDirection, registry, questionCounts, containerSize, mode])
+  }, [appliedChapter, appliedConcept, appliedDirection, registry, questionCounts, containerSize, mode, expandedConceptId])
 
   const appliedChapterName = appliedChapter ? registry[appliedChapter]?.chapter_name || '' : ''
 
