@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   ReactFlow,
   Node,
@@ -602,9 +603,17 @@ function MoreConceptsPopup({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+type Subject = 'Chemistry' | 'Physics'
+const SUBJECT_FILES: Record<Subject, { concepts: string; mapping: string }> = {
+  Chemistry: { concepts: '/chemistry_concepts_new.json', mapping: '/chemistry_question_mapping.json' },
+  Physics:   { concepts: '/physics_concepts_new.json',   mapping: '/physics_question_mapping.json' },
+}
+
 export default function ConceptMapPage() {
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerSize, setContainerSize] = useState({ width: 1200, height: 700 })
+  const [subject, setSubject] = useState<Subject>('Chemistry')
   const [concepts, setConcepts] = useState<Concept[]>([])
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -636,13 +645,23 @@ export default function ConceptMapPage() {
     return () => obs.disconnect()
   }, [])
 
-  // Load data
+  // Load data — reloads when subject changes
   useEffect(() => {
+    setLoading(true)
+    setConcepts([])
+    setQuestionCounts({})
+    setPendingChapter(null)
+    setPendingConcept('all')
+    setAppliedChapter(null)
+    setAppliedConcept('all')
+    setNodes([] as any)
+    setEdges([] as any)
     async function load() {
       try {
+        const files = SUBJECT_FILES[subject]
         const [cRes, mRes] = await Promise.all([
-          fetch('/chemistry_concepts_new.json'),
-          fetch('/chemistry_question_mapping.json'),
+          fetch(files.concepts),
+          fetch(files.mapping),
         ])
         const cData: ConceptsData = await cRes.json()
         const mData: MappingData = await mRes.json()
@@ -660,7 +679,8 @@ export default function ConceptMapPage() {
       }
     }
     load()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject])
 
   // Build chapter registry
   const registry = useMemo(() => buildChapterRegistry(concepts), [concepts])
@@ -746,6 +766,39 @@ export default function ConceptMapPage() {
         {sidebarOpen && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
+            {/* Navigation */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {([['🔥 Topic Heatmap', '/heatmap'], ['🧬 Find Ancestry', '/ancestry'], ['🗺 Concept Map', '/concept-map']] as const).map(([label, href]) => {
+                  const isActive = href === '/concept-map'
+                  return (
+                    <button key={href} onClick={() => router.push(href)}
+                      style={{ background: isActive ? '#f0fdf4' : 'transparent', border: `1.5px solid ${isActive ? '#16a34a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#14532d' : '#64748b', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Subject</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {(['Chemistry', 'Physics'] as Subject[]).map(s => {
+                  const isActive = subject === s
+                  const emoji = s === 'Chemistry' ? '⚗️' : '⚡'
+                  return (
+                    <button key={s} onClick={() => setSubject(s)}
+                      style={{ background: isActive ? '#f8fafc' : 'transparent', border: `1.5px solid ${isActive ? '#0f172a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#0f172a' : '#64748b', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      {emoji} {s}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             {/* Class */}
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
@@ -818,7 +871,7 @@ export default function ConceptMapPage() {
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
             <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>
-              Chemistry · {appliedChapter
+              {subject} · {appliedChapter
                 ? `${appliedChapterName} › ${mode === 'chapter' ? 'Chapter dependencies' : (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '')}`
                 : 'Select a chapter and click Generate Map'}
             </p>
