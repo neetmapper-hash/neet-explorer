@@ -37,89 +37,107 @@ export default function Sidebar({
   const allSelected = selectedYears.length === AVAILABLE_YEARS.length;
 
   return (
-    <div className="w-56 min-h-screen bg-white border-r border-slate-200 flex flex-col p-4 gap-6 shrink-0 shadow-sm">
+    <div style={{
+      width: '224px',
+      minHeight: '100vh',
+      background: '#0a0a0a',
+      borderRight: '1px solid #1e1e1e',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '20px 16px',
+      gap: '28px',
+      flexShrink: 0,
+    }}>
       {/* Logo */}
-      <div className="pt-2">
-        <div className="text-lg font-bold text-slate-800">🧬 NEET Explorer</div>
-        <div className="text-xs text-slate-400 mt-1">5 years · 3 subjects</div>
+      <div style={{ paddingTop: '4px' }}>
+        <div style={{ fontSize: '16px', fontWeight: 800, color: '#f9fafb' }}>🧬 NEET Explorer</div>
+        <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '4px' }}>5 years · 3 subjects</div>
       </div>
 
       {/* Navigation */}
       <div>
-        <div className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">
+        <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>
           Navigate
         </div>
-        <div className="flex flex-col gap-1">
-          <button
-            onClick={() => onPageChange('heatmap')}
-            className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              currentPage === 'heatmap'
-                ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-            }`}
-          >
-            🔥 Topic Heatmap
-          </button>
-          <button
-            onClick={() => onPageChange('ancestry')}
-            className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              currentPage === 'ancestry'
-                ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-            }`}
-          >
-            🧬 Find Ancestry
-          </button>
-          <button
-            onClick={() => onPageChange('concept-map')}
-            className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              currentPage === 'concept-map'
-                ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-            }`}
-          >
-            🗺 Concept Map
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {([
+            ['heatmap',     '🔥 Topic Heatmap'],
+            ['ancestry',    '🧬 Find Ancestry'],
+            ['concept-map', '🗺 Concept Map'],
+          ] as const).map(([page, label]) => {
+            const isActive = currentPage === page;
+            return (
+              <button
+                key={page}
+                onClick={() => onPageChange(page)}
+                style={{
+                  textAlign: 'left',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? '#4ade80' : '#6b7280',
+                  background: isActive ? '#052e16' : 'transparent',
+                  border: `1px solid ${isActive ? '#16a34a44' : 'transparent'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.12s',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Subject */}
       <div>
-        <div className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">
+        <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>
           Subject
         </div>
-        <div className="flex flex-col gap-1">
-          {subjects.map((s) => (
-            <button
-              key={s}
-              onClick={() => onSubjectChange(s)}
-              className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                subject === s
-                  ? 'bg-slate-100 text-slate-800 font-semibold border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-              }`}
-            >
-              {s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿'} {s}
-            </button>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {subjects.map((s) => {
+            const isActive = subject === s;
+            const emoji = s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿';
+            return (
+              <button
+                key={s}
+                onClick={() => onSubjectChange(s)}
+                style={{
+                  textAlign: 'left',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? '#f9fafb' : '#6b7280',
+                  background: isActive ? '#1a1a1a' : 'transparent',
+                  border: `1px solid ${isActive ? '#2d2d2d' : 'transparent'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.12s',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {emoji} {s}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Year filter — only on heatmap */}
       {currentPage === 'heatmap' && (
         <div>
-          <div className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">
+          <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>
             Year Filter
           </div>
           <button
-            onClick={() =>
-              onYearsChange(allSelected ? [2025] : [...AVAILABLE_YEARS])
-            }
-            className="text-xs text-emerald-600 hover:text-emerald-800 mb-2 transition-colors font-semibold"
+            onClick={() => onYearsChange(allSelected ? [2025] : [...AVAILABLE_YEARS])}
+            style={{ fontSize: '11px', color: '#16a34a', marginBottom: '8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', padding: 0 }}
           >
             {allSelected ? 'Deselect all' : 'Select all'}
           </button>
-          <div className="flex flex-col gap-1">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {AVAILABLE_YEARS.map((year) => {
               const selected = selectedYears.includes(year);
               const color = YEAR_COLORS[year];
@@ -127,19 +145,28 @@ export default function Sidebar({
                 <button
                   key={year}
                   onClick={() => toggleYear(year)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '6px 8px', borderRadius: '8px',
+                    background: 'transparent', border: 'none',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    transition: 'background 0.12s',
+                  }}
                 >
                   <div
-                    className="w-2.5 h-2.5 rounded-full transition-opacity"
                     style={{
+                      width: '8px', height: '8px', borderRadius: '50%',
                       background: color,
-                      opacity: selected ? 1 : 0.25,
+                      opacity: selected ? 1 : 0.2,
+                      flexShrink: 0,
+                      transition: 'opacity 0.12s',
                     }}
                   />
-                  <span
-                    className="text-sm transition-colors font-medium"
-                    style={{ color: selected ? '#1e293b' : '#94a3b8' }}
-                  >
+                  <span style={{
+                    fontSize: '13px', fontWeight: 500,
+                    color: selected ? '#d1d5db' : '#374151',
+                    transition: 'color 0.12s',
+                  }}>
                     NEET {year}
                   </span>
                 </button>
@@ -151,10 +178,15 @@ export default function Sidebar({
 
       {/* Back button */}
       {showBackButton && onBack && (
-        <div className="mt-auto">
+        <div style={{ marginTop: 'auto' }}>
           <button
             onClick={onBack}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
+            style={{
+              width: '100%', textAlign: 'left', padding: '8px 12px',
+              borderRadius: '8px', fontSize: '13px', color: '#6b7280',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
           >
             ← Back to Heatmap
           </button>

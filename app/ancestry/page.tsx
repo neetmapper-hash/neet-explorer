@@ -40,40 +40,27 @@ export default function AncestryPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [answer, setAnswer] = useState<string>('')
 
-  // Pick up question passed from heatmap page
   useEffect(() => {
     const q = sessionStorage.getItem('ancestry_question');
     const s = sessionStorage.getItem('ancestry_subject');
     const opts = sessionStorage.getItem('ancestry_options');
     const correct = sessionStorage.getItem('ancestry_correct');
-    if (q) {
-      setQuestion(q);
-      sessionStorage.removeItem('ancestry_question');
-    }
+    if (q) { setQuestion(q); sessionStorage.removeItem('ancestry_question'); }
     if (s && ['Physics', 'Chemistry', 'Biology'].includes(s)) {
-      setSubject(s as Subject);
-      sessionStorage.removeItem('ancestry_subject');
+      setSubject(s as Subject); sessionStorage.removeItem('ancestry_subject');
     }
-    if (opts) {
-      setQuestionOptions(JSON.parse(opts));
-      sessionStorage.removeItem('ancestry_options');
-    }
-    if (correct) {
-      setCorrectAnswer(correct);
-      sessionStorage.removeItem('ancestry_correct');
-    }
+    if (opts) { setQuestionOptions(JSON.parse(opts)); sessionStorage.removeItem('ancestry_options'); }
+    if (correct) { setCorrectAnswer(correct); sessionStorage.removeItem('ancestry_correct'); }
   }, []);
 
   const handleSearch = async (q?: string) => {
     const queryText = q ?? question;
     if (!queryText.trim()) return;
-
     setQuestion(queryText);
     setIsLoading(true);
     setError(null);
     setChain([]);
     setHasSearched(true);
-
     try {
       const res = await fetch('/api/ancestry', {
         method: 'POST',
@@ -81,28 +68,22 @@ export default function AncestryPage() {
         body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer }),
       });
       const data = await res.json();
-      setChain(data.chain ?? [])
-      setAnswer(data.answer ?? '')
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch ancestry');
-      }
-    } catch (err) {
+      setChain(data.chain ?? []);
+      setAnswer(data.answer ?? '');
+      if (!res.ok) throw new Error('Failed to fetch ancestry');
+    } catch {
       setError('Could not identify concept. Try rephrasing your question.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Auto-search if question came from heatmap
   useEffect(() => {
-    if (question && !hasSearched) {
-      handleSearch(question);
-    }
+    if (question && !hasSearched) handleSearch(question);
   }, [question]);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
       <Sidebar
         currentPage="ancestry"
         subject={subject}
@@ -122,32 +103,46 @@ export default function AncestryPage() {
         onYearsChange={() => {}}
       />
 
-      <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-3xl">
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', maxWidth: '760px' }}>
+
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: 0 }}>
             🧬 NEET Concept Ancestry
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p style={{ color: '#4b5563', fontSize: '13px', marginTop: '6px' }}>
             Trace any NEET question back to its foundation
           </p>
         </div>
 
         {/* Sample questions */}
-        <div className="mb-4">
-          <div className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>
             Try a sample
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {SAMPLES[subject].map((sample, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  setQuestionOptions({});
-                  setCorrectAnswer('');
-                  handleSearch(sample);
+                onClick={() => { setQuestionOptions({}); setCorrectAnswer(''); handleSearch(sample); }}
+                style={{
+                  textAlign: 'left', fontSize: '12px',
+                  padding: '10px 12px', borderRadius: '10px',
+                  background: '#111', border: '1px solid #1e1e1e',
+                  color: '#9ca3af', cursor: 'pointer',
+                  transition: 'all 0.12s', fontFamily: 'inherit',
+                  lineHeight: 1.4,
                 }}
-                className="text-left text-xs px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 hover:shadow-sm transition-all"
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = '#161616';
+                  (e.currentTarget as HTMLElement).style.borderColor = '#2d2d2d';
+                  (e.currentTarget as HTMLElement).style.color = '#d1d5db';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = '#111';
+                  (e.currentTarget as HTMLElement).style.borderColor = '#1e1e1e';
+                  (e.currentTarget as HTMLElement).style.color = '#9ca3af';
+                }}
               >
                 {sample.length > 55 ? sample.slice(0, 55) + '…' : sample}
               </button>
@@ -156,35 +151,47 @@ export default function AncestryPage() {
         </div>
 
         {/* Search box */}
-        <div className="mb-6">
+        <div style={{ marginBottom: '28px' }}>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={`Enter your NEET ${subject} question here...`}
             rows={3}
-            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm placeholder-slate-300 resize-none focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-50 transition-all shadow-sm"
+            style={{
+              width: '100%', background: '#111', border: '1px solid #1e1e1e',
+              borderRadius: '12px', padding: '12px 16px',
+              color: '#f9fafb', fontSize: '14px',
+              placeholder: '#374151',
+              resize: 'none', outline: 'none',
+              fontFamily: 'inherit', lineHeight: 1.5,
+              boxSizing: 'border-box',
+              transition: 'border-color 0.12s',
+            }}
+            onFocus={e => (e.target.style.borderColor = '#16a34a44')}
+            onBlur={e => (e.target.style.borderColor = '#1e1e1e')}
           />
 
           {/* Options if available */}
           {Object.keys(questionOptions).length > 0 && (
-            <div className="flex flex-col gap-2 mt-3 mb-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', marginBottom: '8px' }}>
               {Object.entries(questionOptions).map(([num, text]) => {
-                const isCorrect = String(num) === String(correctAnswer)
+                const isCorrect = String(num) === String(correctAnswer);
                 return (
                   <div
                     key={num}
-                    className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
                     style={{
-                      background: isCorrect ? '#f0fdf4' : '#ffffff',
-                      borderColor: isCorrect ? '#86efac' : '#e2e8f0',
-                      color: '#1e293b',
+                      display: 'flex', alignItems: 'flex-start', gap: '12px',
+                      padding: '12px 16px', borderRadius: '10px', fontSize: '13px',
+                      background: isCorrect ? '#052e16' : '#111',
+                      border: `1px solid ${isCorrect ? '#16a34a66' : '#1e1e1e'}`,
+                      color: isCorrect ? '#4ade80' : '#9ca3af',
                     }}
                   >
-                    <span className="text-slate-400 shrink-0">({num})</span>
-                    <span className="flex-1">{text}</span>
-                    {isCorrect && <span className="text-emerald-500 shrink-0">✓</span>}
+                    <span style={{ color: isCorrect ? '#16a34a' : '#374151', flexShrink: 0 }}>({num})</span>
+                    <span style={{ flex: 1 }}>{text}</span>
+                    {isCorrect && <span style={{ color: '#4ade80', flexShrink: 0 }}>✓</span>}
                   </div>
-                )
+                );
               })}
             </div>
           )}
@@ -192,7 +199,16 @@ export default function AncestryPage() {
           <button
             onClick={() => handleSearch()}
             disabled={isLoading || !question.trim()}
-            className="mt-2 w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold py-3 rounded-xl transition-colors text-sm shadow-sm"
+            style={{
+              marginTop: '8px', width: '100%',
+              padding: '12px', borderRadius: '12px',
+              fontSize: '13px', fontWeight: 700,
+              background: isLoading || !question.trim() ? '#1a1a1a' : '#052e16',
+              color: isLoading || !question.trim() ? '#374151' : '#4ade80',
+              border: `1px solid ${isLoading || !question.trim() ? '#1e1e1e' : '#16a34a44'}`,
+              cursor: isLoading || !question.trim() ? 'not-allowed' : 'pointer',
+              transition: 'all 0.12s', fontFamily: 'inherit',
+            }}
           >
             {isLoading ? 'Searching…' : '🔍 Find Concept Ancestry'}
           </button>

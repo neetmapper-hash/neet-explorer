@@ -473,8 +473,8 @@ function ChapterPopup({
   const qCount = chapter.concepts.reduce((s, c) => s + (questionCounts[c.concept_id] || 0), 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={onClose}>
-      <div style={{ background: 'white', border: `2px solid ${colors.border}`, borderRadius: '16px', padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={onClose}>
+      <div style={{ background: '#111', border: `2px solid ${colors.border}`, borderRadius: '16px', padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: `0 8px 40px rgba(0,0,0,0.5)` }} onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexShrink: 0 }}>
@@ -482,7 +482,7 @@ function ChapterPopup({
             <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: colors.border, textTransform: 'uppercase', marginBottom: '6px' }}>
               {CLASS_LABELS[chapter.class]}
             </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.2, margin: 0 }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', lineHeight: 1.2, margin: 0 }}>
               {chapter.chapter_name}
             </h2>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
@@ -491,28 +491,28 @@ function ChapterPopup({
                   📝 {qCount} NEET questions
                 </span>
               )}
-              <span style={{ fontSize: '12px', fontWeight: 600, color: colors.text, background: `${colors.border}15`, borderRadius: '20px', padding: '3px 10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: colors.text, background: `${colors.border}22`, borderRadius: '20px', padding: '3px 10px' }}>
                 {chapter.concepts.length} concepts
               </span>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', color: '#6b7280', cursor: 'pointer', padding: '6px 10px', fontSize: '14px', flexShrink: 0 }}>✕</button>
+          <button onClick={onClose} style={{ background: '#1a1a1a', border: '1px solid #2d2d2d', borderRadius: '8px', color: '#9ca3af', cursor: 'pointer', padding: '6px 10px', fontSize: '14px', flexShrink: 0 }}>✕</button>
         </div>
 
         {/* Concepts list */}
         <div style={{ overflowY: 'auto', flex: 1 }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
             Concepts in this chapter
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {chapter.concepts.map((c, i) => {
               const qc = questionCounts[c.concept_id] || 0
               return (
-                <details key={i} style={{ background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '10px 14px' }}>
+                <details key={i} style={{ background: '#161616', borderRadius: '10px', border: '1px solid #1e1e1e', padding: '10px 14px' }}>
                   <summary style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', listStyle: 'none', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1 }}>
                       <span style={{ color: colors.border, marginTop: '2px', flexShrink: 0 }}>•</span>
-                      <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.4 }}>{c.concept_name}</span>
+                      <span style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.4 }}>{c.concept_name}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                       {qc > 0 && (
@@ -524,7 +524,7 @@ function ChapterPopup({
                     </div>
                   </summary>
                   {c.summary && (
-                    <div style={{ marginTop: '8px', marginLeft: '16px', padding: '8px 10px', background: `${colors.border}0d`, borderLeft: `2px solid ${colors.border}`, borderRadius: '0 6px 6px 0', fontSize: '12px', color: '#4b5563', lineHeight: 1.5 }}>
+                    <div style={{ marginTop: '8px', marginLeft: '16px', padding: '8px 10px', background: `${colors.border}12`, borderLeft: `2px solid ${colors.border}`, borderRadius: '0 6px 6px 0', fontSize: '12px', color: '#9ca3af', lineHeight: 1.5 }}>
                       {c.summary}
                     </div>
                   )}
@@ -728,19 +728,19 @@ export default function ConceptMapPage() {
   const appliedChapterName = appliedChapter ? registry[appliedChapter]?.chapter_name || '' : ''
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '16px' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4b5563', fontSize: '16px' }}>
       Loading concept map...
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
 
       {/* Sidebar */}
-      <div style={{ width: sidebarOpen ? '248px' : '44px', minWidth: sidebarOpen ? '248px' : '44px', background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', transition: 'width 0.22s ease, min-width 0.22s ease', overflow: 'hidden', boxShadow: '1px 0 6px rgba(0,0,0,0.05)', zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #f1f5f9' }}>
-          {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Filters</span>}
-          <button onClick={() => setSidebarOpen(o => !o)} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '7px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b', fontSize: '12px', flexShrink: 0 }}>
+      <div style={{ width: sidebarOpen ? '248px' : '44px', minWidth: sidebarOpen ? '248px' : '44px', background: '#0a0a0a', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', transition: 'width 0.22s ease, min-width 0.22s ease', overflow: 'hidden', zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #1e1e1e' }}>
+          {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb' }}>Filters</span>}
+          <button onClick={() => setSidebarOpen(o => !o)} style={{ background: '#141414', border: '1px solid #1e1e1e', borderRadius: '7px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', fontSize: '12px', flexShrink: 0 }}>
             {sidebarOpen ? '◀' : '▶'}
           </button>
         </div>
@@ -750,13 +750,13 @@ export default function ConceptMapPage() {
 
             {/* Navigation */}
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {([['🔥 Topic Heatmap', '/heatmap'], ['🧬 Find Ancestry', '/ancestry'], ['🗺 Concept Map', '/concept-map']] as const).map(([label, href]) => {
                   const isActive = href === '/concept-map'
                   return (
                     <button key={href} onClick={() => router.push(href)}
-                      style={{ background: isActive ? '#f0fdf4' : 'transparent', border: `1.5px solid ${isActive ? '#16a34a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#14532d' : '#64748b', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      style={{ background: isActive ? '#052e16' : 'transparent', border: `1px solid ${isActive ? '#16a34a44' : 'transparent'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#4ade80' : '#6b7280', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
                       {label}
                     </button>
                   )
@@ -766,14 +766,14 @@ export default function ConceptMapPage() {
 
             {/* Subject */}
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Subject</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Subject</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {(['Chemistry', 'Physics'] as Subject[]).map(s => {
                   const isActive = subject === s
                   const emoji = s === 'Chemistry' ? '⚗️' : '⚡'
                   return (
                     <button key={s} onClick={() => setSubject(s)}
-                      style={{ background: isActive ? '#f8fafc' : 'transparent', border: `1.5px solid ${isActive ? '#0f172a' : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#0f172a' : '#64748b', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      style={{ background: isActive ? '#1a1a1a' : 'transparent', border: `1px solid ${isActive ? '#2d2d2d' : 'transparent'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#f9fafb' : '#6b7280', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
                       {emoji} {s}
                     </button>
                   )
@@ -783,15 +783,15 @@ export default function ConceptMapPage() {
 
             {/* Class */}
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {[9, 10, 11, 12].map(cls => {
                   const colors = CLASS_COLORS[cls]
                   const isActive = pendingClass === cls
                   return (
                     <button key={cls} onClick={() => { setPendingClass(cls); setPendingChapter(null); setPendingConcept('all') }}
-                      style={{ background: isActive ? colors.bg : 'transparent', border: `1.5px solid ${isActive ? colors.border : '#e2e8f0'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? colors.text : '#64748b', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? colors.border : '#cbd5e1', flexShrink: 0 }} />
+                      style={{ background: isActive ? colors.bg : 'transparent', border: `1.5px solid ${isActive ? colors.border : '#1e1e1e'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? colors.text : '#6b7280', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? colors.border : '#2d2d2d', flexShrink: 0 }} />
                       {CLASS_LABELS[cls]}
                     </button>
                   )
@@ -801,9 +801,9 @@ export default function ConceptMapPage() {
 
             {/* Chapter */}
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Chapter</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Chapter</div>
               <select value={pendingChapter || ''} onChange={e => { setPendingChapter(e.target.value || null); setPendingConcept('all') }}
-                style={{ width: '100%', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: pendingChapter ? '#374151' : '#94a3b8', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
+                style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: pendingChapter ? '#d1d5db' : '#4b5563', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
                 <option value=''>Select chapter...</option>
                 {chaptersForClass.map(ch => (
                   <option key={ch.key} value={ch.key}>{ch.name}{ch.count > 0 ? ` (${ch.count}Q)` : ''}</option>
@@ -814,9 +814,9 @@ export default function ConceptMapPage() {
             {/* Concept */}
             {pendingChapter && conceptsForChapter.length > 0 && (
               <div>
-                <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Concept</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Concept</div>
                 <select value={pendingConcept} onChange={e => setPendingConcept(e.target.value)}
-                  style={{ width: '100%', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: '#374151', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
+                  style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: '#d1d5db', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
                   <option value='all'>All concepts (chapter view)</option>
                   {conceptsForChapter.map(c => (
                     <option key={c.concept_id} value={c.concept_id}>{c.concept_name}{questionCounts[c.concept_id] ? ` (${questionCounts[c.concept_id]}Q)` : ''}</option>
@@ -827,11 +827,11 @@ export default function ConceptMapPage() {
 
             {/* Direction */}
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Direction</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Direction</div>
               <div style={{ display: 'flex', gap: '6px' }}>
                 {([['ltr', '→ IX to XII'], ['rtl', '← XII to IX']] as const).map(([d, label]) => (
                   <button key={d} onClick={() => setPendingDirection(d)}
-                    style={{ flex: 1, background: pendingDirection === d ? '#0f172a' : '#f8fafc', border: `1.5px solid ${pendingDirection === d ? '#0f172a' : '#e2e8f0'}`, borderRadius: '8px', padding: '7px 4px', color: pendingDirection === d ? 'white' : '#64748b', cursor: 'pointer', fontSize: '11px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                    style={{ flex: 1, background: pendingDirection === d ? '#16a34a18' : '#111', border: `1px solid ${pendingDirection === d ? '#16a34a44' : '#1e1e1e'}`, borderRadius: '8px', padding: '7px 4px', color: pendingDirection === d ? '#4ade80' : '#6b7280', cursor: 'pointer', fontSize: '11px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s' }}>
                     {label}
                   </button>
                 ))}
@@ -840,7 +840,7 @@ export default function ConceptMapPage() {
 
             {/* Go */}
             <button onClick={handleGo} disabled={!pendingChapter}
-              style={{ background: pendingChapter ? '#2563eb' : '#e2e8f0', border: 'none', borderRadius: '10px', padding: '12px', color: pendingChapter ? 'white' : '#94a3b8', cursor: pendingChapter ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s', boxShadow: pendingChapter ? '0 4px 12px rgba(37,99,235,0.3)' : 'none' }}>
+              style={{ background: pendingChapter ? '#052e16' : '#111', border: `1px solid ${pendingChapter ? '#16a34a44' : '#1e1e1e'}`, borderRadius: '10px', padding: '12px', color: pendingChapter ? '#4ade80' : '#374151', cursor: pendingChapter ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s' }}>
               Generate Map →
             </button>
           </div>
@@ -849,10 +849,10 @@ export default function ConceptMapPage() {
 
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ padding: '11px 20px', borderBottom: '1px solid #e2e8f0', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', flexShrink: 0 }}>
+        <div style={{ padding: '11px 20px', borderBottom: '1px solid #1e1e1e', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Concept Map</h1>
-            <p style={{ fontSize: '11px', color: '#64748b', margin: '1px 0 0' }}>
+            <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#f9fafb', margin: 0 }}>Concept Map</h1>
+            <p style={{ fontSize: '11px', color: '#4b5563', margin: '1px 0 0' }}>
               {subject} · {appliedChapter
                 ? `${appliedChapterName} › ${mode === 'chapter' ? 'Chapter dependencies' : (concepts.find(c => c.concept_id === appliedConcept)?.concept_name || '')}`
                 : 'Select a chapter and click Generate Map'}
@@ -860,10 +860,10 @@ export default function ConceptMapPage() {
           </div>
           {nodes.length > 0 && (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ fontSize: '11px', background: mode === 'chapter' ? '#eff6ff' : '#faf5ff', border: `1px solid ${mode === 'chapter' ? '#bfdbfe' : '#e9d5ff'}`, borderRadius: '6px', padding: '3px 10px', fontWeight: 600, color: mode === 'chapter' ? '#1d4ed8' : '#7e22ce' }}>
+              <div style={{ fontSize: '11px', background: mode === 'chapter' ? '#1e3a5f' : '#2d1b69', border: `1px solid ${mode === 'chapter' ? '#2563eb44' : '#7e22ce44'}`, borderRadius: '6px', padding: '3px 10px', fontWeight: 600, color: mode === 'chapter' ? '#93c5fd' : '#c4b5fd' }}>
                 {mode === 'chapter' ? '📚 Chapter view' : '💡 Concept view'}
               </div>
-              <div style={{ fontSize: '12px', color: '#94a3b8', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '3px 10px' }}>
+              <div style={{ fontSize: '12px', color: '#4b5563', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '3px 10px' }}>
                 {nodes.length} chapters · {edges.length} links
               </div>
             </div>
@@ -874,10 +874,10 @@ export default function ConceptMapPage() {
           {nodes.length === 0 ? (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
               <div style={{ fontSize: '52px', opacity: 0.12 }}>🗺</div>
-              <div style={{ fontSize: '16px', fontWeight: 600, color: '#94a3b8' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#4b5563' }}>
                 {appliedChapter ? 'No chapter dependencies found' : 'Select a chapter and click Generate Map'}
               </div>
-              {!appliedChapter && <div style={{ fontSize: '13px', color: '#cbd5e1' }}>Use the sidebar on the left</div>}
+              {!appliedChapter && <div style={{ fontSize: '13px', color: '#374151' }}>Use the sidebar on the left</div>}
             </div>
           ) : (
             <ReactFlow
@@ -886,10 +886,10 @@ export default function ConceptMapPage() {
               nodeTypes={nodeTypes}
               fitView fitViewOptions={{ padding: 0.08 }}
               minZoom={0.05} maxZoom={2}
-              style={{ background: '#f8fafc' }}
+              style={{ background: '#0d0d0d' }}
             >
-              <Background color="#e2e8f0" gap={28} size={1} />
-              <Controls style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+              <Background color="#1e1e1e" gap={28} size={1} />
+              <Controls style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px' }} />
             </ReactFlow>
           )}
         </div>
