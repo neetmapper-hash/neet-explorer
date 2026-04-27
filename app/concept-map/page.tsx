@@ -193,7 +193,6 @@ function ConceptMapNode({ data }: { data: any }) {
               {/* Concept row */}
               <div
                 onClick={(e) => toggleConcept(concept.concept_id, e)}
-                onMouseDown={(e) => e.stopPropagation()}
                 style={{
                   fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`,
                   color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text,
