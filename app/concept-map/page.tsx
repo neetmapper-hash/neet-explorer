@@ -1,0 +1,910 @@
+'use client'
+
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  ReactFlow,
+  Node,
+  Edge,
+  Background,
+  Controls,
+  Handle,
+  Position,
+  MarkerType,
+  useNodesState,
+  useEdgesState,
+} from '@xyflow/react'
+import '@xyflow/react/dist/base.css'
+import type { Concept } from '@/lib/types'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+// Slim local interface — only what the map needs from the full Concept
+interface MapConcept {
+  id: string                   // e.g. physics_c11_ch04_s02
+  class: number
+  chapter_number: number
+  chapter_name: string
+  concept_name: string
+  summary: string
+  domain: string
+  is_main_topic: boolean
+  builds_upon: { concept_id: string }[]  // objects, not strings
+}
+
+interface ConceptsData { concepts: MapConcept[] }
+interface Mapping { year: number; question_number: number; concept_id: string | null; status: string }
+interface MappingData { mappings: Mapping[] }
+
+interface ChapterInfo {
+  key: string
+  class: number
+  chapter_number: number
+  chapter_name: string
+  concepts: MapConcept[]
+  dependsOn: Set<string>
+}
+
+// ─── Colors ───────────────────────────────────────────────────────────────────
+
+const CLASS_COLORS: Record<number, { bg: string; border: string; text: string; tag: string; tagText: string; light: string }> = {
+  8:  { bg: '#f0fdf9', border: '#10b981', text: '#064e3b', tag: '#d1fae5', tagText: '#065f46', light: '#a7f3d0' },
+  9:  { bg: '#f0fdf4', border: '#16a34a', text: '#14532d', tag: '#dcfce7', tagText: '#166634', light: '#bbf7d0' },
+  10: { bg: '#eff6ff', border: '#2563eb', text: '#1e3a8a', tag: '#dbeafe', tagText: '#1d4ed8', light: '#bfdbfe' },
+  11: { bg: '#faf5ff', border: '#9333ea', text: '#581c87', tag: '#f3e8ff', tagText: '#7e22ce', light: '#e9d5ff' },
+  12: { bg: '#fff7ed', border: '#ea580c', text: '#7c2d12', tag: '#ffedd5', tagText: '#c2410c', light: '#fed7aa' },
+}
+const CLASS_LABELS: Record<number, string> = {
+  8: 'Class VIII', 9: 'Class IX', 10: 'Class X', 11: 'Class XI', 12: 'Class XII',
+}
+
+// ─── Chapter Node (Mode 1) ────────────────────────────────────────────────────
+
+function ChapterMapNode({ data }: { data: any }) {
+  const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[9]
+  const isSelected = data.isSelected
+  const w = data.nodeW || 260
+  const fs = data.fontSize || 16
+
+  return (
+    <div
+      onClick={() => data.onNodeClick && data.onNodeClick(data)}
+      style={{
+        background: isSelected ? colors.border : colors.bg,
+        border: `2.5px solid ${colors.border}`,
+        borderRadius: '12px',
+        padding: `${Math.round(w * 0.06)}px ${Math.round(w * 0.07)}px`,
+        width: `${w}px`,
+        cursor: 'pointer',
+        boxShadow: isSelected ? `0 6px 24px ${colors.border}66` : `0 2px 8px ${colors.border}22`,
+        position: 'relative',
+        transition: 'all 0.15s ease',
+      }}
+    >
+      <Handle type="target" position={Position.Left}
+        style={{ background: isSelected ? 'white' : colors.border, width: 12, height: 12, border: '2px solid white' }} />
+
+      <div style={{
+        fontSize: `${Math.max(9, Math.round(fs * 0.6))}px`,
+        fontWeight: 800, letterSpacing: '0.08em',
+        color: isSelected ? 'rgba(255,255,255,0.75)' : colors.border,
+        marginBottom: '5px', textTransform: 'uppercase',
+      }}>
+        {CLASS_LABELS[data.classNum]}
+      </div>
+
+      <div style={{
+        fontSize: `${fs}px`, fontWeight: 800,
+        color: isSelected ? 'white' : colors.text,
+        lineHeight: 1.35,
+        marginBottom: '8px',
+      }}>
+        {data.chapterName}
+      </div>
+
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {data.questionCount > 0 && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            background: isSelected ? 'rgba(255,255,255,0.2)' : colors.tag,
+            borderRadius: '20px', padding: '3px 8px',
+            fontSize: `${Math.max(10, Math.round(fs * 0.7))}px`,
+            color: isSelected ? 'white' : colors.tagText, fontWeight: 700,
+          }}>
+            📝 {data.questionCount}Q
+          </div>
+        )}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center',
+          background: isSelected ? 'rgba(255,255,255,0.15)' : `${colors.border}15`,
+          borderRadius: '20px', padding: '3px 8px',
+          fontSize: `${Math.max(10, Math.round(fs * 0.7))}px`,
+          color: isSelected ? 'rgba(255,255,255,0.85)' : colors.text, fontWeight: 600,
+        }}>
+          {data.conceptCount} concepts
+        </div>
+      </div>
+
+      <Handle type="source" position={Position.Right}
+        style={{ background: isSelected ? 'white' : colors.border, width: 12, height: 12, border: '2px solid white' }} />
+    </div>
+  )
+}
+
+// ─── Concept Node (Mode 2) ────────────────────────────────────────────────────
+
+function ConceptMapNode({ data }: { data: any }) {
+  const colors = CLASS_COLORS[data.classNum] || CLASS_COLORS[9]
+  const isSelected = data.isSelected
+  const w = data.nodeW || 260
+  const fs = data.fontSize || 15
+  const concepts: MapConcept[] = data.conceptObjects || []
+  const extra = concepts.length > 2 ? concepts.length - 2 : 0
+
+  return (
+    <div
+      style={{
+        background: isSelected ? colors.border : colors.bg,
+        border: `2.5px solid ${colors.border}`,
+        borderRadius: '12px',
+        padding: `${Math.round(w * 0.06)}px ${Math.round(w * 0.07)}px`,
+        width: `${w}px`,
+        cursor: 'pointer',
+        boxShadow: isSelected ? `0 6px 24px ${colors.border}66` : `0 2px 8px ${colors.border}22`,
+        position: 'relative',
+      }}
+    >
+      <Handle type="target" position={Position.Left}
+        style={{ background: isSelected ? 'white' : colors.border, width: 12, height: 12, border: '2px solid white' }} />
+
+      <div style={{
+        fontSize: `${Math.max(9, Math.round(fs * 0.6))}px`,
+        fontWeight: 800, letterSpacing: '0.08em',
+        color: isSelected ? 'rgba(255,255,255,0.75)' : colors.border,
+        marginBottom: '4px', textTransform: 'uppercase',
+      }}>
+        {CLASS_LABELS[data.classNum]}
+      </div>
+
+      <div style={{
+        fontSize: `${fs}px`, fontWeight: 800,
+        color: isSelected ? 'white' : colors.text,
+        lineHeight: 1.3, marginBottom: '8px',
+      }}>
+        {data.chapterName}
+      </div>
+
+      <div style={{
+        height: '1px',
+        background: isSelected ? 'rgba(255,255,255,0.25)' : `${colors.border}33`,
+        marginBottom: '8px',
+      }} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {concepts.slice(0, 2).map((concept) => (
+          <details
+            key={concept.id}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontSize: `${Math.max(11, Math.round(fs * 0.78))}px`, color: isSelected ? 'rgba(255,255,255,0.9)' : colors.text, lineHeight: 1.3 }}
+          >
+            <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '4px', padding: '2px 0' }}>
+              <span>• {concept.concept_name}</span>
+              <span style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.6)' : colors.border, marginLeft: '4px' }}>+</span>
+            </summary>
+            {concept.summary && (
+              <div style={{ marginTop: '4px', marginLeft: '10px', padding: '5px 8px', background: isSelected ? 'rgba(255,255,255,0.12)' : `${colors.border}0d`, borderLeft: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : colors.border}`, borderRadius: '0 6px 6px 0', fontSize: `${Math.max(10, Math.round(fs * 0.72))}px`, lineHeight: 1.5 }}>
+                {concept.summary}
+              </div>
+            )}
+          </details>
+        ))}
+
+        {extra > 0 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              data.onShowMore && data.onShowMore(data)
+            }}
+            style={{
+              marginTop: '4px',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontSize: `${Math.max(11, Math.round(fs * 0.75))}px`,
+              fontWeight: 700,
+              color: isSelected ? 'rgba(255,255,255,0.75)' : colors.border,
+              textAlign: 'left',
+              fontFamily: 'inherit',
+              textDecoration: 'underline',
+              textDecorationStyle: 'dotted',
+            }}
+          >
+            + {extra} more...
+          </button>
+        )}
+      </div>
+
+      <Handle type="source" position={Position.Right}
+        style={{ background: isSelected ? 'white' : colors.border, width: 12, height: 12, border: '2px solid white' }} />
+    </div>
+  )
+}
+
+const nodeTypes = { chapterMapNode: ChapterMapNode, conceptMapNode: ConceptMapNode }
+
+// ─── Build chapter dependency map ─────────────────────────────────────────────
+
+function buildChapterRegistry(concepts: MapConcept[]): Record<string, ChapterInfo> {
+  const registry: Record<string, ChapterInfo> = {}
+
+  // Build concept-to-chapter lookup
+  const conceptToChapter: Record<string, string> = {}
+  for (const c of concepts) {
+    const key = `${c.class}_${c.chapter_number}`
+    conceptToChapter[c.id] = key
+    if (!registry[key]) {
+      registry[key] = {
+        key,
+        class: c.class,
+        chapter_number: c.chapter_number,
+        chapter_name: c.chapter_name,
+        concepts: [],
+        dependsOn: new Set(),
+      }
+    }
+    registry[key].concepts.push(c)
+  }
+
+  // Derive chapter-to-chapter dependencies via builds_upon links
+  for (const ch of Object.values(registry)) {
+    for (const concept of ch.concepts) {
+      for (const link of concept.builds_upon || []) {
+        const parentChKey = conceptToChapter[link.concept_id]
+        if (parentChKey && parentChKey !== ch.key) {
+          ch.dependsOn.add(parentChKey)
+        }
+      }
+    }
+  }
+
+  return registry
+}
+
+// ─── Tree builder ─────────────────────────────────────────────────────────────
+
+function buildChapterTree(
+  selectedChapterKey: string,
+  registry: Record<string, ChapterInfo>,
+  questionCounts: Record<string, number>,
+  direction: 'ltr' | 'rtl',
+  onChapterClick: (data: any) => void,
+  onShowMore: (data: any) => void,
+  availableW: number,
+  availableH: number,
+  mode: 'chapter' | 'concept',
+  selectedConceptId: string | null,
+  expandedConceptId: string | null,
+  onToggleConcept: (id: string) => void,
+): { nodes: Node[]; edges: Edge[] } {
+
+  const selectedChapter = registry[selectedChapterKey]
+  if (!selectedChapter) return { nodes: [], edges: [] }
+
+  const includedKeys = new Set<string>()
+
+  const traverseUp = (key: string, visited = new Set<string>()): void => {
+    if (visited.has(key) || !registry[key]) return
+    visited.add(key); includedKeys.add(key)
+    for (const depKey of Array.from(registry[key].dependsOn)) {
+      traverseUp(depKey, visited)
+    }
+  }
+
+  const getDirectChildChapters = (key: string): string[] => {
+    return Object.keys(registry).filter(k =>
+      registry[k].dependsOn.has(key) && k !== key
+    )
+  }
+
+  traverseUp(selectedChapterKey)
+  for (const childKey of getDirectChildChapters(selectedChapterKey)) {
+    includedKeys.add(childKey)
+  }
+
+  // Group by class — supports 8-12
+  const byClass: Record<number, string[]> = { 8: [], 9: [], 10: [], 11: [], 12: [] }
+  for (const key of Array.from(includedKeys)) {
+    const ch = registry[key]
+    if (ch && byClass[ch.class] !== undefined) byClass[ch.class].push(key)
+  }
+
+  const classOrderLTR = [8, 9, 10, 11, 12]
+  const classOrder = direction === 'ltr' ? classOrderLTR : [12, 11, 10, 9, 8]
+  const presentClasses = classOrder.filter(cls => byClass[cls] && byClass[cls].length > 0)
+  const numCols = presentClasses.length
+  if (numCols === 0) return { nodes: [], edges: [] }
+
+  const maxNodesInCol = Math.max(...presentClasses.map(cls => byClass[cls].length))
+  const H_GAP = Math.max(60, availableW * 0.06)
+  const V_GAP = Math.max(20, availableH * 0.04)
+  const NODE_W = Math.max(200, Math.floor((availableW - (numCols - 1) * H_GAP) / numCols))
+  const NODE_H = Math.max(100, Math.floor((availableH - (maxNodesInCol - 1) * V_GAP) / maxNodesInCol))
+  const FONT_SIZE = Math.max(13, Math.min(20, Math.round(NODE_W / 15)))
+
+  const classX: Record<number, number> = {}
+  presentClasses.forEach((cls, idx) => { classX[cls] = idx * (NODE_W + H_GAP) })
+
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+  const edgeSet = new Set<string>()
+
+  const makeEdge = (fromKey: string, toKey: string, colorClass: number, highlighted = false) => {
+    const edgeId = `${fromKey}→${toKey}`
+    if (edgeSet.has(edgeId)) return
+    edgeSet.add(edgeId)
+    const colors = CLASS_COLORS[colorClass] || CLASS_COLORS[9]
+    edges.push({
+      id: `e-${fromKey}-${toKey}`,
+      source: fromKey,
+      target: toKey,
+      type: 'smoothstep',
+      animated: highlighted,
+      style: { stroke: colors.border, strokeWidth: highlighted ? 4 : 3 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
+    })
+  }
+
+  presentClasses.forEach(classNum => {
+    const chapterKeys = byClass[classNum] || []
+    const x = classX[classNum]
+    const totalH = chapterKeys.length * NODE_H + (chapterKeys.length - 1) * V_GAP
+    const startY = -totalH / 2
+
+    chapterKeys.forEach((key, idx) => {
+      const ch = registry[key]
+      const isSelected = key === selectedChapterKey
+      const y = startY + idx * (NODE_H + V_GAP)
+
+      const chapterQCount = ch.concepts.reduce((s, c) => s + (questionCounts[c.id] || 0), 0)
+
+      if (mode === 'chapter') {
+        nodes.push({
+          id: key, type: 'chapterMapNode',
+          position: { x, y },
+          data: {
+            chapterName: ch.chapter_name,
+            classNum: ch.class,
+            questionCount: chapterQCount,
+            conceptCount: ch.concepts.length,
+            isSelected,
+            nodeW: NODE_W,
+            fontSize: FONT_SIZE,
+            chapterKey: key,
+            concepts: ch.concepts,
+            onNodeClick: onChapterClick,
+          },
+        })
+      } else {
+        let relevantConcepts: MapConcept[] = []
+
+        if (isSelected && selectedConceptId) {
+          const sc = ch.concepts.find(c => c.id === selectedConceptId)
+          relevantConcepts = sc ? [sc] : []
+        } else if (selectedConceptId) {
+          const visited = new Set<string>()
+          const conceptMap = new Map(
+            Object.values(registry).flatMap(r => r.concepts).map(c => [c.id, c])
+          )
+          const findAncestors = (id: string): void => {
+            if (visited.has(id)) return
+            visited.add(id)
+            const c = conceptMap.get(id)
+            if (!c) return
+            // builds_upon is now an array of objects
+            for (const link of c.builds_upon || []) findAncestors(link.concept_id)
+          }
+          const sc = ch.concepts.find(c => c.id === selectedConceptId)
+          if (sc) findAncestors(sc.id)
+          relevantConcepts = ch.concepts
+            .filter(c => visited.has(c.id) && c.id !== selectedConceptId)
+        } else {
+          relevantConcepts = ch.concepts.slice(0, 3)
+        }
+
+        nodes.push({
+          id: key, type: 'conceptMapNode',
+          position: { x, y },
+          data: {
+            chapterName: ch.chapter_name,
+            classNum: ch.class,
+            conceptObjects: relevantConcepts,
+            isSelected,
+            nodeW: NODE_W,
+            fontSize: FONT_SIZE,
+            chapterKey: key,
+            allConcepts: ch.concepts,
+            questionCount: chapterQCount,
+            onShowMore: onShowMore,
+            onNodeClick: onChapterClick,
+            expandedConceptId,
+            onToggleConcept,
+          },
+        })
+      }
+    })
+  })
+
+  for (const key of Array.from(includedKeys)) {
+    const ch = registry[key]
+    if (!ch) continue
+    for (const depKey of Array.from(ch.dependsOn)) {
+      if (!includedKeys.has(depKey)) continue
+      const depCh = registry[depKey]
+      if (!depCh) continue
+      const highlighted = key === selectedChapterKey || depKey === selectedChapterKey
+      makeEdge(depKey, key, depCh.class, highlighted)
+    }
+  }
+
+  return { nodes, edges }
+}
+
+// ─── Chapter Detail Popup ─────────────────────────────────────────────────────
+
+function ChapterPopup({
+  chapter,
+  questionCounts,
+  onClose,
+}: {
+  chapter: ChapterInfo
+  questionCounts: Record<string, number>
+  onClose: () => void
+}) {
+  const colors = CLASS_COLORS[chapter.class] || CLASS_COLORS[9]
+  const qCount = chapter.concepts.reduce((s, c) => s + (questionCounts[c.id] || 0), 0)
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={onClose}>
+      <div style={{ background: '#111', border: `2px solid ${colors.border}`, borderRadius: '16px', padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: `0 8px 40px rgba(0,0,0,0.5)` }} onClick={e => e.stopPropagation()}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexShrink: 0 }}>
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: colors.border, textTransform: 'uppercase', marginBottom: '6px' }}>
+              {CLASS_LABELS[chapter.class]}
+            </div>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', lineHeight: 1.2, margin: 0 }}>
+              {chapter.chapter_name}
+            </h2>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              {qCount > 0 && (
+                <span style={{ fontSize: '12px', fontWeight: 600, color: colors.tagText, background: colors.tag, borderRadius: '20px', padding: '3px 10px' }}>
+                  📝 {qCount} NEET questions
+                </span>
+              )}
+              <span style={{ fontSize: '12px', fontWeight: 600, color: colors.text, background: `${colors.border}22`, borderRadius: '20px', padding: '3px 10px' }}>
+                {chapter.concepts.length} concepts
+              </span>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: '#1a1a1a', border: '1px solid #2d2d2d', borderRadius: '8px', color: '#9ca3af', cursor: 'pointer', padding: '6px 10px', fontSize: '14px', flexShrink: 0 }}>✕</button>
+        </div>
+
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+            Concepts in this chapter
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {chapter.concepts.map((c, i) => {
+              const qc = questionCounts[c.id] || 0
+              return (
+                <details key={i} style={{ background: '#161616', borderRadius: '10px', border: '1px solid #1e1e1e', padding: '10px 14px' }}>
+                  <summary style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', listStyle: 'none', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1 }}>
+                      <span style={{ color: colors.border, marginTop: '2px', flexShrink: 0 }}>•</span>
+                      <span style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.4 }}>{c.concept_name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      {qc > 0 && (
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: colors.tagText, background: colors.tag, borderRadius: '20px', padding: '2px 8px' }}>
+                          {qc}Q
+                        </span>
+                      )}
+                      <span style={{ fontSize: '14px', fontWeight: 700, color: colors.border, width: '18px', textAlign: 'center' }}>+</span>
+                    </div>
+                  </summary>
+                  {c.summary && (
+                    <div style={{ marginTop: '8px', marginLeft: '16px', padding: '8px 10px', background: `${colors.border}12`, borderLeft: `2px solid ${colors.border}`, borderRadius: '0 6px 6px 0', fontSize: '12px', color: '#9ca3af', lineHeight: 1.5 }}>
+                      {c.summary}
+                    </div>
+                  )}
+                </details>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── More Concepts Popup ──────────────────────────────────────────────────────
+
+function MoreConceptsPopup({
+  chapterName,
+  classNum,
+  concepts,
+  onClose,
+}: {
+  chapterName: string
+  classNum: number
+  concepts: string[]
+  onClose: () => void
+}) {
+  const colors = CLASS_COLORS[classNum] || CLASS_COLORS[9]
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={onClose}>
+      <div style={{ background: 'white', border: `2px solid ${colors.border}`, borderRadius: '16px', padding: '24px', maxWidth: '480px', width: '100%', maxHeight: '70vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: colors.border, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{CLASS_LABELS[classNum]}</div>
+            <div style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>{chapterName}</div>
+            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Relevant concepts ({concepts.length})</div>
+          </div>
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', color: '#6b7280', cursor: 'pointer', padding: '6px 10px', fontSize: '14px' }}>✕</button>
+        </div>
+        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {concepts.map((name, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '8px 12px', background: colors.bg, borderRadius: '8px', border: `1px solid ${colors.border}33` }}>
+              <span style={{ color: colors.border, flexShrink: 0, marginTop: '2px' }}>•</span>
+              <span style={{ fontSize: '13px', color: colors.text, lineHeight: 1.4 }}>{name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+type Subject = 'Chemistry' | 'Physics' | 'Biology'
+
+const SUBJECT_FILES: Record<Subject, { concepts: string; mapping: string }> = {
+  Chemistry: { concepts: '/chemistry_concepts_new.json', mapping: '/chemistry_question_mapping.json' },
+  Physics:   { concepts: '/physics_concepts_new.json',   mapping: '/physics_question_mapping.json' },
+  Biology:   { concepts: '/biology_concepts_new.json',   mapping: '/biology_question_mapping.json' },
+}
+
+export default function ConceptMapPage() {
+  const router = useRouter()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 1200, height: 700 })
+  const [subject, setSubject] = useState<Subject>('Physics')
+  const [concepts, setConcepts] = useState<MapConcept[]>([])
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({})
+  const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  const [pendingClass, setPendingClass] = useState<number>(12)
+  const [pendingChapter, setPendingChapter] = useState<string | null>(null)
+  const [pendingConcept, setPendingConcept] = useState<string>('all')
+  const [pendingDirection, setPendingDirection] = useState<'ltr' | 'rtl'>('ltr')
+
+  const [appliedClass, setAppliedClass] = useState<number | null>(null)
+  const [appliedChapter, setAppliedChapter] = useState<string | null>(null)
+  const [appliedConcept, setAppliedConcept] = useState<string>('all')
+  const [appliedDirection, setAppliedDirection] = useState<'ltr' | 'rtl'>('ltr')
+
+  const [chapterPopup, setChapterPopup] = useState<ChapterInfo | null>(null)
+  const [morePopup, setMorePopup] = useState<{ chapterName: string; classNum: number; concepts: string[] } | null>(null)
+  const [expandedConceptId, setExpandedConceptId] = useState<string | null>(null)
+  const [nodes, setNodes, onNodesChange] = useNodesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+
+  useEffect(() => {
+    const obs = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContainerSize({ width: entry.contentRect.width, height: entry.contentRect.height })
+      }
+    })
+    if (containerRef.current) obs.observe(containerRef.current)
+    return () => obs.disconnect()
+  }, [])
+
+  // Load data — flat array from new JSON format
+  useEffect(() => {
+    setLoading(true)
+    setConcepts([])
+    setQuestionCounts({})
+    setPendingChapter(null)
+    setPendingConcept('all')
+    setAppliedChapter(null)
+    setAppliedConcept('all')
+    setNodes([] as any)
+    setEdges([] as any)
+    async function load() {
+      try {
+        const files = SUBJECT_FILES[subject]
+        const [cRes, mRes] = await Promise.all([
+          fetch(files.concepts),
+          fetch(files.mapping),
+        ])
+        // New JSONs are flat arrays, not { subject, concepts: [] }
+        const cData: MapConcept[] = await cRes.json()
+        const mData: MappingData = await mRes.json()
+        const counts: Record<string, number> = {}
+        for (const m of mData.mappings) {
+          if (m.concept_id && m.concept_id !== 'NONE' && m.status !== 'uncertain') {
+            counts[m.concept_id] = (counts[m.concept_id] || 0) + 1
+          }
+        }
+        setConcepts(cData.filter(c => c.concept_name))
+        setQuestionCounts(counts)
+        setLoading(false)
+      } catch (err) {
+        console.error(err); setLoading(false)
+      }
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject])
+
+  const registry = useMemo(() => buildChapterRegistry(concepts), [concepts])
+
+  const chaptersForClass = useMemo(() => {
+    return Object.values(registry)
+      .filter(ch => ch.class === pendingClass)
+      .sort((a, b) => a.chapter_number - b.chapter_number)
+      .map(ch => ({
+        key: ch.key,
+        name: ch.chapter_name,
+        count: ch.concepts.reduce((s, c) => s + (questionCounts[c.id] || 0), 0),
+      }))
+  }, [registry, pendingClass, questionCounts])
+
+  const conceptsForChapter = useMemo(() => {
+    if (!pendingChapter || !registry[pendingChapter]) return []
+    return registry[pendingChapter].concepts
+  }, [registry, pendingChapter])
+
+  const handleChapterNodeClick = useCallback((data: any) => {
+    const ch = registry[data.chapterKey]
+    if (ch) setChapterPopup(ch)
+  }, [registry])
+
+  const handleShowMore = useCallback((data: any) => {
+    setMorePopup({
+      chapterName: data.chapterName,
+      classNum: data.classNum,
+      concepts: (data.conceptObjects || []).map((c: MapConcept) => c.concept_name),
+    })
+  }, [])
+
+  const handleGo = useCallback(() => {
+    if (!pendingChapter) return
+    setAppliedClass(pendingClass)
+    setAppliedChapter(pendingChapter)
+    setAppliedConcept(pendingConcept)
+    setAppliedDirection(pendingDirection)
+  }, [pendingClass, pendingChapter, pendingConcept, pendingDirection])
+
+  const mode: 'chapter' | 'concept' = appliedConcept === 'all' ? 'chapter' : 'concept'
+
+  const handleToggleConcept = useCallback((id: string) => {
+    setExpandedConceptId(prev => prev === id ? null : id)
+  }, [])
+
+  useEffect(() => {
+    if (!appliedChapter || !registry[appliedChapter]) {
+      setNodes([] as any); setEdges([] as any); return
+    }
+    const { nodes: n, edges: e } = buildChapterTree(
+      appliedChapter, registry, questionCounts, appliedDirection,
+      handleChapterNodeClick, handleShowMore,
+      containerSize.width, containerSize.height,
+      mode,
+      appliedConcept === 'all' ? null : appliedConcept,
+      expandedConceptId,
+      handleToggleConcept,
+    )
+    setNodes(n as any)
+    setEdges(e as any)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedChapter, appliedConcept, appliedDirection, registry, questionCounts, containerSize, mode, expandedConceptId])
+
+  const appliedChapterName = appliedChapter ? registry[appliedChapter]?.chapter_name || '' : ''
+
+  // Classes available in loaded data
+  const availableClasses = useMemo(() => {
+    const cls = new Set(Object.values(registry).map(ch => ch.class))
+    return [8, 9, 10, 11, 12].filter(c => cls.has(c))
+  }, [registry])
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4b5563', fontSize: '16px' }}>
+      Loading concept map...
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+
+      {/* Sidebar */}
+      <div style={{ width: sidebarOpen ? '248px' : '44px', minWidth: sidebarOpen ? '248px' : '44px', background: '#0a0a0a', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', transition: 'width 0.22s ease, min-width 0.22s ease', overflow: 'hidden', zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #1e1e1e' }}>
+          {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb' }}>Filters</span>}
+          <button onClick={() => setSidebarOpen(o => !o)} style={{ background: '#141414', border: '1px solid #1e1e1e', borderRadius: '7px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', fontSize: '12px', flexShrink: 0 }}>
+            {sidebarOpen ? '◀' : '▶'}
+          </button>
+        </div>
+
+        {sidebarOpen && (
+          <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
+            {/* Navigation */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {([['🔥 Topic Heatmap', '/heatmap'], ['🧬 Find Ancestry', '/ancestry'], ['🗺 Concept Map', '/concept-map']] as const).map(([label, href]) => {
+                  const isActive = href === '/concept-map'
+                  return (
+                    <button key={href} onClick={() => router.push(href)}
+                      style={{ background: isActive ? '#052e16' : 'transparent', border: `1px solid ${isActive ? '#16a34a44' : 'transparent'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#4ade80' : '#6b7280', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Subject</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {(['Physics', 'Chemistry', 'Biology'] as Subject[]).map(s => {
+                  const isActive = subject === s
+                  const emoji = s === 'Chemistry' ? '⚗️' : s === 'Physics' ? '⚡' : '🌿'
+                  return (
+                    <button key={s} onClick={() => setSubject(s)}
+                      style={{ background: isActive ? '#1a1a1a' : 'transparent', border: `1px solid ${isActive ? '#2d2d2d' : 'transparent'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? '#f9fafb' : '#6b7280', fontSize: '13px', fontWeight: isActive ? 700 : 400, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                      {emoji} {s}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Class — only shows classes present in loaded data */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Class</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {availableClasses.map(cls => {
+                  const colors = CLASS_COLORS[cls]
+                  const isActive = pendingClass === cls
+                  return (
+                    <button key={cls} onClick={() => { setPendingClass(cls); setPendingChapter(null); setPendingConcept('all') }}
+                      style={{ background: isActive ? colors.bg : 'transparent', border: `1.5px solid ${isActive ? colors.border : '#1e1e1e'}`, borderRadius: '8px', padding: '8px 10px', textAlign: 'left', cursor: 'pointer', color: isActive ? colors.text : '#6b7280', fontSize: '13px', fontWeight: isActive ? 600 : 400, fontFamily: 'inherit', transition: 'all 0.12s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? colors.border : '#2d2d2d', flexShrink: 0 }} />
+                      {CLASS_LABELS[cls]}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Chapter */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Chapter</div>
+              <select value={pendingChapter || ''} onChange={e => { setPendingChapter(e.target.value || null); setPendingConcept('all') }}
+                style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: pendingChapter ? '#d1d5db' : '#4b5563', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
+                <option value=''>Select chapter...</option>
+                {chaptersForClass.map(ch => (
+                  <option key={ch.key} value={ch.key}>{ch.name}{ch.count > 0 ? ` (${ch.count}Q)` : ''}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Concept */}
+            {pendingChapter && conceptsForChapter.length > 0 && (
+              <div>
+                <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Concept</div>
+                <select value={pendingConcept} onChange={e => setPendingConcept(e.target.value)}
+                  style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '8px 10px', fontSize: '12px', color: '#d1d5db', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
+                  <option value='all'>All concepts (chapter view)</option>
+                  {conceptsForChapter.map(c => (
+                    <option key={c.id} value={c.id}>{c.concept_name}{questionCounts[c.id] ? ` (${questionCounts[c.id]}Q)` : ''}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Direction */}
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Direction</div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {([['ltr', '→ VIII to XII'], ['rtl', '← XII to VIII']] as const).map(([d, label]) => (
+                  <button key={d} onClick={() => setPendingDirection(d)}
+                    style={{ flex: 1, background: pendingDirection === d ? '#16a34a18' : '#111', border: `1px solid ${pendingDirection === d ? '#16a34a44' : '#1e1e1e'}`, borderRadius: '8px', padding: '7px 4px', color: pendingDirection === d ? '#4ade80' : '#6b7280', cursor: 'pointer', fontSize: '11px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Go */}
+            <button onClick={handleGo} disabled={!pendingChapter}
+              style={{ background: pendingChapter ? '#052e16' : '#111', border: `1px solid ${pendingChapter ? '#16a34a44' : '#1e1e1e'}`, borderRadius: '10px', padding: '12px', color: pendingChapter ? '#4ade80' : '#374151', cursor: pendingChapter ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s' }}>
+              Generate Map →
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '11px 20px', borderBottom: '1px solid #1e1e1e', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#f9fafb', margin: 0 }}>Concept Map</h1>
+            <p style={{ fontSize: '11px', color: '#4b5563', margin: '1px 0 0' }}>
+              {subject} · {appliedChapter
+                ? `${appliedChapterName} › ${mode === 'chapter' ? 'Chapter dependencies' : (concepts.find(c => c.id === appliedConcept)?.concept_name || '')}`
+                : 'Select a chapter and click Generate Map'}
+            </p>
+          </div>
+          {nodes.length > 0 && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ fontSize: '11px', background: mode === 'chapter' ? '#1e3a5f' : '#2d1b69', border: `1px solid ${mode === 'chapter' ? '#2563eb44' : '#7e22ce44'}`, borderRadius: '6px', padding: '3px 10px', fontWeight: 600, color: mode === 'chapter' ? '#93c5fd' : '#c4b5fd' }}>
+                {mode === 'chapter' ? '📚 Chapter view' : '💡 Concept view'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#4b5563', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '3px 10px' }}>
+                {nodes.length} chapters · {edges.length} links
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
+          {nodes.length === 0 ? (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <div style={{ fontSize: '52px', opacity: 0.12 }}>🗺</div>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#4b5563' }}>
+                {appliedChapter ? 'No chapter dependencies found' : 'Select a chapter and click Generate Map'}
+              </div>
+              {!appliedChapter && <div style={{ fontSize: '13px', color: '#374151' }}>Use the sidebar on the left</div>}
+            </div>
+          ) : (
+            <ReactFlow
+              nodes={nodes} edges={edges}
+              onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
+              nodeTypes={nodeTypes}
+              fitView fitViewOptions={{ padding: 0.08 }}
+              minZoom={0.05} maxZoom={2}
+              style={{ background: '#0d0d0d' }}
+            >
+              <Background color="#1e1e1e" gap={28} size={1} />
+              <Controls style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px' }} />
+            </ReactFlow>
+          )}
+        </div>
+      </div>
+
+      {chapterPopup && (
+        <ChapterPopup
+          chapter={chapterPopup}
+          questionCounts={questionCounts}
+          onClose={() => setChapterPopup(null)}
+        />
+      )}
+      {morePopup && (
+        <MoreConceptsPopup
+          chapterName={morePopup.chapterName}
+          classNum={morePopup.classNum}
+          concepts={morePopup.concepts}
+          onClose={() => setMorePopup(null)}
+        />
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Misc
+.DS_Store
+*.log
+review.tar.gz
+fix_biology_concepts.py
+fix_ch3.py
