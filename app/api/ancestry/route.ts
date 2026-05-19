@@ -182,7 +182,7 @@ const CHAPTER_TITLES: Record<string, Record<string, string>> = {
     'class_10_chapter_4_part1': 'Magnetic Effects of Electric Current',
     'class_10_chapter_5_part1': 'Sources of Energy - Renewable Non-renewable',
     'class_11_chapter_1_part1': 'Physical World - Units and Measurements',
-    'class_11_chapter_2_part1': 'Motion in a Straight Line - Kinematics',
+    'class_11_chapter_2_part1': 'Motion in a Straight Line - Kinematics Velocity Speed Acceleration Relative Velocity Relative Motion Reference Frame Observer Displacement Time Bus Train',
     'class_11_chapter_3_part1': 'Motion in a Plane - Vectors Projectile',
     'class_11_chapter_4_part1': 'Laws of Motion - Newton Forces Friction',
     'class_11_chapter_5_part1': 'Work Energy and Power - Conservation',
@@ -321,7 +321,9 @@ No explanation.`;
   // Find exact match in chapter keys
   const keys = Object.keys(chapterNames);
   const exact = keys.find(k => result.includes(k));
-  return exact ?? null;
+  if (!exact) return null;
+  // Strip _part1/_part2 suffix to match chapterIndex keys
+  return exact.replace(/_part\d+$/, '');
 }
 
 // ── STEP 2: Identify concept within chapter (~200 tokens) ──────────────────────
