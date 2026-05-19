@@ -87,47 +87,61 @@ function buildChapterIndex(data: Concept[]): Record<string, Concept[]> {
 // Separate per subject to avoid duplicate key conflicts
 const CHAPTER_TITLES: Record<string, Record<string, string>> = {
   Biology: {
-    'class_9_chapter_5_part1': 'Cell - The Unit of Life',
-    'class_9_chapter_6_part1': 'Tissues in Living Organisms',
-    'class_9_chapter_12_part1': 'Food Security and Agriculture',
-    'class_10_chapter_5_part1': 'Life Processes - Nutrition Respiration Transport',
-    'class_10_chapter_6_part1': 'Control and Coordination - Nervous Hormonal',
-    'class_10_chapter_7_part1': 'Reproduction in Organisms',
-    'class_10_chapter_8_part1': 'Heredity Evolution Genetics Variation',
-    'class_10_chapter_13_part1': 'Environment and Ecosystem',
-    'class_11_chapter_1_part1': 'The Living World - Biodiversity Taxonomy',
-    'class_11_chapter_2_part1': 'Biological Classification - Kingdoms',
-    'class_11_chapter_3_part1': 'Plant Kingdom - Algae Bryophytes Pteridophytes',
-    'class_11_chapter_4_part1': 'Animal Kingdom - Classification Levels',
-    'class_11_chapter_5_part1': 'Morphology of Flowering Plants',
-    'class_11_chapter_6_part1': 'Anatomy of Plants - Tissues',
-    'class_11_chapter_7_part1': 'Structural Organisation in Animals - Tissues Organs',
-    'class_11_chapter_8_part1': 'Cell - The Unit of Life - Organelles Membrane',
-    'class_11_chapter_9_part1': 'Biomolecules - Proteins Enzymes Carbohydrates Lipids',
-    'class_11_chapter_10_part1': 'Cell Cycle and Cell Division - Mitosis Meiosis',
-    'class_11_chapter_11_part1': 'Photosynthesis in Higher Plants',
-    'class_11_chapter_12_part1': 'Respiration in Plants - ATP Energy',
-    'class_11_chapter_13_part1': 'Plant Growth and Development - Hormones',
-    'class_11_chapter_14_part1': 'Digestion and Absorption',
-    'class_11_chapter_15_part1': 'Body Fluids and Circulation - Blood Heart',
-    'class_11_chapter_16_part1': 'Excretory Products and Elimination - Kidney Nephron',
-    'class_11_chapter_17_part1': 'Locomotion and Movement - Muscles Joints',
-    'class_11_chapter_18_part1': 'Neural Control and Coordination - Nervous System Brain',
-    'class_11_chapter_19_part1': 'Chemical Coordination - Endocrine Hormones Insulin',
-    'class_12_chapter_2_part1': 'Sexual Reproduction in Flowering Plants',
-    'class_12_chapter_3_part1': 'Human Reproduction - Male Female Reproductive System',
-    'class_12_chapter_4_part1': 'Molecular Basis of Inheritance - DNA RNA Replication',
-    'class_12_chapter_5_part1': 'Principles of Inheritance - Genetics Mendel',
-    'class_12_chapter_6_part1': 'Evolution - Origin of Life Natural Selection',
-    'class_12_chapter_7_part1': 'Human Health and Disease - Immunity Innate Acquired Pathogens Cancer AIDS',
-    'class_12_chapter_8_part1': 'Microbes in Human Welfare - Biotechnology Applications',
-    'class_12_chapter_9_part1': 'Biotechnology Principles and Processes - Recombinant DNA',
-    'class_12_chapter_10_part1': 'Biotechnology and its Applications',
-    'class_12_chapter_11_part1': 'Organisms and Populations - Ecology',
-    'class_12_chapter_12_part1': 'Ecosystem - Food Chain Energy Flow',
-    'class_12_chapter_13_part1': 'Biodiversity and Conservation',
+    // Class 8 — biology chapters from integrated science
+    'class_8_chapter_1_part1': 'Exploring the Investigative World of Science',
+    'class_8_chapter_2_part1': 'The Invisible Living World - Microorganisms Bacteria Virus',
+    'class_8_chapter_3_part1': 'Health - Disease Immunity Nutrition',
+    'class_8_chapter_12_part1': 'How Nature Works in Harmony - Ecology Food Chain',
+    'class_8_chapter_13_part1': 'Earth - Environment Ecosystem Pollution',
+    // Class 9 — actual chapter numbers from JSON
+    'class_9_chapter_1_part1': 'Exploration Secondary Science',
+    'class_9_chapter_2_part1': 'Cell - Building Block of Life - Membrane Organelles Plasma',
+    'class_9_chapter_3_part1': 'Tissues in Action - Plant Animal Tissues',
+    'class_9_chapter_11_part1': 'Reproduction - Asexual Sexual Organisms',
+    'class_9_chapter_12_part1': 'Diversity and Classification - Kingdom Phylum',
+    'class_9_chapter_13_part1': 'Earth as a System - Energy Matter Life Ecology',
+    // Class 10 — actual chapter numbers from JSON
+    'class_10_chapter_5_part1': 'Life Processes - Nutrition Respiration Transport Excretion',
+    'class_10_chapter_6_part1': 'Control and Coordination - Nervous System Hormones Reflex',
+    'class_10_chapter_7_part1': 'Reproduction - Organisms Sexual Asexual Pollination',
+    'class_10_chapter_8_part1': 'Heredity - Genetics Mendel Variation Inheritance',
+    'class_10_chapter_13_part1': 'Environment - Ecosystem Pollution Conservation',
+    // Class 11 — all 19 chapters
+    'class_11_chapter_1_part1': 'The Living World - Biodiversity Taxonomy Classification',
+    'class_11_chapter_2_part1': 'Biological Classification - Five Kingdoms Monera Protista Fungi',
+    'class_11_chapter_3_part1': 'Plant Kingdom - Algae Bryophytes Pteridophytes Gymnosperms Angiosperms',
+    'class_11_chapter_4_part1': 'Animal Kingdom - Porifera Coelenterata Chordata Classification',
+    'class_11_chapter_5_part1': 'Morphology of Flowering Plants - Root Stem Leaf Flower Fruit',
+    'class_11_chapter_6_part1': 'Anatomy of Flowering Plants - Meristem Vascular Tissue',
+    'class_11_chapter_7_part1': 'Structural Organisation in Animals - Tissues Organ System',
+    'class_11_chapter_8_part1': 'Cell The Unit of Life - Plasma Membrane Cell Wall Organelles Nucleus Mitochondria',
+    'class_11_chapter_9_part1': 'Biomolecules - Proteins Enzymes Carbohydrates Lipids Nucleic Acids',
+    'class_11_chapter_10_part1': 'Cell Cycle and Cell Division - Mitosis Meiosis Interphase',
+    'class_11_chapter_11_part1': 'Photosynthesis in Higher Plants - Light Reaction Dark Reaction Calvin Cycle',
+    'class_11_chapter_12_part1': 'Respiration in Plants - Glycolysis Krebs Cycle ATP Fermentation',
+    'class_11_chapter_13_part1': 'Plant Growth and Development - Auxin Gibberellin Cytokinin Dormancy',
+    'class_11_chapter_14_part1': 'Breathing and Exchange of Gases - Lungs Alveoli Haemoglobin',
+    'class_11_chapter_15_part1': 'Body Fluids and Circulation - Blood Heart Cardiac Cycle Lymph',
+    'class_11_chapter_16_part1': 'Excretory Products and Elimination - Kidney Nephron Urine Formation',
+    'class_11_chapter_17_part1': 'Locomotion and Movement - Muscles Joints Skeleton Actin Myosin',
+    'class_11_chapter_18_part1': 'Neural Control and Coordination - Neuron Synapse Brain Reflex Arc',
+    'class_11_chapter_19_part1': 'Chemical Coordination - Endocrine Glands Hormones Insulin Thyroid',
+    // Class 12 — actual chapter numbers from JSON
+    'class_12_chapter_1_part1': 'Sexual Reproduction in Flowering Plants - Pollination Fertilisation',
+    'class_12_chapter_2_part1': 'Human Reproduction - Male Female Reproductive System Gametogenesis',
+    'class_12_chapter_3_part1': 'Reproductive Health - STDs Contraception Infertility',
+    'class_12_chapter_4_part1': 'Principles of Inheritance and Variation - Mendel Genetics Linkage',
+    'class_12_chapter_5_part1': 'Molecular Basis of Inheritance - DNA RNA Replication Transcription Translation',
+    'class_12_chapter_6_part1': 'Evolution - Origin of Life Natural Selection Speciation Darwin',
+    'class_12_chapter_7_part1': 'Human Health and Disease - Immunity Pathogens Cancer AIDS Drugs',
+    'class_12_chapter_8_part1': 'Microbes in Human Welfare - Fermentation Antibiotics Biogas',
+    'class_12_chapter_9_part1': 'Biotechnology Principles and Processes - Recombinant DNA Cloning PCR',
+    'class_12_chapter_10_part1': 'Biotechnology and Applications - GMO Insulin Gene Therapy',
+    'class_12_chapter_11_part1': 'Organisms and Populations - Ecology Population Growth Interaction',
+    'class_12_chapter_12_part1': 'Ecosystem - Food Chain Energy Flow Nutrient Cycling',
+    'class_12_chapter_13_part1': 'Biodiversity and Conservation - Hotspots Extinction Protected Areas',
   },
-  Chemistry: {
+    Chemistry: {
     'class_9_chapter_1_part1': 'Matter - Particles States of Matter',
     'class_9_chapter_2_part1': 'Is Matter Around Us Pure - Mixtures Solutions',
     'class_9_chapter_3_part1': 'Atoms and Molecules - Dalton Laws Chemical Combination',
@@ -331,7 +345,7 @@ No explanation.`;
   if (!result || result.trim() === 'NONE') return null;
 
   // Extract concept ID pattern
-  const match = result.match(/([a-z]+_c\d+_ch\d+_c\d+)/);
+  const match = result.match(/([a-z]+_c\d+_ch\d+_[ms]\d+)/);
   return match ? match[1] : null;
 }
 
@@ -354,7 +368,7 @@ Return ONLY the ID or NONE.`;
 
     const result = await groqCall(prompt, 30, 0);
     if (result && result !== 'NONE') {
-      const match = result.match(/([a-z]+_c\d+_ch\d+_c\d+)/);
+      const match = result.match(/([a-z]+_c\d+_ch\d+_[ms]\d+)/);
       const conceptId = match ? match[1] : result.trim();
       if (lookup[conceptId]) return conceptId;
     }
