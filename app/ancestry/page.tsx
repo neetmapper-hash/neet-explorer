@@ -27,6 +27,24 @@ const SAMPLES: Record<Subject, string[]> = {
   ],
 };
 
+// Extract meaningful keywords from question text
+function extractKeywords(text: string): string[] {
+  const stopWords = new Set([
+    'the','a','an','is','are','was','of','in','to','and','or','that',
+    'which','what','how','why','when','where','this','it','its','be',
+    'been','has','have','not','no','for','by','on','at','as','with',
+    'from','if','but','so','than','then','each','their','they','does',
+    'do','did','will','would','can','could','should','may','might',
+    'state','define','find','calculate','what','which','give','write',
+  ]);
+  return text
+    .toLowerCase()
+    .replace(/[?.!(),:;]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !stopWords.has(w))
+    .slice(0, 12);
+}
+
 export default function AncestryPage() {
   const router = useRouter();
 
@@ -62,10 +80,11 @@ export default function AncestryPage() {
     setChain([]);
     setHasSearched(true);
     try {
+      const keywords = extractKeywords(queryText);
       const res = await fetch('/api/ancestry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer }),
+        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer, keywords }),
       });
       const data = await res.json();
       setChain(data.chain ?? []);

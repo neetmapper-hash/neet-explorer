@@ -329,10 +329,24 @@ No explanation.`;
 // ── STEP 2: Identify concept within chapter (~200 tokens) ──────────────────────
 async function identifyConceptInChapter(
   question: string,
-  concepts: Concept[]
+  concepts: Concept[],
+  keywords: string[] = []
 ): Promise<string | null> {
-  // Include summary and key_terms so Groq can semantically match
-  const conceptList = concepts.map(c => {
+  // Pre-score concepts by keyword overlap — send top matches first
+  const scored = concepts.map(c => {
+    const cText = [
+      c.concept_name,
+      ...(c.key_terms ?? []),
+      (c.summary ?? '').slice(0, 150),
+    ].join(' ').toLowerCase();
+    const overlap = keywords.filter(kw => kw.length > 2 && cText.includes(kw.toLowerCase())).length;
+    return { concept: c, score: overlap };
+  }).sort((a, b) => b.score - a.score);
+
+  // Send top 20 scored concepts (most keyword overlap first)
+  const topConcepts = scored.slice(0, 20).map(x => x.concept);
+
+  const conceptList = topConcepts.map(c => {
     const terms = (c.key_terms ?? []).slice(0, 5).join(', ');
     const summary = (c.summary ?? '').slice(0, 120);
     return `${c.id} | ${c.concept_name} | ${terms} | ${summary}`;
@@ -346,8 +360,11 @@ CONCEPTS (id | name | key_terms | summary):
 ${conceptList}
 
 Rules:
-- Pick the concept whose key_terms and summary best match the question
-- Prefer the most SPECIFIC concept over a general one
+- Pick the concept whose key_terms and summary SEMANTICALLY match the question
+- For questions about objects moving relative to each other (bus, train, boat, swimmer) → look for "relative velocity"
+- For questions about collisions or force over time → look for "impulse" or "momentum"
+- For questions about projectile motion → look for "projectile" concepts
+- Prefer the most SPECIFIC concept that directly answers what the question tests
 - Return ONLY the concept ID exactly as shown, or NONE
 - No explanation`;
 
@@ -392,7 +409,7 @@ export async function POST(req: NextRequest) {
   try {
     console.log('GROQ_API_KEY set:', !!GROQ_API_KEY, 'length:', GROQ_API_KEY.length);
 
-    const { question, subject: providedSubject, options, correctAnswer } = await req.json();
+    const { question, subject: providedSubject, options, correctAnswer, keywords = [] } = await req.json();
 
     if (!question) {
       return NextResponse.json({ error: 'question is required' }, { status: 400 });
@@ -434,7 +451,7 @@ export async function POST(req: NextRequest) {
       // ── STEP 2: Identify concept within chapter ────────────────────────
       const chapterConcepts = chapterIndex[chapterKey];
       console.log(`Searching ${chapterConcepts.length} concepts in ${chapterKey}`);
-      conceptId = await identifyConceptInChapter(question, chapterConcepts);
+      conceptId = await identifyConceptInChapter(question, chapterConcepts, keywords);
       console.log('Identified concept:', conceptId);
     }
 
