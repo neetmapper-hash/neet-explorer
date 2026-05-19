@@ -329,22 +329,29 @@ async function identifyConceptInChapter(
   question: string,
   concepts: Concept[]
 ): Promise<string | null> {
-  const conceptList = concepts.map(c => `${c.id}|${c.concept_name}`).join('\n');
+  // Include summary and key_terms so Groq can semantically match
+  const conceptList = concepts.map(c => {
+    const terms = (c.key_terms ?? []).slice(0, 5).join(', ');
+    const summary = (c.summary ?? '').slice(0, 120);
+    return `${c.id} | ${c.concept_name} | ${terms} | ${summary}`;
+  }).join('\n');
 
-  const prompt = `You are a NEET expert. Which concept does this question test?
+  const prompt = `You are a NEET expert. Which concept does this question DIRECTLY test?
 
 QUESTION: ${question}
 
-CONCEPTS:
+CONCEPTS (id | name | key_terms | summary):
 ${conceptList}
 
-Return ONLY the concept ID (e.g. bio_c12_ch1_c3) or NONE.
-No explanation.`;
+Rules:
+- Pick the concept whose key_terms and summary best match the question
+- Prefer the most SPECIFIC concept over a general one
+- Return ONLY the concept ID exactly as shown, or NONE
+- No explanation`;
 
-  const result = await groqCall(prompt, 30, 0);
+  const result = await groqCall(prompt, 40, 0);
   if (!result || result.trim() === 'NONE') return null;
 
-  // Extract concept ID pattern
   const match = result.match(/([a-z]+_c\d+_ch\d+_[ms]\d+)/);
   return match ? match[1] : null;
 }
@@ -359,12 +366,15 @@ async function identifyConceptFallback(
 
   for (let i = 0; i < allConcepts.length; i += BATCH) {
     const batch = allConcepts.slice(i, i + BATCH);
-    const conceptList = batch.map(c => `${c.id}|${c.concept_name}`).join('\n');
+    const conceptList = batch.map(c => {
+      const terms = (c.key_terms ?? []).slice(0, 4).join(', ');
+      return `${c.id} | ${c.concept_name} | ${terms}`;
+    }).join('\n');
 
     const prompt = `NEET question: ${question}
-Which concept ID best matches?
+Which concept ID best matches? Consider key_terms carefully.
 ${conceptList}
-Return ONLY the ID or NONE.`;
+Return ONLY the concept ID or NONE.`;
 
     const result = await groqCall(prompt, 30, 0);
     if (result && result !== 'NONE') {
@@ -439,15 +449,19 @@ export async function POST(req: NextRequest) {
     // Traverse ancestry
     const rawChain = traverseAncestry(conceptId, lookup);
 
-    // Deduplicate — one concept per chapter
-    const seenChapters = new Set<string>();
-    const dedupedChain = rawChain.filter(concept => {
+    // Deduplicate — one concept per chapter, keep the one with most builds_upon links
+    const chapterMap = new Map<string, Concept>();
+    for (const concept of rawChain) {
       const parts = concept.id.split('_');
       const key = parts[1] + '_' + parts[2];
-      if (seenChapters.has(key)) return false;
-      seenChapters.add(key);
-      return true;
-    });
+      const existing = chapterMap.get(key);
+      const currentLinks = (concept.builds_upon ?? []).length;
+      const existingLinks = existing ? (existing.builds_upon ?? []).length : -1;
+      if (!existing || currentLinks > existingLinks) {
+        chapterMap.set(key, concept);
+      }
+    }
+    const dedupedChain = Array.from(chapterMap.values());
 
     // Sort Class 12 → 9
     const getClass = (id: string) => {
