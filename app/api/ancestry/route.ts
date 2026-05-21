@@ -336,15 +336,31 @@ function traverseAncestry(
   lookup: Record<string, Concept>,
   visited = new Set<string>(),
   depth = 0,
-  maxDepth = 5
+  maxDepth = 4,
+  sourceClass = 0,
+  sourceChapter = 0
 ): Concept[] {
   if (depth > maxDepth || visited.has(conceptId) || !lookup[conceptId]) return [];
   visited.add(conceptId);
-  const concept   = lookup[conceptId];
+  const concept = lookup[conceptId];
   const ancestry: Concept[] = [];
+
   for (const link of concept.builds_upon ?? []) {
     const prereqId = typeof link === 'string' ? link : link.concept_id;
-    ancestry.push(...traverseAncestry(prereqId, lookup, visited, depth + 1, maxDepth));
+    const linkClass   = typeof link === 'object' ? (link as any).class ?? 0 : 0;
+    const linkChapter = typeof link === 'object' ? (link as any).chapter_number ?? 0 : 0;
+
+    // Skip same-chapter links during traversal — these are parent-child hierarchy
+    // links within a chapter, not meaningful cross-chapter prerequisites
+    // Exception: depth 0 (the starting concept itself) always follows all links
+    if (depth > 0 && sourceClass > 0 && linkClass === sourceClass && linkChapter === sourceChapter) {
+      continue;
+    }
+
+    ancestry.push(...traverseAncestry(
+      prereqId, lookup, visited, depth + 1, maxDepth,
+      concept.class, concept.chapter_number
+    ));
   }
   ancestry.push(concept);
   return ancestry;
