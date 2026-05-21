@@ -1,3 +1,5 @@
+'use client';
+
 // Extract base keywords — semantic detection runs server-side
 function extractKeywords(text: string): string[] {
   const stopWords = new Set([
@@ -16,7 +18,7 @@ function extractKeywords(text: string): string[] {
     .slice(0, 12);
 }
 
-'use client';
+
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
