@@ -1,3 +1,21 @@
+// Extract base keywords — semantic detection runs server-side
+function extractKeywords(text: string): string[] {
+  const stopWords = new Set([
+    'the','a','an','is','are','was','of','in','to','and','or','that',
+    'which','what','how','why','when','where','this','it','its','be',
+    'been','has','have','not','no','for','by','on','at','as','with',
+    'from','if','but','so','than','then','each','their','they','does',
+    'do','did','will','would','can','could','should','may','might',
+    'state','define','find','calculate','give','write',
+  ]);
+  return text
+    .toLowerCase()
+    .replace(/[?.!(),:;]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !stopWords.has(w))
+    .slice(0, 12);
+}
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,66 +45,6 @@ const SAMPLES: Record<Subject, string[]> = {
   ],
 };
 
-// Extract meaningful keywords from question text
-function extractKeywords(text: string): string[] {
-  const stopWords = new Set([
-    'the','a','an','is','are','was','of','in','to','and','or','that',
-    'which','what','how','why','when','where','this','it','its','be',
-    'been','has','have','not','no','for','by','on','at','as','with',
-    'from','if','but','so','than','then','each','their','they','does',
-    'do','did','will','would','can','could','should','may','might',
-    'state','define','find','calculate','what','which','give','write',
-  ]);
-
-  const lower = text.toLowerCase();
-  const base = lower
-    .replace(/[?.!(),:;]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !stopWords.has(w))
-    .slice(0, 12);
-
-  const extra: string[] = [];
-
-  // Detect relative motion: two moving objects mentioned
-  const movingObjects = /bus|train|boat|swimmer|car|cyclist|scooter|girl|boy|man|woman|person|runner|walker|aircraft|plane|ship/g;
-  const objectMatches = lower.match(movingObjects);
-  if (objectMatches && objectMatches.length >= 2) {
-    extra.push('relative velocity', 'relative motion', 'reference frame', 'observer');
-  }
-
-  // Detect projectile motion
-  if (/projectile|thrown|launched|angle|range|horizontal|vertical/.test(lower)) {
-    extra.push('projectile', 'projectile motion', 'trajectory');
-  }
-
-  // Detect collision / impulse
-  if (/collide|collision|impulse|impact|crash|ball.*hit|hit.*ball/.test(lower)) {
-    extra.push('impulse', 'collision', 'momentum conservation');
-  }
-
-  // Detect circular motion
-  if (/circular|centripetal|revolve|rotate|angular|rpm|revolution/.test(lower)) {
-    extra.push('circular motion', 'centripetal', 'angular velocity');
-  }
-
-  // Detect SHM / oscillation
-  if (/oscillat|pendulum|spring|shm|simple harmonic|time period|frequency/.test(lower)) {
-    extra.push('simple harmonic motion', 'oscillation', 'time period');
-  }
-
-  // Detect wave / sound
-  if (/wave|frequency|wavelength|sound|doppler|interference|diffraction/.test(lower)) {
-    extra.push('wave', 'frequency', 'wavelength');
-  }
-
-  // Detect optics
-  if (/lens|mirror|refraction|reflection|focal|image|object distance/.test(lower)) {
-    extra.push('lens', 'mirror', 'refraction', 'focal length');
-  }
-
-  return [...new Set([...base, ...extra])];
-}
-
 export default function AncestryPage() {
   const router = useRouter();
 
@@ -99,6 +57,7 @@ export default function AncestryPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [answer, setAnswer] = useState<string>('')
+  const [studyPath, setStudyPath] = useState<string>('')
 
   useEffect(() => {
     const q = sessionStorage.getItem('ancestry_question');
@@ -120,17 +79,21 @@ export default function AncestryPage() {
     setIsLoading(true);
     setError(null);
     setChain([]);
+    setStudyPath('');
     setHasSearched(true);
     try {
-      const keywords = extractKeywords(queryText);
       const res = await fetch('/api/ancestry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer, keywords }),
+        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer }),
       });
       const data = await res.json();
       setChain(data.chain ?? []);
       setAnswer(data.answer ?? '');
+      setStudyPath(data.studyPath ?? '');
+      if (data.error && !data.chain?.length) {
+        setError(data.error);
+      }
       if (!res.ok) throw new Error('Failed to fetch ancestry');
     } catch {
       setError('Could not identify concept. Try rephrasing your question.');
@@ -282,6 +245,7 @@ export default function AncestryPage() {
             error={error}
             questionText={question}
             answer={answer}
+            studyPath={studyPath}
           />
         )}
       </main>

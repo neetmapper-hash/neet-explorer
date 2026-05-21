@@ -9,6 +9,7 @@ interface AncestryChainProps {
   error: string | null;
   questionText: string;
   answer?: string;
+  studyPath?: string;
 }
 
 interface MCQQuestion {
@@ -388,7 +389,7 @@ function ExplainPopup({ concept, classNum, chapterNum, onClose }: ExplainPopupPr
 }
 
 // ── MAIN COMPONENT ─────────────────────────────────────────────────────────────
-export default function AncestryChain({ chain, isLoading, error, questionText, answer }: AncestryChainProps) {
+export default function AncestryChain({ chain, isLoading, error, questionText, answer, studyPath }: AncestryChainProps) {
   const [explainConcept, setExplainConcept] = useState<{ concept: Concept; classNum: number; chapterNum: number } | null>(null);
 
   if (isLoading) {
@@ -483,6 +484,13 @@ export default function AncestryChain({ chain, isLoading, error, questionText, a
           })}
         </div>
       </div>
+
+      {studyPath && (
+        <div className="bg-[#1a1a2e] border border-[#2a2a4a] rounded-xl p-4 mb-6">
+          <div className="text-xs font-bold text-[#7878ff] mb-2">📖 STUDY PATH</div>
+          <div className="text-[#d0d0d0] text-sm leading-relaxed">{studyPath}</div>
+        </div>
+      )}
 
       <div>
         <h3 className="text-sm font-semibold text-[#888] uppercase tracking-wider mb-3">
