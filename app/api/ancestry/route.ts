@@ -336,9 +336,7 @@ function traverseAncestry(
   lookup: Record<string, Concept>,
   visited = new Set<string>(),
   depth = 0,
-  maxDepth = 4,
-  sourceClass = 0,
-  sourceChapter = 0
+  maxDepth = 4
 ): Concept[] {
   if (depth > maxDepth || visited.has(conceptId) || !lookup[conceptId]) return [];
   visited.add(conceptId);
@@ -347,20 +345,18 @@ function traverseAncestry(
 
   for (const link of concept.builds_upon ?? []) {
     const prereqId = typeof link === 'string' ? link : link.concept_id;
-    const linkClass   = typeof link === 'object' ? (link as any).class ?? 0 : 0;
-    const linkChapter = typeof link === 'object' ? (link as any).chapter_number ?? 0 : 0;
+    if (!prereqId || !lookup[prereqId]) continue;
+
+    const prereq = lookup[prereqId];
 
     // Skip same-chapter links during traversal — these are parent-child hierarchy
-    // links within a chapter, not meaningful cross-chapter prerequisites
-    // Exception: depth 0 (the starting concept itself) always follows all links
-    if (depth > 0 && sourceClass > 0 && linkClass === sourceClass && linkChapter === sourceChapter) {
+    // links within a chapter (e.g. Acceleration → Speed and Velocity, same Ch 4)
+    // Only meaningful cross-chapter prerequisites should appear in the ancestry chain
+    if (prereq.class === concept.class && prereq.chapter_number === concept.chapter_number) {
       continue;
     }
 
-    ancestry.push(...traverseAncestry(
-      prereqId, lookup, visited, depth + 1, maxDepth,
-      concept.class, concept.chapter_number
-    ));
+    ancestry.push(...traverseAncestry(prereqId, lookup, visited, depth + 1, maxDepth));
   }
   ancestry.push(concept);
   return ancestry;
@@ -390,6 +386,27 @@ async function generateAnswer(
     || /calculate|find the|what is the value|acceleration of|velocity of|force on|energy|power|pressure|resistance|current|voltage/i.test(question);
 
   const maxTokens = isNumerical ? 500 : 300;
+
+  // Use stronger model for numerical questions — 8B model loops on physics calculations
+  const numericalGroqCall = async (p: string, tokens: number) => {
+    // Try 70B first for numerical, fall back to cascade
+    for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']) {
+      try {
+        const res = await fetch(GROQ_URL, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, max_tokens: tokens, temperature: 0.1,
+            messages: [{ role: 'user', content: p }] }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.choices[0].message.content.trim();
+        }
+        if (res.status !== 429) break;
+      } catch {}
+    }
+    return null;
+  };
 
   let prompt = '';
 
@@ -442,6 +459,9 @@ async function generateAnswer(
       + '\nANSWER:';
   }
 
+    if (isNumerical) {
+    return await numericalGroqCall(prompt, maxTokens) ?? '';
+  }
   return await groqCall(prompt, maxTokens, 0.3) ?? '';
 }
 
