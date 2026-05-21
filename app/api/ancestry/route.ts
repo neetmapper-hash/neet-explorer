@@ -359,78 +359,76 @@ async function generateAnswer(
   options?: Record<string, string>,
   correctAnswer?: string
 ): Promise<string> {
-  const context = `${concept.concept_name} (Class ${concept.class}): ${concept.summary}`;
+  const context = concept.concept_name + ' (Class ' + concept.class + '): ' + concept.summary;
 
-  // Format prerequisites as human-readable list
   const prereqConcepts = chain
     .filter(c => c.id !== concept.id)
     .slice(0, 4)
-    .map(c => `- Class ${c.class} Ch ${c.chapter_number}: ${c.concept_name} — ${(c.summary ?? '').slice(0, 80)}`)
+    .map(c => '- Class ' + c.class + ' Ch ' + c.chapter_number + ': ' + c.concept_name + ' — ' + (c.summary ?? '').slice(0, 80))
     .join('\n');
 
-  const hasOptions  = options && Object.keys(options).length > 0;
-  const hasCorrect  = !!correctAnswer;
+  const hasOptions = options && Object.keys(options).length > 0;
+  const hasCorrect = !!correctAnswer;
 
-  // Detect numerical/calculation questions — need more tokens and step-by-step guidance
-  const isNumerical = /\d+\s*(kg|N|m\/s|m\s*s|km|g\s*=|J|W|Pa|Hz|ohm|mol|atm)/i.test(question)
-    || /calculate|find the|what is the value|acceleration|velocity|force|energy|power|pressure|resistance|current|voltage/i.test(question);
+  const isNumerical = /\d+\s*(kg|N|m\/s|ms|km|J|W|Pa|Hz|ohm|mol|atm)/i.test(question)
+    || /calculate|find the|what is the value|acceleration of|velocity of|force on|energy|power|pressure|resistance|current|voltage/i.test(question);
 
-  let prompt: string;
+  const maxTokens = isNumerical ? 500 : 300;
+
+  let prompt = '';
 
   if (hasOptions && hasCorrect) {
-    prompt = isNumerical
-      ? \`You are a NEET expert. Solve this numerical question for a student.
-- Start with: "The correct option is (${correctAnswer})..."
-- Show the key calculation in ONE line: write the formula, substitute values, get the answer
-- Example: "F = ma = 5 × 2 = 10 N"
-- Then explain in 1-2 sentences why this matches option (${correctAnswer})
-- Keep it under 5 sentences total, no bullet points, no markdown
+    const optionLines = Object.entries(options!).map(([k, v]) => '(' + k + ') ' + v).join('\n');
+    const correctText = options![correctAnswer!] ?? '';
 
-BACKGROUND: ${context}
-QUESTION: ${question}
-OPTIONS:
-${Object.entries(options!).map(([k, v]) => \`(\${k}) \${v}\`).join('\n')}
-THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options![correctAnswer!] ?? ''}
-SOLUTION:\`
-      : \`You are a NEET expert. Explain this question to a student.
-- Start with: "The correct option is (${correctAnswer})..."
-- Explain WHY that option is correct in 2-3 sentences using the background concept
-- Briefly say why the other options are wrong
-- Max 5 sentences, no bullet points, no markdown
-
-BACKGROUND: ${context}
-PREREQUISITES: ${prereqConcepts || 'none'}
-QUESTION: ${question}
-OPTIONS:
-${Object.entries(options!).map(([k, v]) => \`(\${k}) \${v}\`).join('\n')}
-THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options![correctAnswer!] ?? ''}
-EXPLANATION:\`;
+    if (isNumerical) {
+      prompt = 'You are a NEET expert. Solve this numerical question for a student.\n'
+        + '- Start with: "The correct option is (' + correctAnswer + ')..."\n'
+        + '- Show the key calculation in ONE line: formula → substitute values → answer\n'
+        + '- Example format: "F = ma = 5 × 2 = 10 N"\n'
+        + '- Then explain in 1-2 sentences why this is option (' + correctAnswer + ')\n'
+        + '- Max 4 sentences total, no bullet points, no markdown\n'
+        + '\nBACKGROUND: ' + context
+        + '\nQUESTION: ' + question
+        + '\nOPTIONS:\n' + optionLines
+        + '\nTHE CORRECT ANSWER IS OPTION (' + correctAnswer + '): ' + correctText
+        + '\nSOLUTION:';
+    } else {
+      prompt = 'You are a NEET expert. Explain this question to a student.\n'
+        + '- Start with: "The correct option is (' + correctAnswer + ')..."\n'
+        + '- Explain WHY that option is correct in 2-3 sentences using the background concept\n'
+        + '- Briefly say why the other options are wrong\n'
+        + '- Max 5 sentences, no bullet points, no markdown\n'
+        + '\nBACKGROUND: ' + context
+        + '\nPREREQUISITES: ' + (prereqConcepts || 'none')
+        + '\nQUESTION: ' + question
+        + '\nOPTIONS:\n' + optionLines
+        + '\nTHE CORRECT ANSWER IS OPTION (' + correctAnswer + '): ' + correctText
+        + '\nEXPLANATION:';
+    }
   } else if (!hasOptions && hasCorrect) {
-    prompt = \`You are a NEET expert. Explain this question to a student.
-- The answer is: ${correctAnswer}
-- Explain WHY this is correct in 2-3 sentences using the background concept
-- Max 4 sentences, no bullet points, no markdown
-
-BACKGROUND: ${context}
-PREREQUISITES: ${prereqConcepts || 'none'}
-QUESTION: ${question}
-EXPLANATION:\`;
+    prompt = 'You are a NEET expert. Explain this question to a student.\n'
+      + '- The answer is: ' + correctAnswer + '\n'
+      + '- Explain WHY this is correct in 2-3 sentences using the background concept\n'
+      + '- Max 4 sentences, no bullet points, no markdown\n'
+      + '\nBACKGROUND: ' + context
+      + '\nPREREQUISITES: ' + (prereqConcepts || 'none')
+      + '\nQUESTION: ' + question
+      + '\nEXPLANATION:';
   } else {
-    prompt = \`You are a NEET expert. Answer this question for a student in 3-4 sentences.
-- Answer directly and clearly
-- Use the background concept to explain
-- No bullet points, no markdown, speak as a teacher
-
-BACKGROUND: ${context}
-PREREQUISITES: ${prereqConcepts || 'none'}
-QUESTION: ${question}
-ANSWER:\`;
+    prompt = 'You are a NEET expert. Answer this question for a student in 3-4 sentences.\n'
+      + '- Answer directly and clearly\n'
+      + '- Use the background concept to explain\n'
+      + '- No bullet points, no markdown, speak as a teacher\n'
+      + '\nBACKGROUND: ' + context
+      + '\nPREREQUISITES: ' + (prereqConcepts || 'none')
+      + '\nQUESTION: ' + question
+      + '\nANSWER:';
   }
 
-  // Numerical questions get more tokens to avoid cut-off mid-calculation
-  const maxTokens = isNumerical ? 500 : 300;
   return await groqCall(prompt, maxTokens, 0.3) ?? '';
 }
+
 
 // ── Change 10: Study guidance (always runs, not optional) ─────────────────────
 
