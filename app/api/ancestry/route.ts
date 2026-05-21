@@ -368,14 +368,31 @@ async function generateAnswer(
     .map(c => `- Class ${c.class} Ch ${c.chapter_number}: ${c.concept_name} — ${(c.summary ?? '').slice(0, 80)}`)
     .join('\n');
 
-  const hasOptions     = options && Object.keys(options).length > 0;
-  const hasCorrect     = !!correctAnswer;
+  const hasOptions  = options && Object.keys(options).length > 0;
+  const hasCorrect  = !!correctAnswer;
+
+  // Detect numerical/calculation questions — need more tokens and step-by-step guidance
+  const isNumerical = /\d+\s*(kg|N|m\/s|m\s*s|km|g\s*=|J|W|Pa|Hz|ohm|mol|atm)/i.test(question)
+    || /calculate|find the|what is the value|acceleration|velocity|force|energy|power|pressure|resistance|current|voltage/i.test(question);
 
   let prompt: string;
 
   if (hasOptions && hasCorrect) {
-    // MCQ with full options
-    prompt = `You are a NEET expert. Explain this question to a student.
+    prompt = isNumerical
+      ? \`You are a NEET expert. Solve this numerical question for a student.
+- Start with: "The correct option is (${correctAnswer})..."
+- Show the key calculation in ONE line: write the formula, substitute values, get the answer
+- Example: "F = ma = 5 × 2 = 10 N"
+- Then explain in 1-2 sentences why this matches option (${correctAnswer})
+- Keep it under 5 sentences total, no bullet points, no markdown
+
+BACKGROUND: ${context}
+QUESTION: ${question}
+OPTIONS:
+${Object.entries(options!).map(([k, v]) => \`(\${k}) \${v}\`).join('\n')}
+THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options![correctAnswer!] ?? ''}
+SOLUTION:\`
+      : \`You are a NEET expert. Explain this question to a student.
 - Start with: "The correct option is (${correctAnswer})..."
 - Explain WHY that option is correct in 2-3 sentences using the background concept
 - Briefly say why the other options are wrong
@@ -385,12 +402,11 @@ BACKGROUND: ${context}
 PREREQUISITES: ${prereqConcepts || 'none'}
 QUESTION: ${question}
 OPTIONS:
-${Object.entries(options!).map(([k, v]) => `(${k}) ${v}`).join('\n')}
+${Object.entries(options!).map(([k, v]) => \`(\${k}) \${v}\`).join('\n')}
 THE CORRECT ANSWER IS OPTION (${correctAnswer}): ${options![correctAnswer!] ?? ''}
-EXPLANATION:`;
+EXPLANATION:\`;
   } else if (!hasOptions && hasCorrect) {
-    // Change 3B: correct answer provided but no options
-    prompt = `You are a NEET expert. Explain this question to a student.
+    prompt = \`You are a NEET expert. Explain this question to a student.
 - The answer is: ${correctAnswer}
 - Explain WHY this is correct in 2-3 sentences using the background concept
 - Max 4 sentences, no bullet points, no markdown
@@ -398,10 +414,9 @@ EXPLANATION:`;
 BACKGROUND: ${context}
 PREREQUISITES: ${prereqConcepts || 'none'}
 QUESTION: ${question}
-EXPLANATION:`;
+EXPLANATION:\`;
   } else {
-    // Open question
-    prompt = `You are a NEET expert. Answer this question for a student in 3-4 sentences.
+    prompt = \`You are a NEET expert. Answer this question for a student in 3-4 sentences.
 - Answer directly and clearly
 - Use the background concept to explain
 - No bullet points, no markdown, speak as a teacher
@@ -409,10 +424,12 @@ EXPLANATION:`;
 BACKGROUND: ${context}
 PREREQUISITES: ${prereqConcepts || 'none'}
 QUESTION: ${question}
-ANSWER:`;
+ANSWER:\`;
   }
 
-  return await groqCall(prompt, 300, 0.3) ?? '';
+  // Numerical questions get more tokens to avoid cut-off mid-calculation
+  const maxTokens = isNumerical ? 500 : 300;
+  return await groqCall(prompt, maxTokens, 0.3) ?? '';
 }
 
 // ── Change 10: Study guidance (always runs, not optional) ─────────────────────
