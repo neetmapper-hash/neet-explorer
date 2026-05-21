@@ -173,7 +173,7 @@ function extractAndEnrichKeywords(question: string, clientKeywords: string[] = [
     extra.push('photosynthesis', 'chlorophyll', 'light reaction');
 
   // Merge client keywords + server keywords, deduplicate
-  return [...new Set([...base, ...extra, ...clientKeywords])];
+  return Array.from(new Set([...base, ...extra, ...clientKeywords]));
 }
 
 // ── Change 3: Pre-score all concepts by keyword overlap ────────────────────────

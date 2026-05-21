@@ -18,8 +18,6 @@ function extractKeywords(text: string): string[] {
     .slice(0, 12);
 }
 
-
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Subject, Concept } from '@/lib/types';
