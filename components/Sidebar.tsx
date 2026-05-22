@@ -3,10 +3,10 @@
 import { Subject, AVAILABLE_YEARS, YEAR_COLORS } from '@/lib/types';
 
 interface SidebarProps {
-  currentPage: 'heatmap' | 'ancestry' | 'concept-map';
+  currentPage: 'heatmap' | 'ancestry' | 'concept-map' | 'quiz';
   subject: Subject;
   selectedYears: number[];
-  onPageChange: (page: 'heatmap' | 'ancestry' | 'concept-map') => void;
+  onPageChange: (page: 'heatmap' | 'ancestry' | 'concept-map' | 'quiz') => void;
   onSubjectChange: (subject: Subject) => void;
   onYearsChange: (years: number[]) => void;
   showBackButton?: boolean;
@@ -64,6 +64,7 @@ export default function Sidebar({
             ['heatmap',     '🔥 Topic Heatmap'],
             ['ancestry',    '🧬 Find Ancestry'],
             ['concept-map', '🗺 Concept Map'],
+            ['quiz',        '📚 Concepts & Quiz'],
           ] as const).map(([page, label]) => {
             const isActive = currentPage === page;
             return (
