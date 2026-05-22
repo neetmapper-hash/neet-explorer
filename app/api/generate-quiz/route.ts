@@ -94,7 +94,36 @@ Format:
 
     const allQuestions: any[] = [];
 
+    // Difficulty bands per batch — ensures variety across 30 questions
+    const batchDifficulties = [
+      'Easy, Easy, Easy, Medium, Medium',
+      'Medium, Medium, Hard, Hard, Hard',
+      'Easy, Medium, Hard, Hard, Advanced',
+      'Easy, Easy, Medium, Medium, Hard',
+      'Medium, Hard, Hard, Advanced, Advanced',
+      'Easy, Medium, Medium, Hard, Advanced',
+    ];
+
+    // Topic angles per batch — forces different aspects of the chapter
+    const batchAngles = [
+      'Focus on definitions and basic concepts',
+      'Focus on applications and real-world examples',
+      'Focus on numerical problems and calculations',
+      'Focus on comparisons and differences between concepts',
+      'Focus on exceptions, special cases, and common mistakes',
+      'Focus on NEET exam style questions from previous years',
+    ];
+
     for (let batch = 0; batch < 6; batch++) {
+      // Build batch-specific prompt with variation
+      const batchPrompt = (isAssertion
+        ? prompt
+        : prompt.replace(
+            difficultyPlan,
+            batchDifficulties[batch]
+          )
+        ) + '\n\nBatch instruction: ' + batchAngles[batch] + '. Generate DIFFERENT questions from previous batches.';
+
       let parsed = null;
 
       for (let attempt = 1; attempt <= 3; attempt++) {
@@ -110,8 +139,8 @@ Format:
               },
               body: JSON.stringify({
                 model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.4,
+                messages: [{ role: 'user', content: batchPrompt }],
+                temperature: 0.4 + (batch * 0.05),
                 max_tokens: 1800,
               }),
             }),
