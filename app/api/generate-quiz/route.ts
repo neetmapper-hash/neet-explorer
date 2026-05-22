@@ -47,28 +47,46 @@ async function groqCall(prompt: string, temperature: number): Promise<string | n
 }
 
 const DIFFICULTY_DESCRIPTIONS: Record<string, string> = {
-  easy:     'straightforward recall questions — definitions, basic facts, simple identification',
-  medium:   'application questions — apply concepts to simple scenarios, fill-in-the-blank type',
-  hard:     'analytical questions — multi-step reasoning, compare/contrast, why/how questions',
-  advanced: 'complex questions — integrate multiple concepts, interpret data, predict outcomes',
-  expert:   'tricky questions — common misconceptions, exceptions to rules, subtle distinctions',
-  neet:     'NEET exam style — exactly as they appear in past NEET papers, high difficulty',
+  easy:     'straightforward recall — definitions, basic facts, simple identification',
+  medium:   'application — apply concepts to simple scenarios, cause and effect',
+  hard:     'analytical — multi-step reasoning, compare and contrast, explain why',
+  advanced: 'complex — integrate multiple concepts, interpret data, predict outcomes',
+  expert:   'tricky — misconceptions, exceptions to rules, subtle distinctions',
+  neet:     'NEET exam style — high difficulty, exactly as in past NEET papers',
 };
 
 export async function POST(req: Request) {
   try {
     const { chapter, concepts, classLevel, subject, mode, difficulty, previousQuestions = [] } = await req.json();
-
     const isAssertion = mode === 'assertion_reasoning';
     const level = difficulty ?? 'easy';
     const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
+    const allConcepts = concepts ?? [];
 
-    const limitedConcepts = (concepts ?? []).slice(0, 8);
-    const conceptText = limitedConcepts
+    // Rotate concept window based on difficulty level
+    // Each level covers a different slice of chapter concepts
+    const LEVELS = ['easy','medium','hard','advanced','expert','neet'];
+    const levelIndex = LEVELS.indexOf(level);
+    let selectedConcepts: any[];
+
+    if (allConcepts.length <= 8) {
+      selectedConcepts = allConcepts;
+    } else {
+      const step = Math.max(1, Math.floor(allConcepts.length / 6));
+      const startIdx = Math.min(levelIndex * step, allConcepts.length - 8);
+      selectedConcepts = allConcepts.slice(startIdx, startIdx + 8);
+      // Always include main topics
+      const mainTopics = allConcepts
+        .filter((c: any) => c.is_main_topic)
+        .slice(0, 3)
+        .filter((c: any) => !selectedConcepts.some((s: any) => s.concept_name === c.concept_name));
+      selectedConcepts = [...mainTopics, ...selectedConcepts].slice(0, 8);
+    }
+
+    const conceptText = selectedConcepts
       .map((c: any) => 'Concept: ' + c.concept_name + '\nSummary: ' + (c.summary || '').slice(0, 200))
       .join('\n\n');
 
-    // Tell Groq which questions to avoid (from previous levels)
     const avoidText = previousQuestions.length > 0
       ? '\n\nDo NOT repeat these questions:\n' + previousQuestions.slice(-10).join('\n')
       : '';
@@ -81,31 +99,26 @@ export async function POST(req: Request) {
       + 'Subject: ' + subject + '\n'
       + 'Class: ' + classLevel + '\n'
       + 'Chapter: ' + chapter + '\n'
-      + 'Difficulty level: ' + level.toUpperCase() + ' — ' + levelDesc + '\n\n'
-      + 'Concepts:\n' + conceptText
+      + 'Difficulty level: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+      + 'Concepts to focus on:\n' + conceptText
       + avoidText + '\n\n'
       + 'Rules:\n'
       + '- ALL 5 questions must be ' + level + ' difficulty\n'
-      + '- Output ONLY a valid JSON array — no markdown, no comments\n'
+      + '- Questions must cover the concepts listed above — do not repeat topics\n'
+      + '- Output ONLY a valid JSON array - no markdown, no comments\n'
       + '- Double quotes only, no trailing commas\n'
-      + '- Each question must test a DIFFERENT concept or aspect\n'
       + '- Never truncate the output\n\n'
       + 'Format:\n' + format;
 
-    console.log('Generating 5', level, isAssertion ? 'assertion' : 'MCQ', 'questions for:', chapter);
+    console.log('Level:', level, '| Concepts:', selectedConcepts.map((c: any) => c.concept_name).join(', '));
 
     let questions: any[] = [];
     for (let attempt = 1; attempt <= 3; attempt++) {
-      console.log('Attempt', attempt);
       const raw = await groqCall(prompt, 0.4 + (attempt * 0.1));
       if (!raw) continue;
       try {
         const parsed = safeJSONParse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          questions = parsed;
-          console.log('Success — got', parsed.length, 'questions');
-          break;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) { questions = parsed; break; }
       } catch (err) {
         console.error('Parse failed attempt', attempt, String(err).slice(0, 100));
       }
@@ -114,7 +127,6 @@ export async function POST(req: Request) {
     const valid = questions.filter((q: any) =>
       q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation
     );
-
     const unique = valid.filter((q, i, arr) =>
       i === arr.findIndex((x: any) => x.question === q.question)
     );
