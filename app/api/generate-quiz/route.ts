@@ -1,9 +1,5 @@
-import OpenAI from 'openai';
-
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-});
+const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 function extractJSONArray(text: string) {
   const start = text.indexOf('[');
@@ -106,18 +102,26 @@ Format:
           console.log(`Batch ${batch + 1} attempt ${attempt}`);
 
           const response = await Promise.race([
-            client.chat.completions.create({
-              model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.4,
-              max_tokens: 1800,
+            fetch(GROQ_URL, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.4,
+                max_tokens: 1800,
+              }),
             }),
             new Promise((_, reject) =>
               setTimeout(() => reject(new Error('Groq timeout')), 60000)
             ),
           ]);
 
-          const text = (response as any).choices?.[0]?.message?.content || '';
+          const json = await (response as Response).json();
+          const text = json.choices?.[0]?.message?.content || '';
           parsed = safeJSONParse(text);
           if (Array.isArray(parsed)) {
             console.log(`Batch ${batch + 1} success`);
