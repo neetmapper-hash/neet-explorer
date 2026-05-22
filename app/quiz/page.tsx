@@ -59,7 +59,7 @@ export default function QuizPage() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set([11, 12]));
+  const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set());
   const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
   const [quizMode, setQuizMode] = useState<'mcq' | 'assertion' | null>(null);
   const [currentLevel, setCurrentLevel] = useState(0);
@@ -158,7 +158,7 @@ export default function QuizPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
-      <Sidebar currentPage="ancestry" subject={subject} selectedYears={[2021,2022,2023,2024,2025]}
+      <Sidebar currentPage="quiz" subject={subject} selectedYears={[2021,2022,2023,2024,2025]}
         onPageChange={page => {
           if (page === 'heatmap') router.push('/heatmap');
           if (page === 'ancestry') router.push('/ancestry');
