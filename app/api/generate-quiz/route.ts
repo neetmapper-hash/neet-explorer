@@ -1,9 +1,5 @@
-import OpenAI from 'openai';
-
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-});
+const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 function extractJSONArray(text: string) {
   const start = text.indexOf('[');
@@ -13,16 +9,12 @@ function extractJSONArray(text: string) {
 }
 
 function safeJSONParse(raw: string) {
-  try {
-    return JSON.parse(raw);
-  } catch {
+  try { return JSON.parse(raw); }
+  catch {
     let fixed = raw
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
-      .replace(/[""]/g, '"')
-      .replace(/['']/g, "'")
-      .replace(/,\s*}/g, '}')
-      .replace(/,\s*]/g, ']')
+      .replace(/```json/g, '').replace(/```/g, '')
+      .replace(/[""]/g, '"').replace(/['']/g, "'")
+      .replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')
       .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
     const extracted = extractJSONArray(fixed);
     if (!extracted) throw new Error('Could not extract JSON array');
@@ -30,133 +22,111 @@ function safeJSONParse(raw: string) {
   }
 }
 
+async function groqCall(prompt: string, temperature: number): Promise<string | null> {
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature,
+        max_tokens: 2000,
+      }),
+    });
+    if (!res.ok) {
+      console.error('Groq error:', res.status, (await res.text()).slice(0, 200));
+      return null;
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch (err) {
+    console.error('Groq fetch error:', err);
+    return null;
+  }
+}
+
+const DIFFICULTY_DESCRIPTIONS: Record<string, string> = {
+  easy:     'straightforward recall questions — definitions, basic facts, simple identification',
+  medium:   'application questions — apply concepts to simple scenarios, fill-in-the-blank type',
+  hard:     'analytical questions — multi-step reasoning, compare/contrast, why/how questions',
+  advanced: 'complex questions — integrate multiple concepts, interpret data, predict outcomes',
+  expert:   'tricky questions — common misconceptions, exceptions to rules, subtle distinctions',
+  neet:     'NEET exam style — exactly as they appear in past NEET papers, high difficulty',
+};
+
 export async function POST(req: Request) {
   try {
-    const { chapter, concepts, classLevel, subject, mode } = await req.json();
-
-    const limitedConcepts = (concepts ?? []).slice(0, 8);
-
-    const conceptText = limitedConcepts
-      .map((c: any) => `Concept: ${c.concept_name}\nSummary: ${(c.summary || '').slice(0, 300)}`)
-      .join('\n\n');
-
-    const difficultyPlan = `Question 1: Easy\nQuestion 2: Easy\nQuestion 3: Medium\nQuestion 4: Hard\nQuestion 5: Advanced`;
+    const { chapter, concepts, classLevel, subject, mode, difficulty, previousQuestions = [] } = await req.json();
 
     const isAssertion = mode === 'assertion_reasoning';
+    const level = difficulty ?? 'easy';
+    const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
 
-    const prompt = isAssertion
-      ? `Generate EXACTLY 5 assertion reasoning questions.
-Subject: ${subject}
-Class: ${classLevel}
-Chapter: ${chapter}
-Concepts:
-${conceptText}
-Difficulty progression:
-${difficultyPlan}
-Rules:
-- valid JSON only
-- output ONLY JSON array
-- no markdown, no comments, no trailing commas
-- double quotes only, escape quotes properly
-- never truncate output
-Format:
-[
-  {
-    "question": "...",
-    "difficulty": "easy",
-    "assertion": "...",
-    "reason": "...",
-    "options": ["...", "...", "...", "..."],
-    "answer": "...",
-    "explanation": "..."
-  }
-]`
-      : `Generate EXACTLY 5 MCQs.
-Subject: ${subject}
-Class: ${classLevel}
-Chapter: ${chapter}
-Concepts:
-${conceptText}
-Difficulty progression:
-${difficultyPlan}
-Rules:
-- valid JSON only
-- output ONLY JSON array
-- no markdown, no comments, no trailing commas
-- double quotes only, escape quotes properly
-- never truncate output
-Format:
-[
-  {
-    "question": "...",
-    "difficulty": "easy",
-    "options": ["...", "...", "...", "..."],
-    "answer": "...",
-    "explanation": "..."
-  }
-]`;
+    const limitedConcepts = (concepts ?? []).slice(0, 8);
+    const conceptText = limitedConcepts
+      .map((c: any) => 'Concept: ' + c.concept_name + '\nSummary: ' + (c.summary || '').slice(0, 200))
+      .join('\n\n');
 
-    const allQuestions: any[] = [];
+    // Tell Groq which questions to avoid (from previous levels)
+    const avoidText = previousQuestions.length > 0
+      ? '\n\nDo NOT repeat these questions:\n' + previousQuestions.slice(-10).join('\n')
+      : '';
 
-    for (let batch = 0; batch < 6; batch++) {
-      let parsed = null;
+    const format = isAssertion
+      ? '[\n  {\n    "question": "...",\n    "difficulty": "' + level + '",\n    "assertion": "...",\n    "reason": "...",\n    "options": ["...", "...", "...", "..."],\n    "answer": "...",\n    "explanation": "..."\n  }\n]'
+      : '[\n  {\n    "question": "...",\n    "difficulty": "' + level + '",\n    "options": ["...", "...", "...", "..."],\n    "answer": "...",\n    "explanation": "..."\n  }\n]';
 
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          console.log(`Batch ${batch + 1} attempt ${attempt}`);
+    const prompt = 'Generate EXACTLY 5 ' + (isAssertion ? 'assertion reasoning' : 'MCQ') + ' questions for NEET.\n'
+      + 'Subject: ' + subject + '\n'
+      + 'Class: ' + classLevel + '\n'
+      + 'Chapter: ' + chapter + '\n'
+      + 'Difficulty level: ' + level.toUpperCase() + ' — ' + levelDesc + '\n\n'
+      + 'Concepts:\n' + conceptText
+      + avoidText + '\n\n'
+      + 'Rules:\n'
+      + '- ALL 5 questions must be ' + level + ' difficulty\n'
+      + '- Output ONLY a valid JSON array — no markdown, no comments\n'
+      + '- Double quotes only, no trailing commas\n'
+      + '- Each question must test a DIFFERENT concept or aspect\n'
+      + '- Never truncate the output\n\n'
+      + 'Format:\n' + format;
 
-          const response = await Promise.race([
-            client.chat.completions.create({
-              model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.4,
-              max_tokens: 1800,
-            }),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Groq timeout')), 60000)
-            ),
-          ]);
+    console.log('Generating 5', level, isAssertion ? 'assertion' : 'MCQ', 'questions for:', chapter);
 
-          const text = (response as any).choices?.[0]?.message?.content || '';
-          parsed = safeJSONParse(text);
-          if (Array.isArray(parsed)) {
-            console.log(`Batch ${batch + 1} success`);
-            break;
-          }
-        } catch (err) {
-          console.error(`Batch ${batch + 1} Attempt ${attempt} failed`, err);
+    let questions: any[] = [];
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      console.log('Attempt', attempt);
+      const raw = await groqCall(prompt, 0.4 + (attempt * 0.1));
+      if (!raw) continue;
+      try {
+        const parsed = safeJSONParse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          questions = parsed;
+          console.log('Success — got', parsed.length, 'questions');
+          break;
         }
+      } catch (err) {
+        console.error('Parse failed attempt', attempt, String(err).slice(0, 100));
       }
-
-      if (!parsed) {
-        console.error(`Batch ${batch + 1} failed completely`);
-        continue;
-      }
-      allQuestions.push(...parsed);
     }
 
-    const validQuestions = allQuestions.filter(
-      (q: any) =>
-        q.question &&
-        Array.isArray(q.options) &&
-        q.options.length === 4 &&
-        q.answer &&
-        q.explanation
+    const valid = questions.filter((q: any) =>
+      q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation
     );
 
-    const uniqueQuestions = validQuestions.filter(
-      (question, index, self) =>
-        index === self.findIndex((q: any) => q.question === question.question)
+    const unique = valid.filter((q, i, arr) =>
+      i === arr.findIndex((x: any) => x.question === q.question)
     );
 
-    if (uniqueQuestions.length < 5) {
-      return Response.json({ success: false, error: 'Too few valid questions generated' });
+    if (unique.length < 3) {
+      return Response.json({ success: false, error: 'Could not generate enough questions. Please try again.' });
     }
 
-    return Response.json({ success: true, total: uniqueQuestions.length, questions: uniqueQuestions });
+    return Response.json({ success: true, total: unique.length, questions: unique, difficulty: level });
 
   } catch (error: any) {
-    console.error(error);
+    console.error('generate-quiz error:', error);
     return Response.json({ success: false, error: error.message });
   }
 }
