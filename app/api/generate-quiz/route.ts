@@ -1,5 +1,9 @@
-const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1',
+});
 
 function extractJSONArray(text: string) {
   const start = text.indexOf('[');
@@ -94,36 +98,7 @@ Format:
 
     const allQuestions: any[] = [];
 
-    // Difficulty bands per batch — ensures variety across 30 questions
-    const batchDifficulties = [
-      'Easy, Easy, Easy, Medium, Medium',
-      'Medium, Medium, Hard, Hard, Hard',
-      'Easy, Medium, Hard, Hard, Advanced',
-      'Easy, Easy, Medium, Medium, Hard',
-      'Medium, Hard, Hard, Advanced, Advanced',
-      'Easy, Medium, Medium, Hard, Advanced',
-    ];
-
-    // Topic angles per batch — forces different aspects of the chapter
-    const batchAngles = [
-      'Focus on definitions and basic concepts',
-      'Focus on applications and real-world examples',
-      'Focus on numerical problems and calculations',
-      'Focus on comparisons and differences between concepts',
-      'Focus on exceptions, special cases, and common mistakes',
-      'Focus on NEET exam style questions from previous years',
-    ];
-
     for (let batch = 0; batch < 6; batch++) {
-      // Build batch-specific prompt with variation
-      const batchPrompt = (isAssertion
-        ? prompt
-        : prompt.replace(
-            difficultyPlan,
-            batchDifficulties[batch]
-          )
-        ) + '\n\nBatch instruction: ' + batchAngles[batch] + '. Generate DIFFERENT questions from previous batches.';
-
       let parsed = null;
 
       for (let attempt = 1; attempt <= 3; attempt++) {
@@ -131,26 +106,18 @@ Format:
           console.log(`Batch ${batch + 1} attempt ${attempt}`);
 
           const response = await Promise.race([
-            fetch(GROQ_URL, {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
-                messages: [{ role: 'user', content: batchPrompt }],
-                temperature: 0.4 + (batch * 0.05),
-                max_tokens: 1800,
-              }),
+            client.chat.completions.create({
+              model: isAssertion ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.4,
+              max_tokens: 1800,
             }),
             new Promise((_, reject) =>
               setTimeout(() => reject(new Error('Groq timeout')), 60000)
             ),
           ]);
 
-          const json = await (response as Response).json();
-          const text = json.choices?.[0]?.message?.content || '';
+          const text = (response as any).choices?.[0]?.message?.content || '';
           parsed = safeJSONParse(text);
           if (Array.isArray(parsed)) {
             console.log(`Batch ${batch + 1} success`);
