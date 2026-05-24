@@ -747,7 +747,7 @@ export default function ConceptMapPage() {
             <div>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>Navigate</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {([['🔥 Topic Heatmap', '/heatmap'], ['🧬 Find Ancestry', '/ancestry'], ['🗺 Concept Map', '/concept-map']] as const).map(([label, href]) => {
+                {([['🔥 Topic Heatmap', '/heatmap'], ['🧬 Find Ancestry', '/ancestry'], ['🗺 Concept Map', '/concept-map'], ['📚 Concepts & Quiz', '/quiz']] as const).map(([label, href]) => {
                   const isActive = href === '/concept-map'
                   return (
                     <button key={href} onClick={() => router.push(href)}
