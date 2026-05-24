@@ -180,9 +180,13 @@ export async function POST(req: Request) {
       }));
     }
 
-    const valid = questions.filter((q: any) =>
-      q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation
-    );
+    const valid = questions.filter((q: any) => {
+      if (isAssertion) {
+        // For AR questions, assertion is required; question field may be generic
+        return q.assertion && q.reason && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation;
+      }
+      return q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation;
+    });
     const unique = valid.filter((q, i, arr) =>
       i === arr.findIndex((x: any) => x.question === q.question)
     );
