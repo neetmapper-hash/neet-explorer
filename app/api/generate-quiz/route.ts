@@ -191,6 +191,7 @@ export async function POST(req: Request) {
       i === arr.findIndex((x: any) => x.question === q.question)
     );
 
+    console.log("valid:", valid.length, "unique:", unique.length, "raw questions:", JSON.stringify(questions.slice(0,1)));
     if (unique.length < 3) {
       return Response.json({ success: false, error: 'Could not generate enough questions. Please try again.' });
     }
