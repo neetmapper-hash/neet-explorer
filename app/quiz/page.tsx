@@ -59,7 +59,7 @@ export default function QuizPage() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set());
+  const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set([]));
   const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
   const [quizMode, setQuizMode] = useState<'mcq' | 'assertion' | null>(null);
   const [currentLevel, setCurrentLevel] = useState(0);
