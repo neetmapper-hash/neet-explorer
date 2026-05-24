@@ -55,6 +55,13 @@ const DIFFICULTY_DESCRIPTIONS: Record<string, string> = {
   neet:     'NEET exam style — high difficulty, exactly as in past NEET papers',
 };
 
+const AR_OPTIONS = [
+  'Both A and R are true and R is the correct explanation of A',
+  'Both A and R are true but R is not the correct explanation of A',
+  'A is true but R is false',
+  'A is false but R is true',
+];
+
 export async function POST(req: Request) {
   try {
     const { chapter, concepts, classLevel, subject, mode, difficulty, previousQuestions = [] } = await req.json();
@@ -63,8 +70,6 @@ export async function POST(req: Request) {
     const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
     const allConcepts = concepts ?? [];
 
-    // Rotate concept window based on difficulty level
-    // Each level covers a different slice of chapter concepts
     const LEVELS = ['easy','medium','hard','advanced','expert','neet'];
     const levelIndex = LEVELS.indexOf(level);
     let selectedConcepts: any[];
@@ -75,7 +80,6 @@ export async function POST(req: Request) {
       const step = Math.max(1, Math.floor(allConcepts.length / 6));
       const startIdx = Math.min(levelIndex * step, allConcepts.length - 8);
       selectedConcepts = allConcepts.slice(startIdx, startIdx + 8);
-      // Always include main topics
       const mainTopics = allConcepts
         .filter((c: any) => c.is_main_topic)
         .slice(0, 3)
@@ -91,26 +95,69 @@ export async function POST(req: Request) {
       ? '\n\nDo NOT repeat these questions:\n' + previousQuestions.slice(-10).join('\n')
       : '';
 
-    const format = isAssertion
-      ? '[\n  {\n    "question": "...",\n    "difficulty": "' + level + '",\n    "assertion": "...",\n    "reason": "...",\n    "options": ["...", "...", "...", "..."],\n    "answer": "...",\n    "explanation": "..."\n  }\n]'
-      : '[\n  {\n    "question": "...",\n    "difficulty": "' + level + '",\n    "options": ["...", "...", "...", "..."],\n    "answer": "...",\n    "explanation": "..."\n  }\n]';
+    const arFormat = '[\n'
+      + '  {\n'
+      + '    "question": "In the following question, a statement of Assertion (A) is followed by a statement of Reason (R).",\n'
+      + '    "difficulty": "' + level + '",\n'
+      + '    "assertion": "Write the assertion statement about ' + chapter + ' here",\n'
+      + '    "reason": "Write the reason statement here",\n'
+      + '    "options": [\n'
+      + '      "Both A and R are true and R is the correct explanation of A",\n'
+      + '      "Both A and R are true but R is not the correct explanation of A",\n'
+      + '      "A is true but R is false",\n'
+      + '      "A is false but R is true"\n'
+      + '    ],\n'
+      + '    "answer": "Both A and R are true and R is the correct explanation of A",\n'
+      + '    "explanation": "Explain why the answer is correct"\n'
+      + '  }\n'
+      + ']';
 
-    const prompt = 'Generate EXACTLY 5 ' + (isAssertion ? 'assertion reasoning' : 'MCQ') + ' questions for NEET.\n'
-      + 'Subject: ' + subject + '\n'
-      + 'Class: ' + classLevel + '\n'
-      + 'Chapter: ' + chapter + '\n'
-      + 'Difficulty level: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
-      + 'Concepts to focus on:\n' + conceptText
-      + avoidText + '\n\n'
-      + 'Rules:\n'
-      + '- ALL 5 questions must be ' + level + ' difficulty\n'
-      + '- Questions must cover the concepts listed above — do not repeat topics\n'
-      + '- Output ONLY a valid JSON array - no markdown, no comments\n'
-      + '- Double quotes only, no trailing commas\n'
-      + '- Never truncate the output\n\n'
-      + 'Format:\n' + format;
+    const mcqFormat = '[\n'
+      + '  {\n'
+      + '    "question": "...",\n'
+      + '    "difficulty": "' + level + '",\n'
+      + '    "options": ["...", "...", "...", "..."],\n'
+      + '    "answer": "...",\n'
+      + '    "explanation": "..."\n'
+      + '  }\n'
+      + ']';
 
-    console.log('Level:', level, '| Concepts:', selectedConcepts.map((c: any) => c.concept_name).join(', '));
+    const prompt = isAssertion
+      ? 'Generate EXACTLY 5 Assertion-Reason questions for NEET.\n'
+        + 'Subject: ' + subject + '\n'
+        + 'Class: ' + classLevel + '\n'
+        + 'Chapter: ' + chapter + '\n'
+        + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + 'Concepts:\n' + conceptText
+        + avoidText + '\n\n'
+        + 'CRITICAL RULES for Assertion-Reason:\n'
+        + '- Write a factual ASSERTION (A) about the concept\n'
+        + '- Write a REASON (R) that may or may not explain the assertion\n'
+        + '- The OPTIONS must ALWAYS be exactly these 4 in this exact order:\n'
+        + '  1. Both A and R are true and R is the correct explanation of A\n'
+        + '  2. Both A and R are true but R is not the correct explanation of A\n'
+        + '  3. A is true but R is false\n'
+        + '  4. A is false but R is true\n'
+        + '- The answer must be one of these 4 options EXACTLY as written above\n'
+        + '- Mix the answers across questions (do not always use option 1)\n'
+        + '- Output ONLY valid JSON array, no markdown\n\n'
+        + 'Format:\n' + arFormat
+      : 'Generate EXACTLY 5 MCQ questions for NEET.\n'
+        + 'Subject: ' + subject + '\n'
+        + 'Class: ' + classLevel + '\n'
+        + 'Chapter: ' + chapter + '\n'
+        + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + 'Concepts:\n' + conceptText
+        + avoidText + '\n\n'
+        + 'Rules:\n'
+        + '- ALL 5 questions must be ' + level + ' difficulty\n'
+        + '- Questions must cover the concepts listed above\n'
+        + '- Output ONLY valid JSON array, no markdown, no comments\n'
+        + '- Double quotes only, no trailing commas\n'
+        + '- Never truncate the output\n\n'
+        + 'Format:\n' + mcqFormat;
+
+    console.log('Level:', level, '| Mode:', mode);
 
     let questions: any[] = [];
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -122,6 +169,15 @@ export async function POST(req: Request) {
       } catch (err) {
         console.error('Parse failed attempt', attempt, String(err).slice(0, 100));
       }
+    }
+
+    // For assertion-reasoning, enforce the standard 4 options
+    if (isAssertion) {
+      questions = questions.map((q: any) => ({
+        ...q,
+        options: AR_OPTIONS,
+        answer: AR_OPTIONS.includes(q.answer) ? q.answer : AR_OPTIONS[0],
+      }));
     }
 
     const valid = questions.filter((q: any) =>
