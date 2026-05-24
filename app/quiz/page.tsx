@@ -178,11 +178,11 @@ export default function QuizPage() {
           <div style={{ padding: '6px 0' }}>
             {Array.from(byClass.entries()).sort((a, b) => a[0] - b[0]).map(([cls, chs]) => (
               <div key={cls}>
-                <button onClick={() => toggleClass(cls)} style={{ width: '100%', textAlign: 'left', padding: '7px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+                <button onClick={() => toggleClass(Number(cls))} style={{ width: '100%', textAlign: 'left', padding: '7px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
                   <span style={{ fontSize: '11px', color: CLASS_COLOR[cls] ?? '#6b7280' }}>{CLASS_EMOJI[cls]} Class {cls}</span>
-                  <span style={{ fontSize: '9px', color: '#374151', marginLeft: 'auto' }}>{expandedClasses.has(cls) ? '▲' : '▼'}</span>
+                  <span style={{ fontSize: '9px', color: '#374151', marginLeft: 'auto' }}>{expandedClasses.has(Number(cls)) ? '▲' : '▼'}</span>
                 </button>
-                {expandedClasses.has(cls) && chs.map(ch => (
+                {expandedClasses.has(Number(cls)) && chs.map(ch => (
                   <div key={`${ch.class}_${ch.chapter_number}`}>
                     <div style={{ padding: '4px 14px 2px 24px', fontSize: '10px', color: '#4b5563', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       Ch {ch.chapter_number} · {ch.chapter_name.slice(0, 26)}
