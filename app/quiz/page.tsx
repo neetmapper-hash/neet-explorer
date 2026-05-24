@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Subject } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
+import { getSeenSetIds, markSetAsSeen } from '@/lib/quizSession';
 
 interface Concept {
   id: string; concept_name: string; summary: string; key_terms: string[];
@@ -71,6 +72,7 @@ export default function QuizPage() {
   const [previousQuestions, setPreviousQuestions] = useState<string[]>([]);
   const [showSummary, setShowSummary] = useState(false);
   const [levelComplete, setLevelComplete] = useState(false);
+  const [fromCache, setFromCache] = useState(false); // shows cache indicator in UI
 
   useEffect(() => {
     setLoading(true);
@@ -86,7 +88,7 @@ export default function QuizPage() {
   function resetQuiz() {
     setQuizMode(null); setCurrentLevel(0); setQuestions([]); setAnswers({});
     setLevelResults([]); setPreviousQuestions([]); setShowSummary(false);
-    setLevelComplete(false); setQuizError(null);
+    setLevelComplete(false); setQuizError(null); setFromCache(false);
   }
 
   const filtered = useMemo(() => {
@@ -112,7 +114,7 @@ export default function QuizPage() {
 
   async function generateLevel(levelIndex: number, mode: 'mcq' | 'assertion') {
     if (!selectedConcept) return;
-    setLoadingQuiz(true); setQuizError(null); setQuestions([]); setAnswers({}); setLevelComplete(false);
+    setLoadingQuiz(true); setQuizError(null); setQuestions([]); setAnswers({}); setLevelComplete(false); setFromCache(false);
     const level = LEVELS[levelIndex];
     const chapterConcepts = concepts.filter(c => c.class === selectedConcept.class && c.chapter_number === selectedConcept.chapter_number);
     try {
@@ -122,11 +124,14 @@ export default function QuizPage() {
           subject, classLevel: selectedConcept.class, chapter: selectedConcept.chapter_name,
           concepts: chapterConcepts, mode: mode === 'assertion' ? 'assertion_reasoning' : 'mcq',
           difficulty: level, previousQuestions,
+          seenSetIds: getSeenSetIds(), // ← send seen set IDs from sessionStorage
         }),
       });
       const data = await res.json();
       if (data.success) {
         setQuestions(data.questions);
+        setFromCache(data.fromCache ?? false); // ← track if questions came from cache
+        markSetAsSeen(data.setId);             // ← mark this set as seen in sessionStorage
         setPreviousQuestions(prev => [...prev, ...data.questions.map((q: QuizQuestion) => q.question)]);
       } else { setQuizError(data.error ?? 'Failed to generate questions'); }
     } catch { setQuizError('Network error — please try again'); }
@@ -291,11 +296,19 @@ export default function QuizPage() {
                     <span style={{ fontSize: '13px', fontWeight: 700, color: lc.text }}>{LEVEL_LABELS[LEVELS[currentLevel]]}</span>
                     <span style={{ fontSize: '11px', color: lc.text, opacity: 0.7 }}>Level {currentLevel + 1}/{LEVELS.length}</span>
                   </div>
-                  {levelComplete && (
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: levelPassed ? '#4ade80' : '#f87171' }}>
-                      {levelScore}/{questions.length} — {levelPassed ? '✓ Passed' : '✗ Need 3+'}
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Cache indicator — shows only when questions loaded from cache */}
+                    {fromCache && !loadingQuiz && questions.length > 0 && (
+                      <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '20px', background: '#0c1a0c', color: '#4ade80', border: '1px solid #16a34a44' }}>
+                        ⚡ cached
+                      </span>
+                    )}
+                    {levelComplete && (
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: levelPassed ? '#4ade80' : '#f87171' }}>
+                        {levelScore}/{questions.length} — {levelPassed ? '✓ Passed' : '✗ Need 3+'}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Loading */}
@@ -383,4 +396,3 @@ export default function QuizPage() {
     </div>
   );
 }
-// cache bust Sun May 24 05:04:47 PM IST 2026

@@ -115,6 +115,7 @@ export default function AncestryPage() {
         onPageChange={(page) => {
           if (page === 'heatmap') router.push('/heatmap');
           if (page === 'concept-map') router.push('/concept-map');
+          if (page === 'quiz') router.push('/quiz');
         }}
         onSubjectChange={(s) => {
           setSubject(s);

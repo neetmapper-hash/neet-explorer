@@ -1,3 +1,5 @@
+import { supabase } from '@/lib/supabase';
+
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -62,14 +64,92 @@ const AR_OPTIONS = [
   'A is false but R is true',
 ];
 
+// ─── Cache helpers ────────────────────────────────────────────────────────────
+
+function buildCacheKey(subject: string, chapter: string, classLevel: string, difficulty: string, mode: string) {
+  // Normalize so "Physics" and "physics" map to same key
+  return `quiz:${subject.toLowerCase()}:${chapter.toLowerCase()}:${classLevel}:${difficulty}:${mode}`;
+}
+
+async function getCachedSet(cacheKey: string, seenSetIds: string[]) {
+  try {
+    let query = supabase
+      .from('quiz_cache')
+      .select('id, questions')
+      .eq('cache_key', cacheKey);
+
+    // Exclude sets the user has already seen this session
+    if (seenSetIds.length > 0) {
+      query = query.not('id', 'in', `(${seenSetIds.join(',')})`);
+    }
+
+    const { data, error } = await query.limit(1).single();
+
+    if (error || !data) return null;
+    return { id: data.id as string, questions: data.questions };
+  } catch {
+    return null;
+  }
+}
+
+async function saveToCache(cacheKey: string, questions: any[]) {
+  try {
+    const { data, error } = await supabase
+      .from('quiz_cache')
+      .insert({ cache_key: cacheKey, questions })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Cache save error:', error.message);
+      return null;
+    }
+    return data?.id as string ?? null;
+  } catch (err) {
+    console.error('Cache save exception:', err);
+    return null;
+  }
+}
+
+// ─── Main handler ─────────────────────────────────────────────────────────────
+
 export async function POST(req: Request) {
   try {
-    const { chapter, concepts, classLevel, subject, mode, difficulty, previousQuestions = [] } = await req.json();
+    const {
+      chapter,
+      concepts,
+      classLevel,
+      subject,
+      mode,
+      difficulty,
+      previousQuestions = [],
+      seenSetIds = [],          // <-- NEW: client sends this from sessionStorage
+    } = await req.json();
+
     const isAssertion = mode === 'assertion_reasoning';
     const level = difficulty ?? 'easy';
     const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
     const allConcepts = concepts ?? [];
 
+    // ── 1. Check cache first ─────────────────────────────────────────────────
+    const cacheKey = buildCacheKey(subject, chapter, classLevel, level, mode);
+    const cached = await getCachedSet(cacheKey, seenSetIds);
+
+    if (cached) {
+      console.log('Cache HIT:', cacheKey, '| set:', cached.id);
+      return Response.json({
+        success: true,
+        total: cached.questions.length,
+        questions: cached.questions,
+        difficulty: level,
+        setId: cached.id,       // <-- client stores this in sessionStorage
+        fromCache: true,
+      });
+    }
+
+    console.log('Cache MISS:', cacheKey, '| calling Groq...');
+
+    // ── 2. Cache miss → generate with Groq ──────────────────────────────────
     const LEVELS = ['easy','medium','hard','advanced','expert','neet'];
     const levelIndex = LEVELS.indexOf(level);
     let selectedConcepts: any[];
@@ -171,7 +251,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // For assertion-reasoning, enforce the standard 4 options
     if (isAssertion) {
       questions = questions.map((q: any) => ({
         ...q,
@@ -182,21 +261,33 @@ export async function POST(req: Request) {
 
     const valid = questions.filter((q: any) => {
       if (isAssertion) {
-        // For AR questions, assertion is required; question field may be generic
         return q.assertion && q.reason && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation;
       }
       return q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation;
     });
+
     const unique = valid.filter((q, i, arr) =>
       i === arr.findIndex((x: any) => isAssertion ? x.assertion === q.assertion : x.question === q.question)
     );
 
-    console.log("valid:", valid.length, "unique:", unique.length, "raw questions:", JSON.stringify(questions.slice(0,1)));
+    console.log('valid:', valid.length, 'unique:', unique.length);
+
     if (unique.length < 3) {
       return Response.json({ success: false, error: 'Could not generate enough questions. Please try again.' });
     }
 
-    return Response.json({ success: true, total: unique.length, questions: unique, difficulty: level });
+    // ── 3. Save to cache ─────────────────────────────────────────────────────
+    const setId = await saveToCache(cacheKey, unique);
+    console.log('Saved to cache:', cacheKey, '| setId:', setId);
+
+    return Response.json({
+      success: true,
+      total: unique.length,
+      questions: unique,
+      difficulty: level,
+      setId,              // <-- client stores this in sessionStorage
+      fromCache: false,
+    });
 
   } catch (error: any) {
     console.error('generate-quiz error:', error);
