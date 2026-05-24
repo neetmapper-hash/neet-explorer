@@ -97,15 +97,16 @@ export default function QuizPage() {
 
   const byClass = useMemo(() => {
     const chapters = groupByChapter(filtered);
-    const map = new Map<number, ChapterGroup[]>();
+    const map: Record<number, ChapterGroup[]> = {};
     for (const ch of chapters) {
-      if (!map.has(ch.class)) map.set(ch.class, []);
-      map.get(ch.class)!.push(ch);
+      const cls = Number(ch.class);
+      if (!map[cls]) map[cls] = [];
+      map[cls].push(ch);
     }
     return map;
   }, [filtered]);
 
-  const toggleClass = (cls: number) => {
+  const toggleClass = (cls: number) => { console.log("toggle", cls, typeof cls);
     setExpandedClasses(prev => { const next = new Set(prev); next.has(cls) ? next.delete(cls) : next.add(cls); return next; });
   };
 
@@ -176,7 +177,7 @@ export default function QuizPage() {
         </div>
         {loading ? <div style={{ padding: '20px', color: '#4b5563', fontSize: '12px' }}>Loading...</div> : (
           <div style={{ padding: '6px 0' }}>
-            {Array.from(byClass.entries()).sort((a, b) => a[0] - b[0]).map(([cls, chs]) => (
+            {(Object.keys(byClass).map(Number).sort((a,b) => a-b)).map((cls) => { const chs = byClass[cls]; console.log("cls", cls, "has", expandedClasses.has(cls), "size", expandedClasses.size); return (
               <div key={cls}>
                 <button onClick={() => toggleClass(Number(cls))} style={{ width: '100%', textAlign: 'left', padding: '7px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
                   <span style={{ fontSize: '11px', color: CLASS_COLOR[cls] ?? '#6b7280' }}>{CLASS_EMOJI[cls]} Class {cls}</span>
@@ -196,7 +197,7 @@ export default function QuizPage() {
                   </div>
                 ))}
               </div>
-            ))}
+            )})}
           </div>
         )}
       </div>
