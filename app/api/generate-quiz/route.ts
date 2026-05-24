@@ -188,7 +188,7 @@ export async function POST(req: Request) {
       return q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && q.explanation;
     });
     const unique = valid.filter((q, i, arr) =>
-      i === arr.findIndex((x: any) => x.question === q.question)
+      i === arr.findIndex((x: any) => isAssertion ? x.assertion === q.assertion : x.question === q.question)
     );
 
     console.log("valid:", valid.length, "unique:", unique.length, "raw questions:", JSON.stringify(questions.slice(0,1)));
