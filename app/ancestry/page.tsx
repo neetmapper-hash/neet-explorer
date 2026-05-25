@@ -49,30 +49,44 @@ export default function AncestryPage() {
   const router = useRouter();
 
   const [subject, setSubject] = useState<Subject>('Physics');
-  const [question, setQuestion] = useState('')
-  const [questionOptions, setQuestionOptions] = useState<Record<string, string>>({})
+  const [question, setQuestion] = useState('');
+  const [questionOptions, setQuestionOptions] = useState<Record<string, string>>({});
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [chain, setChain] = useState<Concept[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [answer, setAnswer] = useState<string>('')
-  const [studyPath, setStudyPath] = useState<string>('')
+  const [answer, setAnswer] = useState<string>('');
+  const [studyPath, setStudyPath] = useState<string>('');
+  const [fromCache, setFromCache] = useState(false);
+  const [fromHeatmap, setFromHeatmap] = useState(false); // tracks if question came from heatmap
 
   useEffect(() => {
     const q = sessionStorage.getItem('ancestry_question');
     const s = sessionStorage.getItem('ancestry_subject');
     const opts = sessionStorage.getItem('ancestry_options');
     const correct = sessionStorage.getItem('ancestry_correct');
-    if (q) { setQuestion(q); sessionStorage.removeItem('ancestry_question'); }
-    if (s && ['Physics', 'Chemistry', 'Biology'].includes(s)) {
-      setSubject(s as Subject); sessionStorage.removeItem('ancestry_subject');
+
+    if (q) {
+      setQuestion(q);
+      setFromHeatmap(true);                          // ← came from heatmap
+      sessionStorage.removeItem('ancestry_question');
     }
-    if (opts) { setQuestionOptions(JSON.parse(opts)); sessionStorage.removeItem('ancestry_options'); }
-    if (correct) { setCorrectAnswer(correct); sessionStorage.removeItem('ancestry_correct'); }
+    if (s && ['Physics', 'Chemistry', 'Biology'].includes(s)) {
+      setSubject(s as Subject);
+      sessionStorage.removeItem('ancestry_subject');
+    }
+    if (opts) {
+      setQuestionOptions(JSON.parse(opts));
+      sessionStorage.removeItem('ancestry_options');
+    }
+    if (correct) {
+      setCorrectAnswer(correct);
+      sessionStorage.removeItem('ancestry_correct');
+    }
   }, []);
 
-  const handleSearch = async (q?: string) => {
+  const handleSearch = async (q?: string, isHeatmap?: boolean) => {
     const queryText = q ?? question;
     if (!queryText.trim()) return;
     setQuestion(queryText);
@@ -80,17 +94,31 @@ export default function AncestryPage() {
     setError(null);
     setChain([]);
     setStudyPath('');
+    setFromCache(false);
     setHasSearched(true);
+
+    // fromHeatmap is true if passed explicitly (initial auto-search from heatmap)
+    // or if the fromHeatmap state is already set
+    const isFromHeatmap = isHeatmap ?? fromHeatmap;
+
     try {
       const res = await fetch('/api/ancestry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: queryText, subject, options: questionOptions, correctAnswer }),
+        body: JSON.stringify({
+          question: queryText,
+          subject,
+          options: questionOptions,
+          correctAnswer,
+          keywords: extractKeywords(queryText),
+          fromHeatmap: isFromHeatmap,               // ← send flag to API
+        }),
       });
       const data = await res.json();
       setChain(data.chain ?? []);
       setAnswer(data.answer ?? '');
       setStudyPath(data.studyPath ?? '');
+      setFromCache(data.fromCache ?? false);         // ← track cache hit
       if (data.error && !data.chain?.length) {
         setError(data.error);
       }
@@ -102,9 +130,10 @@ export default function AncestryPage() {
     }
   };
 
+  // Auto-search when question arrives from heatmap via sessionStorage
   useEffect(() => {
-    if (question && !hasSearched) handleSearch(question);
-  }, [question]);
+    if (question && !hasSearched && fromHeatmap) handleSearch(question, true);
+  }, [question, fromHeatmap]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
@@ -118,12 +147,14 @@ export default function AncestryPage() {
           if (page === 'quiz') router.push('/quiz');
         }}
         onSubjectChange={(s) => {
-          setSubject(s);
+          setSubject(s as Subject);
           setChain([]);
           setHasSearched(false);
           setError(null);
           setQuestionOptions({});
           setCorrectAnswer('');
+          setFromHeatmap(false);
+          setFromCache(false);
         }}
         onYearsChange={() => {}}
       />
@@ -132,10 +163,21 @@ export default function AncestryPage() {
 
         {/* Header */}
         <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: 0 }}>
-            🧬 NEET Concept Ancestry
-          </h1>
-          <p style={{ color: '#4b5563', fontSize: '13px', marginTop: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: 0 }}>
+              🧬 NEET Concept Ancestry
+            </h1>
+            {/* Cache indicator */}
+            {fromCache && !isLoading && hasSearched && (
+              <span style={{
+                fontSize: '10px', padding: '2px 8px', borderRadius: '20px',
+                background: '#0c1a0c', color: '#4ade80', border: '1px solid #16a34a44',
+              }}>
+                ⚡ cached
+              </span>
+            )}
+          </div>
+          <p style={{ color: '#4b5563', fontSize: '13px', marginTop: 0 }}>
             Trace any NEET question back to its foundation
           </p>
         </div>
@@ -149,7 +191,12 @@ export default function AncestryPage() {
             {SAMPLES[subject].map((sample, i) => (
               <button
                 key={i}
-                onClick={() => { setQuestionOptions({}); setCorrectAnswer(''); handleSearch(sample); }}
+                onClick={() => {
+                  setQuestionOptions({});
+                  setCorrectAnswer('');
+                  setFromHeatmap(false);             // samples are not from heatmap
+                  handleSearch(sample, false);
+                }}
                 style={{
                   textAlign: 'left', fontSize: '12px',
                   padding: '10px 12px', borderRadius: '10px',
@@ -179,7 +226,10 @@ export default function AncestryPage() {
         <div style={{ marginBottom: '28px' }}>
           <textarea
             value={question}
-            onChange={(e) => setQuestion(e.target.value)}
+            onChange={(e) => {
+              setQuestion(e.target.value);
+              setFromHeatmap(false); // user is typing — no longer a heatmap question
+            }}
             placeholder={`Enter your NEET ${subject} question here...`}
             rows={3}
             style={{

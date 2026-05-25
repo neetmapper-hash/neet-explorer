@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
 const GROQ_URL     = 'https://api.groq.com/openai/v1/chat/completions';
@@ -89,14 +90,64 @@ function buildConceptLookup(data: Concept[]): Record<string, Concept> {
   return lookup;
 }
 
-function buildChapterIndex(data: Concept[]): Record<string, Concept[]> {
-  const index: Record<string, Concept[]> = {};
-  for (const c of data) {
-    const key = `class_${c.class}_chapter_${c.chapter_number}`;
-    if (!index[key]) index[key] = [];
-    index[key].push(c);
+// ── Cache helpers ──────────────────────────────────────────────────────────────
+
+// For heatmap PYQs: cache by exact question text (fixed NEET questions)
+// For user-typed:   cache by conceptId (same concept = same ancestry + answer)
+function buildCacheKey(
+  question: string,
+  subject: string,
+  conceptId: string | null,
+  isFromHeatmap: boolean
+): string {
+  if (isFromHeatmap) {
+    // Normalize: lowercase, trim, collapse spaces
+    const normalized = question.toLowerCase().trim().replace(/\s+/g, ' ');
+    return `ancestry:heatmap:${subject.toLowerCase()}:${normalized}`;
   }
-  return index;
+  return `ancestry:concept:${subject.toLowerCase()}:${conceptId}`;
+}
+
+async function getFromCache(cacheKey: string) {
+  try {
+    const { data, error } = await supabase
+      .from('ancestry_cache')
+      .select('chain, concept_id, answer, study_path')
+      .eq('cache_key', cacheKey)
+      .single();
+
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function saveToCache(
+  cacheKey: string,
+  question: string,
+  subject: string,
+  conceptId: string,
+  chain: Concept[],
+  answer: string,
+  studyPath: string
+) {
+  try {
+    await supabase.from('ancestry_cache').upsert(
+      {
+        cache_key: cacheKey,
+        question,
+        subject: subject.toLowerCase(),
+        concept_id: conceptId,
+        chain,
+        answer,
+        study_path: studyPath,
+      },
+      { onConflict: 'cache_key' } // update if same key exists
+    );
+  } catch (err) {
+    console.error('Cache save error:', err);
+  }
 }
 
 // ── Change 1: Server-side keyword extraction + semantic detection ──────────────
@@ -112,7 +163,6 @@ const STOP_WORDS = new Set([
 function extractAndEnrichKeywords(question: string, clientKeywords: string[] = []): string[] {
   const lower = question.toLowerCase();
 
-  // Base keywords from question text
   const base = lower
     .replace(/[?.!(),:;]/g, ' ')
     .split(/\s+/)
@@ -120,7 +170,6 @@ function extractAndEnrichKeywords(question: string, clientKeywords: string[] = [
 
   const extra: string[] = [];
 
-  // Semantic detection patterns — server-side
   const movingObjects = /bus|train|boat|swimmer|car|cyclist|scooter|girl|boy|man|woman|person|runner|aircraft|plane|ship/g;
   const objMatches = lower.match(movingObjects);
   if (objMatches && objMatches.length >= 2) {
@@ -172,11 +221,10 @@ function extractAndEnrichKeywords(question: string, clientKeywords: string[] = [
   if (/photosynthesis|chlorophyll|light reaction|calvin/.test(lower))
     extra.push('photosynthesis', 'chlorophyll', 'light reaction');
 
-  // Merge client keywords + server keywords, deduplicate
   return Array.from(new Set([...base, ...extra, ...clientKeywords]));
 }
 
-// ── Change 3: Pre-score all concepts by keyword overlap ────────────────────────
+// ── Pre-score concepts by keyword overlap ──────────────────────────────────────
 
 function scoreConceptsByKeywords(
   concepts: Concept[],
@@ -195,20 +243,18 @@ function scoreConceptsByKeywords(
       let score = 0;
       for (const kw of keywords) {
         if (kw.length > 2 && cText.includes(kw.toLowerCase())) {
-          // Higher weight for key_terms matches
           const inKeyTerms = (c.key_terms ?? []).some(t => t.toLowerCase().includes(kw.toLowerCase()));
           const inName     = c.concept_name.toLowerCase().includes(kw.toLowerCase());
           score += inKeyTerms ? 3 : inName ? 2 : 1;
         }
       }
-      // Boost main topics slightly
       if (c.is_main_topic) score += 0.5;
       return { concept: c, score };
     })
     .sort((a, b) => b.score - a.score);
 }
 
-// ── Change 4: Prompt 1 — concept identification (concept-first, no chapter step) ──
+// ── Prompt 1 — concept identification ─────────────────────────────────────────
 
 async function identifyConceptGlobal(
   question: string,
@@ -258,7 +304,7 @@ Output STRICT JSON ONLY — no markdown, no explanation:
   return result;
 }
 
-// ── Change 5: Prompt 1B — disambiguation (triggers when confidence != "high") ──
+// ── Prompt 1B — disambiguation ─────────────────────────────────────────────────
 
 async function disambiguateConcept(
   question: string,
@@ -299,14 +345,13 @@ Output STRICT JSON ONLY:
   return result;
 }
 
-// ── Change 6: Prompt 1C — fallback with pre-scoring (not raw batch of 80) ─────
+// ── Prompt 1C — fallback ───────────────────────────────────────────────────────
 
 async function identifyConceptFallback(
   question: string,
   allConcepts: Concept[],
   keywords: string[]
 ): Promise<string | null> {
-  // Pre-score and take top 60
   const scored   = scoreConceptsByKeywords(allConcepts, keywords);
   const top60    = scored.slice(0, 60).map(x => x.concept);
 
@@ -349,9 +394,6 @@ function traverseAncestry(
 
     const prereq = lookup[prereqId];
 
-    // Skip same-chapter links during traversal — these are parent-child hierarchy
-    // links within a chapter (e.g. Acceleration → Speed and Velocity, same Ch 4)
-    // Only meaningful cross-chapter prerequisites should appear in the ancestry chain
     if (prereq.class === concept.class && prereq.chapter_number === concept.chapter_number) {
       continue;
     }
@@ -362,7 +404,7 @@ function traverseAncestry(
   return ancestry;
 }
 
-// ── Change 9: Answer generation with prerequisite context ─────────────────────
+// ── Answer generation ──────────────────────────────────────────────────────────
 
 async function generateAnswer(
   question: string,
@@ -387,9 +429,7 @@ async function generateAnswer(
 
   const maxTokens = isNumerical ? 500 : 300;
 
-  // Use stronger model for numerical questions — 8B model loops on physics calculations
   const numericalGroqCall = async (p: string, tokens: number) => {
-    // Try 70B first for numerical, fall back to cascade
     for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']) {
       try {
         const res = await fetch(GROQ_URL, {
@@ -459,14 +499,13 @@ async function generateAnswer(
       + '\nANSWER:';
   }
 
-    if (isNumerical) {
+  if (isNumerical) {
     return await numericalGroqCall(prompt, maxTokens) ?? '';
   }
   return await groqCall(prompt, maxTokens, 0.3) ?? '';
 }
 
-
-// ── Change 10: Study guidance (always runs, not optional) ─────────────────────
+// ── Study path ─────────────────────────────────────────────────────────────────
 
 async function generateStudyPath(
   concept: Concept,
@@ -501,13 +540,13 @@ export async function POST(req: NextRequest) {
   try {
     console.log('GROQ_API_KEY set:', !!GROQ_API_KEY, 'length:', GROQ_API_KEY.length);
 
-    // Change 2: subject always from client — no Prompt 0
     const {
       question,
       subject: providedSubject,
       options,
       correctAnswer,
       keywords: clientKeywords = [],
+      fromHeatmap = false,   // <-- client sends this flag when question comes from heatmap
     } = await req.json();
 
     if (!question) {
@@ -515,13 +554,30 @@ export async function POST(req: NextRequest) {
     }
 
     const subject = providedSubject ?? 'Biology';
-    console.log('Subject:', subject, '| Source: provided');
+    console.log('Subject:', subject, '| fromHeatmap:', fromHeatmap);
 
-    // Change 1: server-side keyword enrichment
+    // ── 1. Check cache for heatmap questions (exact question match) ────────────
+    if (fromHeatmap) {
+      const heatmapKey = buildCacheKey(question, subject, null, true);
+      const cached = await getFromCache(heatmapKey);
+      if (cached) {
+        console.log('Cache HIT (heatmap):', heatmapKey);
+        return NextResponse.json({
+          chain: cached.chain,
+          conceptId: cached.concept_id,
+          answer: cached.answer,
+          studyPath: cached.study_path,
+          fromCache: true,
+        });
+      }
+      console.log('Cache MISS (heatmap):', heatmapKey);
+    }
+
+    // ── 2. Keyword extraction ──────────────────────────────────────────────────
     const keywords = extractAndEnrichKeywords(question, clientKeywords);
     console.log('Keywords:', keywords.slice(0, 8).join(', '));
 
-    // Load concept data
+    // ── 3. Load concept data ───────────────────────────────────────────────────
     let conceptData: any;
     try {
       const conceptRes = await fetch(
@@ -539,16 +595,14 @@ export async function POST(req: NextRequest) {
     const lookup              = buildConceptLookup(concepts);
     console.log('Total concepts:', concepts.length);
 
-    // Change 3: Pre-score all concepts, send top 30 to Prompt 1
+    // ── 4. Score + identify concept ────────────────────────────────────────────
     const scored     = scoreConceptsByKeywords(concepts, keywords);
     const top30      = scored.slice(0, 30).map(x => x.concept);
     const top5scored = scored.slice(0, 5).map(x => x.concept);
 
-    // Change 4: Prompt 1 — identify concept directly (no chapter step)
     let match = await identifyConceptGlobal(question, top30);
     console.log('Prompt 1 result:', match?.concept_id, '| confidence:', match?.confidence);
 
-    // Change 5: Prompt 1B — disambiguate if confidence != "high"
     if (match && match.confidence !== 'high') {
       console.log('Confidence not high — running Prompt 1B disambiguation');
       const disambig = await disambiguateConcept(question, top5scored);
@@ -558,7 +612,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Change 6: Prompt 1C fallback — pre-scored top 60
     let conceptId: string | null = match?.concept_id ?? null;
     if (!conceptId || !lookup[conceptId]) {
       console.log('Running Prompt 1C fallback');
@@ -566,7 +619,6 @@ export async function POST(req: NextRequest) {
       console.log('Prompt 1C result:', conceptId);
     }
 
-    // Change 13: wrong subject warning
     if (!conceptId || !lookup[conceptId]) {
       const otherSubjects = ['Biology', 'Chemistry', 'Physics'].filter(s => s !== subject).join(' or ');
       return NextResponse.json({
@@ -580,10 +632,26 @@ export async function POST(req: NextRequest) {
     const foundConcept = lookup[conceptId];
     console.log('Concept found:', conceptId, '|', foundConcept.concept_name);
 
-    // Traverse builds_upon graph
+    // ── 5. Check cache for user-typed questions (concept-level cache) ──────────
+    if (!fromHeatmap) {
+      const conceptKey = buildCacheKey(question, subject, conceptId, false);
+      const cached = await getFromCache(conceptKey);
+      if (cached) {
+        console.log('Cache HIT (concept):', conceptKey);
+        return NextResponse.json({
+          chain: cached.chain,
+          conceptId: cached.concept_id,
+          answer: cached.answer,
+          studyPath: cached.study_path,
+          fromCache: true,
+        });
+      }
+      console.log('Cache MISS (concept):', conceptKey);
+    }
+
+    // ── 6. Traverse ancestry graph ─────────────────────────────────────────────
     const rawChain = traverseAncestry(conceptId, lookup);
 
-    // Dedup: keep most-connected concept per chapter
     const chapterMap = new Map<string, Concept>();
     for (const c of rawChain) {
       const key      = `${c.class}_${c.chapter_number}`;
@@ -593,19 +661,21 @@ export async function POST(req: NextRequest) {
       if (!existing || curLinks > exLinks) chapterMap.set(key, c);
     }
 
-    // Sort descending by class (Class 12 → 8)
     const chain = Array.from(chapterMap.values())
       .sort((a, b) => b.class !== a.class ? b.class - a.class : b.chapter_number - a.chapter_number);
 
     console.log('Chain length:', chain.length);
 
-    // Change 9: answer with prerequisite context
-    const answer = await generateAnswer(question, foundConcept, chain, options, correctAnswer);
-
-    // Change 10: study path always generated
+    // ── 7. Generate answer + study path ───────────────────────────────────────
+    const answer    = await generateAnswer(question, foundConcept, chain, options, correctAnswer);
     const studyPath = await generateStudyPath(foundConcept, chain);
 
-    return NextResponse.json({ chain, conceptId, answer, studyPath });
+    // ── 8. Save to cache ───────────────────────────────────────────────────────
+    const cacheKey = buildCacheKey(question, subject, conceptId, fromHeatmap);
+    await saveToCache(cacheKey, question, subject, conceptId, chain, answer, studyPath);
+    console.log('Saved to cache:', cacheKey);
+
+    return NextResponse.json({ chain, conceptId, answer, studyPath, fromCache: false });
 
   } catch (err) {
     console.error('Ancestry API error:', err);
