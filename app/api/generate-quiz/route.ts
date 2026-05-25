@@ -48,6 +48,8 @@ async function groqCall(prompt: string, temperature: number): Promise<string | n
   }
 }
 
+// ── Difficulty descriptions ────────────────────────────────────────────────────
+
 const DIFFICULTY_DESCRIPTIONS: Record<string, string> = {
   easy:     'straightforward recall — definitions, basic facts, simple identification',
   medium:   'application — apply concepts to simple scenarios, cause and effect',
@@ -64,10 +66,93 @@ const AR_OPTIONS = [
   'A is false but R is true',
 ];
 
-// ─── Cache helpers ────────────────────────────────────────────────────────────
+// ── Class-level content restrictions ──────────────────────────────────────────
+// Prevents Claude from generating questions using concepts beyond the student's class
+
+const CLASS_RESTRICTIONS: Record<string, Record<number, { not_studied: string; studied: string }>> = {
+  Physics: {
+    8: {
+      not_studied: 'coefficients of friction, electric fields, gravitational constant G, vectors, electrostatics, calculus, electromagnetic induction, thermodynamics laws, Ohm\'s law circuits',
+      studied: 'basic forces (push/pull), friction as a concept, gravity as weight, simple machines, basic motion (speed/distance/time), sound basics, light reflection',
+    },
+    9: {
+      not_studied: 'electric fields, gravitational constant G, vectors, electrostatics, calculus, electromagnetic induction, thermodynamics laws, capacitors',
+      studied: 'laws of motion (F=ma), gravity and weight, work energy power, pressure, sound waves, basic electricity (current/voltage/resistance), atoms and molecules',
+    },
+    10: {
+      not_studied: 'vectors, calculus, electromagnetic induction, thermodynamics laws, capacitors, nuclear physics beyond basic radioactivity',
+      studied: 'light reflection and refraction, lenses and mirrors, electricity circuits, magnetic effects of current, sources of energy, basic nuclear concepts',
+    },
+    11: {
+      not_studied: 'quantum mechanics beyond Bohr model, university-level derivations, solid state physics',
+      studied: 'vectors, kinematics, laws of motion, work energy power, rotational motion, gravitation, properties of matter, thermodynamics, oscillations, waves, electrostatics, current electricity',
+    },
+    12: {
+      not_studied: 'university-level physics beyond NCERT scope',
+      studied: 'all NCERT Class 12 topics: electromagnetic induction, alternating current, electromagnetic waves, optics, dual nature, atoms, nuclei, semiconductors, communication systems',
+    },
+  },
+  Biology: {
+    8: {
+      not_studied: 'cell organelles in detail, DNA/RNA, meiosis, hormones, enzyme kinetics, genetics, evolution, biotechnology',
+      studied: 'basic cell structure, microorganisms, food production, conservation of plants and animals, reproduction basics, basic body systems',
+    },
+    9: {
+      not_studied: 'DNA/RNA structure, meiosis details, genetics and heredity, hormones in detail, enzyme kinetics, evolution, biotechnology',
+      studied: 'cell structure and function, tissues, diversity of organisms, basic reproduction (asexual/sexual), basic disease concepts, food and nutrition basics',
+    },
+    10: {
+      not_studied: 'DNA/RNA molecular details, genetic engineering, enzyme kinetics, detailed hormones, biotechnology, ecological pyramids in detail',
+      studied: 'life processes (nutrition, respiration, transport, excretion), control and coordination (nervous and hormonal basics), reproduction, heredity and evolution basics, ecosystem basics',
+    },
+    11: {
+      not_studied: 'genetic engineering, recombinant DNA technology, detailed biotechnology, immune system in detail',
+      studied: 'living world, classification, plant and animal morphology and anatomy, cell biology, biomolecules, cell cycle, plant physiology, human physiology',
+    },
+    12: {
+      not_studied: 'university-level biology beyond NCERT scope',
+      studied: 'all NCERT Class 12 topics: reproduction, genetics, evolution, human health and disease, biotechnology, ecology and environment',
+    },
+  },
+  Chemistry: {
+    8: {
+      not_studied: 'atomic structure details, chemical bonding, thermodynamics, electrochemistry, organic chemistry, mole concept, equilibrium',
+      studied: 'basic materials (metals/non-metals), physical and chemical changes, combustion basics, acids/bases/salts introduction, basic separation techniques',
+    },
+    9: {
+      not_studied: 'quantum numbers, orbitals, chemical bonding details, thermodynamics, electrochemistry, organic chemistry reactions, mole concept calculations',
+      studied: 'matter and its states, atoms and molecules, basic atomic structure (Bohr model), chemical reactions basics, physical and chemical changes, solutions and mixtures',
+    },
+    10: {
+      not_studied: 'quantum numbers, orbitals, thermodynamics laws, electrochemistry, organic mechanisms, equilibrium calculations',
+      studied: 'chemical reactions and equations, acids bases and salts, metals and non-metals, carbon compounds (basic organic), periodic table basics',
+    },
+    11: {
+      not_studied: 'electrochemistry, coordination compounds, polymers, biomolecules in detail, university chemistry',
+      studied: 'mole concept, atomic structure, periodic table, chemical bonding, thermodynamics, equilibrium, redox reactions, hydrogen, s-block elements, basic organic chemistry, hydrocarbons',
+    },
+    12: {
+      not_studied: 'university-level chemistry beyond NCERT scope',
+      studied: 'all NCERT Class 12 topics: solid state, solutions, electrochemistry, chemical kinetics, surface chemistry, coordination compounds, haloalkanes, alcohols, aldehydes, amines, biomolecules, polymers',
+    },
+  },
+};
+
+function getClassRestriction(subject: string, classLevel: number): string {
+  const subjectRestrictions = CLASS_RESTRICTIONS[subject] ?? CLASS_RESTRICTIONS['Physics'];
+  const restriction = subjectRestrictions[classLevel] ?? subjectRestrictions[11];
+  return (
+    'CRITICAL CLASS RESTRICTION — This is Class ' + classLevel + ' ' + subject + ':\n'
+    + '- Do NOT use concepts, formulas, or topics from Class ' + (classLevel + 1) + ' or higher\n'
+    + '- Do NOT use: ' + restriction.not_studied + '\n'
+    + '- Students at this level know: ' + restriction.studied + '\n'
+    + '- Keep questions appropriate for Class ' + classLevel + ' NCERT level only\n'
+  );
+}
+
+// ── Cache helpers ──────────────────────────────────────────────────────────────
 
 function buildCacheKey(subject: string, chapter: string, classLevel: string, difficulty: string, mode: string) {
-  // Normalize so "Physics" and "physics" map to same key
   return `quiz:${subject.toLowerCase()}:${chapter.toLowerCase()}:${classLevel}:${difficulty}:${mode}`;
 }
 
@@ -78,13 +163,11 @@ async function getCachedSet(cacheKey: string, seenSetIds: string[]) {
       .select('id, questions')
       .eq('cache_key', cacheKey);
 
-    // Exclude sets the user has already seen this session
     if (seenSetIds.length > 0) {
       query = query.not('id', 'in', `(${seenSetIds.join(',')})`);
     }
 
     const { data, error } = await query.limit(1).single();
-
     if (error || !data) return null;
     return { id: data.id as string, questions: data.questions };
   } catch {
@@ -100,10 +183,7 @@ async function saveToCache(cacheKey: string, questions: any[]) {
       .select('id')
       .single();
 
-    if (error) {
-      console.error('Cache save error:', error.message);
-      return null;
-    }
+    if (error) { console.error('Cache save error:', error.message); return null; }
     return data?.id as string ?? null;
   } catch (err) {
     console.error('Cache save exception:', err);
@@ -111,7 +191,7 @@ async function saveToCache(cacheKey: string, questions: any[]) {
   }
 }
 
-// ─── Main handler ─────────────────────────────────────────────────────────────
+// ── Main handler ───────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
@@ -123,7 +203,7 @@ export async function POST(req: Request) {
       mode,
       difficulty,
       previousQuestions = [],
-      seenSetIds = [],          // <-- NEW: client sends this from sessionStorage
+      seenSetIds = [],
     } = await req.json();
 
     const isAssertion = mode === 'assertion_reasoning';
@@ -131,7 +211,7 @@ export async function POST(req: Request) {
     const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
     const allConcepts = concepts ?? [];
 
-    // ── 1. Check cache first ─────────────────────────────────────────────────
+    // ── 1. Check cache ─────────────────────────────────────────────────────────
     const cacheKey = buildCacheKey(subject, chapter, classLevel, level, mode);
     const cached = await getCachedSet(cacheKey, seenSetIds);
 
@@ -142,14 +222,14 @@ export async function POST(req: Request) {
         total: cached.questions.length,
         questions: cached.questions,
         difficulty: level,
-        setId: cached.id,       // <-- client stores this in sessionStorage
+        setId: cached.id,
         fromCache: true,
       });
     }
 
     console.log('Cache MISS:', cacheKey, '| calling Groq...');
 
-    // ── 2. Cache miss → generate with Groq ──────────────────────────────────
+    // ── 2. Select concepts ─────────────────────────────────────────────────────
     const LEVELS = ['easy','medium','hard','advanced','expert','neet'];
     const levelIndex = LEVELS.indexOf(level);
     let selectedConcepts: any[];
@@ -175,6 +255,10 @@ export async function POST(req: Request) {
       ? '\n\nDo NOT repeat these questions:\n' + previousQuestions.slice(-10).join('\n')
       : '';
 
+    // ── 3. Class restriction text ──────────────────────────────────────────────
+    const classRestriction = getClassRestriction(subject, Number(classLevel));
+
+    // ── 4. Build prompts ───────────────────────────────────────────────────────
     const arFormat = '[\n'
       + '  {\n'
       + '    "question": "In the following question, a statement of Assertion (A) is followed by a statement of Reason (R).",\n'
@@ -208,6 +292,7 @@ export async function POST(req: Request) {
         + 'Class: ' + classLevel + '\n'
         + 'Chapter: ' + chapter + '\n'
         + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + classRestriction + '\n'
         + 'Concepts:\n' + conceptText
         + avoidText + '\n\n'
         + 'CRITICAL RULES for Assertion-Reason:\n'
@@ -227,18 +312,21 @@ export async function POST(req: Request) {
         + 'Class: ' + classLevel + '\n'
         + 'Chapter: ' + chapter + '\n'
         + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + classRestriction + '\n'
         + 'Concepts:\n' + conceptText
         + avoidText + '\n\n'
         + 'Rules:\n'
-        + '- ALL 5 questions must be ' + level + ' difficulty\n'
+        + '- ALL 5 questions must be ' + level + ' difficulty appropriate for Class ' + classLevel + '\n'
         + '- Questions must cover the concepts listed above\n'
+        + '- Do NOT introduce any concept not in the concepts list above\n'
         + '- Output ONLY valid JSON array, no markdown, no comments\n'
         + '- Double quotes only, no trailing commas\n'
         + '- Never truncate the output\n\n'
         + 'Format:\n' + mcqFormat;
 
-    console.log('Level:', level, '| Mode:', mode);
+    console.log('Level:', level, '| Mode:', mode, '| Class:', classLevel, '| Subject:', subject);
 
+    // ── 5. Call Groq ───────────────────────────────────────────────────────────
     let questions: any[] = [];
     for (let attempt = 1; attempt <= 3; attempt++) {
       const raw = await groqCall(prompt, 0.4 + (attempt * 0.1));
@@ -276,7 +364,7 @@ export async function POST(req: Request) {
       return Response.json({ success: false, error: 'Could not generate enough questions. Please try again.' });
     }
 
-    // ── 3. Save to cache ─────────────────────────────────────────────────────
+    // ── 6. Save to cache ───────────────────────────────────────────────────────
     const setId = await saveToCache(cacheKey, unique);
     console.log('Saved to cache:', cacheKey, '| setId:', setId);
 
@@ -285,7 +373,7 @@ export async function POST(req: Request) {
       total: unique.length,
       questions: unique,
       difficulty: level,
-      setId,              // <-- client stores this in sessionStorage
+      setId,
       fromCache: false,
     });
 
