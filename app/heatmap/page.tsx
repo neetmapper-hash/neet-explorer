@@ -276,7 +276,18 @@ export default function HeatmapPage() {
         onYearsChange={setSelectedYears}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden" style={{ height: '100vh' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .heatmap-main { padding-top: 52px !important; padding-bottom: 64px !important; height: auto !important; }
+          .heatmap-left { width: 100% !important; border-right: none !important; }
+          .heatmap-right { display: none !important; }
+          .heatmap-left.hide-mobile { display: none !important; }
+          .heatmap-right.show-mobile { display: flex !important; flex-direction: column; width: 100% !important; }
+          .mobile-back-btn { display: flex !important; }
+        }
+        .mobile-back-btn { display: none; }
+      `}</style>
+      <main className="heatmap-main flex-1 flex flex-col overflow-hidden" style={{ height: '100vh' }}>
 
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid #1e1e1e' }}>
@@ -304,7 +315,7 @@ export default function HeatmapPage() {
 
             {/* ── LEFT PANEL ── */}
             <div
-              className="flex-shrink-0 overflow-y-auto flex flex-col"
+              className={`heatmap-left flex-shrink-0 overflow-y-auto flex flex-col${selectedChapter ? ' hide-mobile' : ''}`}
               style={{ width: '260px', borderRight: '1px solid #1e1e1e' }}
             >
               {/* View toggle */}
@@ -343,7 +354,15 @@ export default function HeatmapPage() {
             </div>
 
             {/* ── RIGHT PANEL ── */}
-            <div key={subject} className="flex-1 overflow-y-auto" style={{ background: '#0d0d0d' }}>
+            <div key={subject} className={`heatmap-right flex-1 overflow-y-auto${selectedChapter ? ' show-mobile' : ''}`} style={{ background: '#0d0d0d' }}>
+              {/* Mobile back button */}
+              <button
+                className="mobile-back-btn items-center gap-2 px-4 py-3 w-full text-left"
+                style={{ background: '#0a0a0a', borderBottom: '1px solid #1e1e1e', color: '#6b7280', fontSize: '13px', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                onClick={() => { setSelectedChapter(null); setExpandedQuestion(null); }}
+              >
+                ← Back to chapters
+              </button>
               {!selectedChapter ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="text-4xl opacity-20">←</div>
