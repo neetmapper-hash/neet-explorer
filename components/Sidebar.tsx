@@ -1,6 +1,8 @@
 'use client';
 
 import { Subject, AVAILABLE_YEARS, YEAR_COLORS } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   currentPage: 'heatmap' | 'ancestry' | 'concept-map' | 'quiz';
@@ -18,6 +20,13 @@ export default function Sidebar({
   onSubjectChange, onYearsChange, showBackButton, onBack,
 }: SidebarProps) {
   const subjects: Subject[] = ['Biology', 'Physics', 'Chemistry'];
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
 
   const toggleYear = (year: number) => {
     if (selectedYears.includes(year)) {
@@ -124,8 +133,8 @@ export default function Sidebar({
         </div>
       )}
 
-      {showBackButton && onBack && (
-        <div style={{ marginTop: 'auto' }}>
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {showBackButton && onBack && (
           <button onClick={onBack} style={{
             width: '100%', textAlign: 'left', padding: '8px 12px',
             borderRadius: '8px', fontSize: '13px', color: '#6b7280',
@@ -133,8 +142,16 @@ export default function Sidebar({
           }}>
             ← Back to Heatmap
           </button>
-        </div>
-      )}
+        )}
+        <button onClick={handleLogout} style={{
+          width: '100%', textAlign: 'left', padding: '8px 12px',
+          borderRadius: '8px', fontSize: '13px', color: '#ef4444',
+          background: 'transparent', border: '1px solid #2d1b1b',
+          cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.12s',
+        }}>
+          🚪 Sign Out
+        </button>
+      </div>
     </div>
   );
 }
