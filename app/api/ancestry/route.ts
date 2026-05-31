@@ -594,6 +594,9 @@ export async function POST(req: NextRequest) {
     const concepts: Concept[] = Array.isArray(conceptData) ? conceptData : [];
     const lookup              = buildConceptLookup(concepts);
     console.log('Total concepts:', concepts.length);
+    if (concepts.length === 0) {
+        return NextResponse.json({ error: 'Concepts array is empty or wrong format' }, { status: 500 });
+    }
 
     // ── 4. Score + identify concept ────────────────────────────────────────────
     const scored     = scoreConceptsByKeywords(concepts, keywords);
