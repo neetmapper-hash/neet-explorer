@@ -465,6 +465,16 @@ export default function HeatmapPage() {
 
                               {isExpanded && (
                                 <div className="px-4 pb-4" style={{ borderTop: '1px solid #1e1e1e' }}>
+                                  {q.has_diagram && q.image_file && (
+                                    <div className="mt-3 mb-3">
+                                      <img
+                                        src={`/images/${q.image_file}`}
+                                        alt="Question diagram"
+                                        className="rounded-lg max-w-full"
+                                        style={{ border: '1px solid #1e1e1e' }}
+                                      />
+                                    </div>
+                                  )}
                                   {q.options && Object.keys(q.options).length > 0 && (
                                     <div className="flex flex-col gap-2 mt-3">
                                       {Object.entries(q.options).map(([num, text]) => {
