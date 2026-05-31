@@ -41,9 +41,10 @@ export default function Sidebar({
 
   return (
     <div style={{
-      width: '224px', minHeight: '100vh', background: '#0a0a0a',
+      width: '224px', height: '100vh', background: '#0a0a0a',
       borderRight: '1px solid #1e1e1e', display: 'flex',
       flexDirection: 'column', padding: '20px 16px', gap: '28px', flexShrink: 0,
+      position: 'sticky', top: 0, overflowY: 'auto',
     }}>
       <div style={{ paddingTop: '4px' }}>
         <div style={{ fontSize: '16px', fontWeight: 800, color: '#f9fafb' }}>🧬 NEET Explorer</div>
