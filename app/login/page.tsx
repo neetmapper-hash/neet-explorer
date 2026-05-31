@@ -19,7 +19,7 @@ export default function LoginPage() {
         if (!error && data.session) {
           setTimeout(() => {
             window.location.replace('/heatmap')
-          }, 500)
+          }, 1500)
         }
       })
     }
