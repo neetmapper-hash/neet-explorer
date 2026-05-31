@@ -3160,12 +3160,18 @@
     }
   },
   "Chemistry": {
-    "12_1": {
-      "chapter": 1,
+    "12_3": {
       "class": 12,
-      "chapter_name": "Solutions",
-      "subject": "Chemistry",
-      "total_count": 11,
+      "chapter": 3,
+      "chapter_name": "Chemical Kinetics",
+      "total_count": 3,
+      "by_year": {
+        "2021": 0,
+        "2022": 1,
+        "2023": 0,
+        "2024": 0,
+        "2025": 2
+      },
       "questions": [
         {
           "year": 2025,
@@ -3178,169 +3184,8 @@
             "4": "0.225"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
         },
-        {
-          "year": 2024,
-          "question_number": 62,
-          "question": "Arrange the following compounds in increasing order of their solubilities in chloroform: NaCl, CH3OH, cyclohexane, CH3CN",
-          "options": {
-            "1": "NaCl < CH3CN < CH3OH < Cyclohexane",
-            "2": "CH3OH < CH3CN < NaCl < Cyclohexane",
-            "3": "NaCl < CH3OH < CH3CN < Cyclohexane",
-            "4": "Cyclohexane < CH3CN < CH3OH < NaCl"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_003",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 71,
-          "question": "Which of the following aqueous solution will exhibit highest boiling point?",
-          "options": {
-            "1": "0.015M C\u2086H\u2081\u2082O\u2086",
-            "2": "0.01M Urea",
-            "3": "0.01M KNO\u2083",
-            "4": "0.01M Na\u2082SO\u2084"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_008",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 61,
-          "question": "Given below are two statements: one is labelled as Assertion (A) and the other is labelled as Reason (R). Assertion (A): In a particular point defect, an ionic solid is electrically neutral, even if few of its cations are missing from its unit cells. Reason (R): In an ionic solid, Frenkel defect arises due to dislocation of cation from its lattice site to interstitial site, maintaining overall electrical neutrality. In the light of the above statements, choose the most appropriate answer from the options given below:",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 70,
-          "question": "The correct option for the number of body centred unit cells in all 14 types of Bravais lattice unit cells is :",
-          "options": {
-            "1": "3",
-            "2": "7",
-            "3": "5",
-            "4": "2"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 72,
-          "question": "A compound is formed by two elements A and B. The element B forms cubic close packed structure and atoms of A occupy $1/3$ of tetrahedral voids. If the formula of the compound is $A_xB_y$, then the value of $x + y$ is in option",
-          "options": {
-            "1": "4",
-            "2": "3",
-            "3": "2",
-            "4": "5"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 83,
-          "question": "In one molal solution that contains 0.5 mole of a solute, there is",
-          "options": {
-            "1": "1000 g of solvent",
-            "2": "500 mL of solvent",
-            "3": "500 g of solvent",
-            "4": "100 mL of solvent"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 69,
-          "question": "The following solutions were prepared by dissolving 10 g of glucose (C6H12O6) in 250 ml of water (P1), 10 g of urea (CH4N2O) in 250 ml of water (P2) and 10 g of sucrose (C12H22O11) in 250 ml of water (P3). The right option for the decreasing order of osmotic pressure of these solutions is :",
-          "options": {
-            "1": "P3 > P1 > P2",
-            "2": "P2 > P1 > P3",
-            "3": "P1 > P2 > P3",
-            "4": "P2 > P3 > P1"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 90,
-          "question": "5 moles of liquid X and 10 moles of liquid Y make a solution having a vapour pressure of 70 torr. The vapour pressures of pure X and Y are 63 torr and 78 torr respectively. Which of the following is true regarding the described solution?",
-          "options": {
-            "1": "The solution has volume greater than the sum of individual volumes.",
-            "2": "The solution shows positive deviation.",
-            "3": "The solution shows negative deviation.",
-            "4": "The solution is ideal."
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_004",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 76,
-          "question": "The pH of the solution containing 50 mL each of 0.10 M sodium acetate and 0.01 M acetic acid is [Given pKa of CH3COOH = 4.57]",
-          "options": {
-            "1": "2.57",
-            "2": "5.57",
-            "3": "3.57",
-            "4": "4.57"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2021,
-          "question_number": 68,
-          "question": "The pKb of dimethylamine and pKa of acetic acid are 3.27 and 4.77 respectively at T (K). The correct option for the pH of dimethylammonium acetate solution is :",
-          "options": {
-            "1": "6.25",
-            "2": "8.50",
-            "3": "5.50",
-            "4": "7.75"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_1_001",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_3": {
-      "chapter": 3,
-      "class": 12,
-      "chapter_name": "Chemical Kinetics",
-      "subject": "Chemistry",
-      "total_count": 8,
-      "questions": [
         {
           "year": 2025,
           "question_number": 50,
@@ -3352,9 +3197,7 @@
             "4": "210 s"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_008",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -3367,108 +3210,22 @@
             "4": "0.4606"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_008",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 52,
-          "question": "Following data is for a reaction between reactants A and B :\nRate\nmol L\u207b\u00b9 s\u207b\u00b9\n2 \u00d7 10\u207b\u00b3\n4 \u00d7 10\u207b\u00b3\n1.6 \u00d7 10\u207b\u00b2\n[A]\n0.1 M\n0.1 M\n0.2 M\n[B]\n0.1 M\n0.2 M\n0.2 M\nThe order of the reaction with respect to A and B, respectively, are",
-          "options": {
-            "1": "1, 0",
-            "2": "0, 1",
-            "3": "1, 2",
-            "4": "2, 1"
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_3_003",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 54,
-          "question": "Which one is an example of heterogenous catalysis?",
-          "options": {
-            "1": "Hydrolysis of sugar catalysed by H$^+$ ions",
-            "2": "Decomposition of ozone in presence of nitrogen monoxide",
-            "3": "Combination between dinitrogen and dihydrogen to form ammonia in the presence of finely divided iron",
-            "4": "Oxidation of sulphur dioxide into sulphur trioxide in the presence of oxides of nitrogen"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 81,
-          "question": "Which of the following plot represents the variation of ln k versus 1/T in accordance with Arrhenius equation?",
-          "options": {
-            "1": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line.",
-            "2": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line starting from origin.",
-            "3": "Graph with ln k on y-axis, 1/T on x-axis, showing a downward sloping line.",
-            "4": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line."
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_3_011",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 65,
-          "question": "If the half-life (t1/2) for a first order reaction is 1 minute, then the time required for 99.9% completion of the reaction is closest to :",
-          "options": {
-            "1": "10 minutes",
-            "2": "2 minutes",
-            "3": "4 minutes",
-            "4": "5 minutes"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_009",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 64,
-          "question": "For a certain reaction, the rate = k[A]2[B], when the initial concentration of A is tripled keeping concentration of B constant, the initial rate would",
-          "options": {
-            "1": "Increase by a factor of six",
-            "2": "Increase by a factor of nine",
-            "3": "Increase by a factor of three",
-            "4": "Decrease by a factor of nine"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_002",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 84,
-          "question": "Given below are two statements : one is labelled as Assertion A and the other is labelled as Reason R : Assertion A : A reaction can have zero activation energy. Reasons R : The minimum extra amount of energy absorbed by reactant molecules so that their energy becomes equal to threshold value, is called activation energy. In the light of the above statements, choose the correct answer from the options given below :",
-          "options": {
-            "1": "Both A and R are true and R is NOT the correct explanation of A",
-            "2": "A is true but R is false",
-            "3": "A is false but R is true",
-            "4": "Both A and R are true and R is the correct explanation of A"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_3_011",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
         }
       ]
     },
     "11_4": {
-      "chapter": 4,
       "class": 11,
+      "chapter": 4,
       "chapter_name": "Chemical Bonding and Molecular Structure",
-      "subject": "Chemistry",
-      "total_count": 22,
+      "total_count": 28,
+      "by_year": {
+        "2021": 7,
+        "2022": 7,
+        "2023": 4,
+        "2024": 4,
+        "2025": 6
+      },
       "questions": [
         {
           "year": 2025,
@@ -3481,9 +3238,7 @@
             "4": "Statement I is true but Statement II is false"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_015",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2025,
@@ -3496,9 +3251,7 @@
             "4": "1, 1-Dimethylcyclopropane"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_010",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2025,
@@ -3511,9 +3264,7 @@
             "4": "[Ni(H2O)6]2+"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_015",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2025,
@@ -3526,9 +3277,20 @@
             "4": "A-I, B-II, C-III, D-IV"
           },
           "correct_answer": "4",
-          "has_diagram": true,
-          "concept_id": "chem_11_4_009",
-          "mapping_status": "verified"
+          "has_diagram": true
+        },
+        {
+          "year": 2025,
+          "question_number": 63,
+          "question": "Match List-I with List-II.\n\nList-I\n(Name of Vitamin)\n\nA. Vitamin B12\nB. Vitamin D\nC. Vitamin B2\nD. Vitamin B6\n\nChoose the correct answer from the options given below:\n(1) A-IV, B-III, C-II, D-I\n(3) A-IV, B-III, C-I, D-II",
+          "options": {
+            "1": "A-IV, B-III, C-II, D-I",
+            "2": "A-I, B-III, C-II, D-IV",
+            "3": "A-IV, B-III, C-I, D-II",
+            "4": "A-II, B-III, C-I, D-IV"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -3541,9 +3303,7 @@
             "4": "A, C only"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_009",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -3556,9 +3316,20 @@
             "4": "BF3"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_009",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 62,
+          "question": "Arrange the following compounds in increasing order of their solubilities in chloroform: NaCl, CH3OH, cyclohexane, CH3CN",
+          "options": {
+            "1": "NaCl < CH3CN < CH3OH < Cyclohexane",
+            "2": "CH3OH < CH3CN < NaCl < Cyclohexane",
+            "3": "NaCl < CH3OH < CH3CN < Cyclohexane",
+            "4": "Cyclohexane < CH3CN < CH3OH < NaCl"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -3570,9 +3341,7 @@
             "3": "PCl5 exhibits sp3d hybridisation"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_4_005",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2024,
@@ -3585,9 +3354,20 @@
             "4": "A-IV, B-III, C-I, D-II"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_007",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 61,
+          "question": "Given below are two statements : one is labelled as Assertion A and the other is labelled as Reason R : Assertion A : Metallic sodium dissolves in liquid ammonia giving a deep blue solution, which is paramagnetic. Reason R : The deep blue solution is due to the formation of amide. In the light of the above statements, choose the correct answer from the options given below :",
+          "options": {
+            "1": "Both A and R are true but R is NOT the correct explanation of A",
+            "2": "A is true but R is false",
+            "3": "A is false but R is true",
+            "4": "Both A and R are true and R is the correct explanation of A"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -3600,9 +3380,7 @@
             "4": "B, C, D, E are correct"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_016",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -3615,9 +3393,7 @@
             "4": "$\\sigma 1s < \\sigma^* 1s < \\sigma 2s < \\sigma^* 2s < (\\pi 2p_x = \\pi 2p_y) < \\sigma 2p_z < (\\pi^* 2p_x = \\pi^* 2p_y) < \\sigma^* 2p_z$"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_015",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -3630,9 +3406,7 @@
             "4": "NH3"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_003",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -3645,9 +3419,7 @@
             "4": "SF4"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_010",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -3660,9 +3432,7 @@
             "4": "Diamond is sp3 hybridised and graphite is sp2 hybridized."
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_007",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -3675,9 +3445,46 @@
             "4": ""
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_4_005",
-          "mapping_status": "verified"
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 65,
+          "question": "Given below are two statements Statement I: The acidic strength of monosubstituted nitrophenol is higher than phenol because of electron withdrawing nitro group. Statement II: o-nitrophenol, m-nitrophenol and p-nitrophenol will have same acidic strength as they have one nitro group attached to the phenolic ring. In the light of the above statements, choose the most appropriate answer from the options given below:",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct.",
+            "2": "Both Statement I and Statement II are correct.",
+            "3": "Both Statement I and Statement II are incorrect.",
+            "4": "Statement I is correct but Statement II is incorrect."
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 73,
+          "question": "Given below are two statements Statement I: Primary aliphatic amines react with HNO2 to give unstable diazonium salts. Statement II: Primary aromatic amines react with HNO2 to form diazonium salts which are stable even above 300 K. In the light of the above statements, choose the most appropriate answer from the options given below",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct.",
+            "2": "Both Statement I and Statement II are correct.",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect."
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 82,
+          "question": "Given below are two statements Statement I The boiling points of the following hydrides of group 16 elements increases in the order \u2013 H2O < H2S < H2Se < H2Te Statement II The boiling points of these hydrides increase with increase in molar mass. In the light of the above statements, choose the most appropriate answer from the options given below :",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct",
+            "2": "Both Statement I and Statement II are correct",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -3690,9 +3497,20 @@
             "4": ""
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_4_007",
-          "mapping_status": "verified"
+          "has_diagram": true
+        },
+        {
+          "year": 2021,
+          "question_number": 50,
+          "question": "A uniform conducting wire of length 12a and resistance 'R' is wound up as a current carrying coil in the shape of, (i) an equilateral triangle of side 'a'. (ii) a square of side 'a'. The magnetic dipole moments of the coil in each case respectively are",
+          "options": {
+            "1": "4 Ia2 and 3 Ia2",
+            "2": "3 Ia2 and 3 Ia2",
+            "3": "3 Ia2 and Ia2",
+            "4": "3 Ia2 and 4 Ia2"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -3705,9 +3523,7 @@
             "4": "Dimer and Linear, respectively"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_013",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -3720,9 +3536,7 @@
             "4": "sp2 and 6"
           },
           "correct_answer": "",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_013",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -3735,9 +3549,7 @@
             "4": "Statement I is correct but statement II is false"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_007",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -3750,9 +3562,20 @@
             "4": "3 3 3 3 CH \u2013 F < CH \u2013 Cl CH \u2013 Br > CH \u2013 I >"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_007",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 81,
+          "question": "Dihedral angle of least stable conformer of ethane is :",
+          "options": {
+            "1": "0\u00b0",
+            "2": "120\u00b0",
+            "3": "180\u00b0",
+            "4": "60\u00b0"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -3765,802 +3588,22 @@
             "4": ""
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_4_010",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 70,
-          "question": "Amongst the following the total number of species NOT having eight electrons around central atom in its outermost shell, is $NH_3, AlCl_3, BeCl_2, CCl_4, PCl_5 :$",
-          "options": {
-            "1": "2",
-            "2": "4",
-            "3": "1",
-            "4": "3"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_005",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 51,
-          "question": "Right option for the number of tetrahedral and octahedral voids in hexagonal primitive unit cell are :",
-          "options": {
-            "1": "12, 6",
-            "2": "8, 4",
-            "3": "6, 12",
-            "4": "2, 1"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_4_006",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_10": {
-      "chapter": 10,
-      "class": 12,
-      "chapter_name": "Biomolecules",
-      "subject": "Chemistry",
-      "total_count": 11,
-      "questions": [
-        {
-          "year": 2025,
-          "question_number": 63,
-          "question": "Match List-I with List-II.\n\nList-I\n(Name of Vitamin)\n\nA. Vitamin B12\nB. Vitamin D\nC. Vitamin B2\nD. Vitamin B6\n\nChoose the correct answer from the options given below:\n(1) A-IV, B-III, C-II, D-I\n(3) A-IV, B-III, C-I, D-II",
-          "options": {
-            "1": "A-IV, B-III, C-II, D-I",
-            "2": "A-I, B-III, C-II, D-IV",
-            "3": "A-IV, B-III, C-I, D-II",
-            "4": "A-II, B-III, C-I, D-IV"
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_10_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 78,
-          "question": "Sugar 'X'\nA. is found in honey\nB. is a keto sugar\nC. exists in \u03b1 and \u03b2 \u2013 anomeric forms.\nD. Is laevorotatory.\n'X' is :",
-          "options": {
-            "1": "Sucrose",
-            "2": "D-Glucose",
-            "3": "D-Fructose",
-            "4": "Maltose"
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_10_003",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 83,
-          "question": "Given below are two statements : Statement I : Glycogen is similar to amylose in its structure. Statement II : Glycogen is found in yeast and fungi also. In the light of the above statements, choose the correct answer from the options given below :",
-          "options": {
-            "1": "Statement I is true but Statement II is false.",
-            "2": "Statement I is false but Statement II is true.",
-            "3": "Both Statement I and Statement II are true.",
-            "4": "Both Statement I and Statement II are false."
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_005",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 80,
-          "question": "The Kjeldahl's method for the estimation of nitrogen can be used to estimate the amount of nitrogen in which one of the following compounds?",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_006",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 67,
-          "question": "The incorrect statement regarding enzymes is",
-          "options": {
-            "1": "Enzymes are very specific for a particular reaction and substrate.",
-            "2": "Enzymes are biocatalysts.",
-            "3": "Like chemical catalysts enzymes reduce the activation energy of bio processes.",
-            "4": "Enzymes are polysaccharides."
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_011",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 67,
-          "question": "Match List I with List II",
-          "options": {},
-          "correct_answer": "None",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2023,
-          "question_number": 75,
-          "question": "Given below are two statements : Statement I : A unit formed by the attachment of a base to 1' position of sugar is known as nucleoside. Statement II : When nucleoside is linked to phosphorous acid at 5' -position of sugar moiety, we get nucleotide. In the light of the above statements, choose the correct answer from the options given below :",
-          "options": {
-            "1": "Both Statement I and Statement II are false",
-            "2": "Statement I is true but Statement II is false",
-            "3": "Statement I is false but Statement II is true",
-            "4": "Both Statement I and Statement II are true"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_013",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 82,
-          "question": "Some tranquilizers are listed below. Which one from the following belongs to barbiturates?",
-          "options": {
-            "1": "Meprobamate",
-            "2": "Valium",
-            "3": "Veronal",
-            "4": "Chlordiazepoxide"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 66,
-          "question": "Match List-I with List-II. List-I List-II (Drug class) (Drug molecule) (a) Antacids (i) Salvarsan (b) Antihistamines (ii) Morphine (c) Analgesics (iii) Cimetidine (d) Antimicrobials (iv) Seldane Choose the correct answer from the options given below :",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_10_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 61,
-          "question": "The RBC deficiency is deficiency disease of :",
-          "options": {
-            "1": "Vitamin B2",
-            "2": "Vitamin B12",
-            "3": "Vitamin B6",
-            "4": "Vitamin B1"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 76,
-          "question": "Given below are two statements : Statement I : Aspirin and Paracetamol belong to the class of narcotic analgesics. Statement II : Morphine and Heroin are non-narcotic analgesics. In the light of the above statements, choose the correct answer from the options given below.",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is true.",
-            "2": "Both Statement I and Statement II are true",
-            "3": "Both Statement I and Statement II are false",
-            "4": "Statement I is correct but Statement II is false"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_10_012",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
         }
       ]
     },
     "11_6": {
+      "class": 11,
       "chapter": 6,
-      "class": 11,
       "chapter_name": "Equilibrium",
-      "subject": "Chemistry",
-      "total_count": 7,
-      "questions": [
-        {
-          "year": 2023,
-          "question_number": 61,
-          "question": "Given below are two statements : one is labelled as Assertion A and the other is labelled as Reason R : Assertion A : Metallic sodium dissolves in liquid ammonia giving a deep blue solution, which is paramagnetic. Reason R : The deep blue solution is due to the formation of amide. In the light of the above statements, choose the correct answer from the options given below :",
-          "options": {
-            "1": "Both A and R are true but R is NOT the correct explanation of A",
-            "2": "A is true but R is false",
-            "3": "A is false but R is true",
-            "4": "Both A and R are true and R is the correct explanation of A"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_6_002",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 80,
-          "question": "Higher yield of NO in N\u2082(g) + O\u2082(g) \u21cc 2NO(g) can be obtained at",
-          "options": {
-            "1": "Higher temperature",
-            "2": "Lower temperature",
-            "3": "Higher concentration of N\u2082",
-            "4": "Higher concentration of O\u2082"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_6_008",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2025,
-          "question_number": 89,
-          "question": "For the reaction A(g) \u21cc 2B(g), the backward reaction rate constant is higher than the forward reaction rate constant by a factor of 2500, at 1000 K. [Given : R = 0.0831 L atm mol\u207b\u00b9 K\u207b\u00b9] Kp for the reaction at 1000 K is",
-          "options": {
-            "1": "0.021",
-            "2": "83.1",
-            "3": "2.077 \u00d7 10\u2075",
-            "4": "0.033"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_6_004",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 61,
-          "question": "At a given temperature and pressure, the equilibrium constant values for the equilibria are given below: 3A2 + B2 \uf083 2A3B, K1 A3B 2 2 2 3 1 A B , K 2 2 + \uf083 The relation between K1 and K2 is :",
-          "options": {
-            "1": "2 1 2 K 2K =",
-            "2": "1 2 K K 2 =",
-            "3": "1 2 1 K K =",
-            "4": "2 1 1 K K ="
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_6_003",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 67,
-          "question": "Select the incorrect reaction among the following:",
-          "options": {
-            "1": "CH\u2083COCl H\u2082/\u0394 CH\u2083COOH",
-            "2": "CONH\u2082 (i) LiAlH\u2084 (ii) H\u2082O COOH",
-            "3": "CH\u2083CH\u2082OH (i)KMnO\u2084/OH\u207b (ii) H\u2083O\u207a CH\u2083COOH",
-            "4": "CH\u2083CH\u2082CH\u2082OH CrO\u2083-H\u2082SO\u2084 CH\u2083CH\u2082COOH"
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2023,
-          "question_number": 65,
-          "question": "Taking stability as the factor, which one of the following represents correct relationship?",
-          "options": {
-            "1": "InI3 > InI",
-            "2": "AlCl > AlCl3",
-            "3": "T\uf06cI > T\uf06cI3",
-            "4": "T\uf06cCI3 > T\uf06cCI"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2025,
-          "question_number": 68,
-          "question": "Phosphoric acid ionizes in three steps with their ionization constant values K_{a1}, K_{a2} and K_{a3}, respectively, while K is the overall ionization constant. Which of the following statements are true?\nA. log K = log K_{a1} + log K_{a2} + log K_{a3}\nB. H\u2083PO\u2084 is a stronger acid than H\u2082PO\u2084\u207b and HPO\u2084\u00b2\u207b\nC. K_{a1} > K_{a2} > K_{a3}\nD. K = \nK_{a3} + K_{a2}\n2",
-          "options": {
-            "1": "A, B and C only",
-            "2": "A and B only",
-            "3": "A and C only",
-            "4": "B, C and D only"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_6_010",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_7": {
-      "chapter": 7,
-      "class": 12,
-      "chapter_name": "Alcohols, Phenols and Ethers",
-      "subject": "Chemistry",
-      "total_count": 2,
-      "questions": [
-        {
-          "year": 2022,
-          "question_number": 65,
-          "question": "Given below are two statements Statement I: The acidic strength of monosubstituted nitrophenol is higher than phenol because of electron withdrawing nitro group. Statement II: o-nitrophenol, m-nitrophenol and p-nitrophenol will have same acidic strength as they have one nitro group attached to the phenolic ring. In the light of the above statements, choose the most appropriate answer from the options given below:",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct.",
-            "2": "Both Statement I and Statement II are correct.",
-            "3": "Both Statement I and Statement II are incorrect.",
-            "4": "Statement I is correct but Statement II is incorrect."
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_7_009",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 88,
-          "question": "Total number of possible isomers (both structural as well as stereoisomers) of cyclic ethers of molecular formula C\u2084H\u2088O is :",
-          "options": {
-            "1": "11",
-            "2": "6",
-            "3": "8",
-            "4": "10"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_7_014",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_9": {
-      "chapter": 9,
-      "class": 12,
-      "chapter_name": "Amines",
-      "subject": "Chemistry",
-      "total_count": 7,
-      "questions": [
-        {
-          "year": 2022,
-          "question_number": 73,
-          "question": "Given below are two statements Statement I: Primary aliphatic amines react with HNO2 to give unstable diazonium salts. Statement II: Primary aromatic amines react with HNO2 to form diazonium salts which are stable even above 300 K. In the light of the above statements, choose the most appropriate answer from the options given below",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct.",
-            "2": "Both Statement I and Statement II are correct.",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect."
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_9_011",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 79,
-          "question": "Identify the compound that will react with Hinsberg's reagent to give a solid which dissolves in alkali.",
-          "options": {
-            "1": "CH3 CH2 CH2 CH3 CH3 N",
-            "2": "CH3 CH2 NO2",
-            "3": "CH3 CH2 NH CH3",
-            "4": "CH3 CH2 NH2"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_9_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 77,
-          "question": "Which of the following reactions will NOT give primary amine as the product?",
-          "options": {
-            "1": "CH3CNxE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
-            "2": "CH3NCxE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
-            "3": "CH3CONH2xE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
-            "4": "CH3CONH2xE2x86x92Br2/KOH Product"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_9_003",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 66,
-          "question": "The correct order of decreasing basic strength of the given amines is:",
-          "options": {
-            "1": "benzenamine > ethanamine > N-methylaniline > N-ethylethanamine",
-            "2": "N-methylaniline > benzenamine > ethanamine > N-ethylethanamine",
-            "3": "N-ethylethanamine > ethanamine > benzenamine > N-methylaniline",
-            "4": "N-ethylethanamine > ethanamine > N-methylaniline > benzenamine"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_9_008",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 74,
-          "question": "Identify the product in the following reaction:",
-          "options": {
-            "1": "<img src='https://example.com/1.png'>",
-            "2": "<img src='https://example.com/2.png'>",
-            "3": "<img src='https://example.com/3.png'>",
-            "4": "<img src='https://example.com/4.png'>"
-          },
-          "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2023,
-          "question_number": 78,
-          "question": "Identify product (A) in the following reaction:",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "4",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2022,
-          "question_number": 86,
-          "question": "Compound X on reaction with O3 followed by Zn/H2O gives formaldehyde and 2-methyl propanal as products. The compound X is",
-          "options": {
-            "1": "Pent-2-ene",
-            "2": "3-Methylbut-1-ene",
-            "3": "2-Methylbut-1-ene",
-            "4": "2-Methylbut-2-ene"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_9_001",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "11_3": {
-      "chapter": 3,
-      "class": 11,
-      "chapter_name": "Classification of Elements and Periodicity",
-      "subject": "Chemistry",
-      "total_count": 11,
-      "questions": [
-        {
-          "year": 2022,
-          "question_number": 82,
-          "question": "Given below are two statements Statement I The boiling points of the following hydrides of group 16 elements increases in the order \u2013 H2O < H2S < H2Se < H2Te Statement II The boiling points of these hydrides increase with increase in molar mass. In the light of the above statements, choose the most appropriate answer from the options given below :",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct",
-            "2": "Both Statement I and Statement II are correct",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_014",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 51,
-          "question": "The element expected to form largest ion to achieve the nearest noble gas configuration is",
-          "options": {
-            "1": "F",
-            "2": "N",
-            "3": "Na",
-            "4": "O"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_006",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 69,
-          "question": "Which of the following statements are true?\nA. Unlike Ga that has a very high melting point, Cs has a very low melting point.\nB. On Pauling scale, the electronegativity values of N and Cl are not the same.\nC. Ar, K\u207a, Cl\u207b, Ca\u00b2\u207a, and S\u00b2\u207b are all isoelectronic species.\nD. The correct order of the first ionization enthalpies of Na, Mg, Al, and Si is Si >Al > Mg > Na.\nE. The atomic radius of Cs is greater than that of Li and Rb.",
-          "options": {
-            "1": "A, C and E only",
-            "2": "A, B and E only",
-            "3": "C and E only",
-            "4": "C and D only"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_009",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2025,
-          "question_number": 84,
-          "question": "Which among the following electronic configurations belong to main group elements?\nA. [Ne]3s$^1$\nC. [Kr]4d$^{10}$ 5s$^2$5p$^5$\nE. [Rn]5f$^6$6d$^2$7s$^2$\nChoose the correct answer from the option given below :\n(1) A, C and D only\n(2) B and E only\n(3) A and C only\n(4) D and E only",
-          "options": {
-            "1": "A, C and D only",
-            "2": "B and E only",
-            "3": "A and C only",
-            "4": "D and E only"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_003",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 51,
-          "question": "The correct decreasing order of atomic radii (pm) of Li, Be, B and C is",
-          "options": {
-            "1": "Be > Li > B > C",
-            "2": "Li > Be > B > C",
-            "3": "C > B > Be > Li",
-            "4": "Li > C > Be > B"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_005",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 58,
-          "question": "Match List-I with List-II :",
-          "options": {
-            "1": "A-III, B-I, C-IV, D-II",
-            "2": "A-I, B-IV, C-III, D-II",
-            "3": "A-II, B-IV, C-I, D-III",
-            "4": "A-III, B-IV, C-I, D-II"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 74,
-          "question": "Match List-I with List-II: List-I (Block/group in periodic table) List-II (Element) A. Lanthanoid I. Ce B. d-block element II. As C. p-block element III. Cs D. s-block element IV. Mn Choose the correct answer from the options given below:",
-          "options": {
-            "1": "A-I, B-II, C-IV, D-III",
-            "2": "A-I, B-IV, C-III, D-II",
-            "3": "A-I, B-IV, C-II, D-III",
-            "4": "A-IV, B-I, C-II, D-III"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_003",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 85,
-          "question": "Select the correct statements from the following",
-          "options": {
-            "1": "C, D and E only",
-            "2": "A and E only",
-            "3": "B, C and E only",
-            "4": "A, B and C only"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2021,
-          "question_number": 52,
-          "question": "Zr (Z = 40) and Hf (Z = 72) have similar atomic and ionic radii because of :",
-          "options": {
-            "1": "Having similar chemical properties",
-            "2": "Belonging to same group",
-            "3": "Diagonal relationship",
-            "4": "Lanthanoid contraction"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_012",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2025,
-          "question_number": 70,
-          "question": "Given below are two statements :\nStatement I : Like nitrogen that can form ammonia, arsenic can form arsine.\nStatement II : Antimony cannot form antimony pentoxide.\nIn the light of the above statements, choose the most appropriate answer from the options given below :\n(1) Statement I is incorrect but Statement II is correct\n(2) Both Statement I and Statement II are correct\n(3) Both Statement I and Statement II are incorrect\n(4) Statement I is correct but Statement II is incorrect",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct",
-            "2": "Both Statement I and Statement II are correct",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_011",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 83,
-          "question": "Noble gases are named because of their inertness towards reactivity. Identify an incorrect statement about them.",
-          "options": {
-            "1": "Noble gases have large positive values of electron gain enthalpy",
-            "2": "Noble gases are sparingly soluble in water",
-            "3": "Noble gases have very high melting and boiling points",
-            "4": "Noble gases have weak dispersion forces"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_3_010",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "11_8": {
-      "chapter": 8,
-      "class": 11,
-      "chapter_name": "Organic Chemistry - Basic Principles",
-      "subject": "Chemistry",
-      "total_count": 9,
-      "questions": [
-        {
-          "year": 2021,
-          "question_number": 81,
-          "question": "Dihedral angle of least stable conformer of ethane is :",
-          "options": {
-            "1": "0\u00b0",
-            "2": "120\u00b0",
-            "3": "180\u00b0",
-            "4": "60\u00b0"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 81,
-          "question": "Given below are two statements : Statement I : The boiling points of aldehydes and ketones are higher than hydrocarbons of comparable molecular masses because of weak molecular association in aldehydes and ketones due to dipole - dipole interactions. Statement II : The boiling points of aldehydes and ketones are lower than the alcohols of similar molecular masses due to the absence of H-bonding. In the light of the above statements, choose the most appropriate answer from the given below",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct",
-            "2": "Both Statement I and Statement II are correct",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_005",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 72,
-          "question": "Given below are two statements :\nStatement-I : Benzenediazonium salt is prepared by the reaction of aniline with nitrous acid at 273 \u2013 278 K. It decomposes easily in the dry state.\nStatement-II : Insertion of iodine into the benzene ring is difficult and hence iodobenzene is prepared through the reaction of benzenediazonium salt with KI.\nIn the light of the above statements, choose the most appropriate answer from the options given below :\n(1) Statement I is incorrect but Statement II is correct\n(2) Both Statement I and Statement II are correct\n(3) Both Statement I and Statement II are incorrect\n(4) Statement I is correct but Statement II is incorrect",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct",
-            "2": "Both Statement I and Statement II are correct",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect"
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_8_005",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 53,
-          "question": "Given below are two statements:\nStatement I: Propene on treatment with diborane gives an addition product with the formula ((CH\u2083)\u2082 \u2013 CH)\u2082B.\nStatement II: Oxidation of ((CH\u2083)\u2082 \u2013 CH)\u2082B with hydrogen peroxide in presence of NaOH gives propan-2-ol.\nIn the light of the above statements, choose the most appropriate answer from the options given below:",
-          "options": {
-            "1": "Statement I is correct but Statement II is incorrect",
-            "2": "Statement I is incorrect but Statement II is correct",
-            "3": "Both Statement I and Statement II are correct",
-            "4": "Both Statement I and Statement II are incorrect"
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_8_002",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 52,
-          "question": "In Lassaigne's extract of an organic compound, both nitrogen and sulphur are present, which gives blood red colour with Fe$^{3+}$ due to the formation of",
-          "options": {
-            "1": "NaSCN",
-            "2": "[Fe(CN)$_5$NOS]$^{4-}$",
-            "3": "[Fe(SCN)]$^{2+}$",
-            "4": "Fe$_4$[Fe(CN)$_6$]$_3$\u00b7xH$_2$O"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_015",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 69,
-          "question": "The incorrect statement regarding chirality is",
-          "options": {
-            "1": "A racemic mixture shows zero optical rotation",
-            "2": "S N1 reaction yields 1 : 1 mixture of both enantiomers",
-            "3": "The product obtained by S N2 reaction of haloalkane having chirality at the reactive site shows inversion of configuration",
-            "4": "Enantiomers are superimposable mirror images on each other"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_003",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 90,
-          "question": "Given below are two statements:\n\nStatement I:\nIn Lucas test, primary, secondary and tertiary alcohols are distinguished on the basis of their reactivity with conc. HCl + ZnCl2, known as Lucas Reagent.\n\nStatement II:\nPrimary alcohols are most reactive and immediately produce turbidity at room temperature on reaction with Lucas Reagent.\n\nIn the light of the above statements, choose the most appropriate answer from the options given below:",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct",
-            "2": "Both Statement I and Statement II are correct",
-            "3": "Both Statement I and Statement II are incorrect",
-            "4": "Statement I is correct but Statement II is incorrect"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_011",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2021,
-          "question_number": 60,
-          "question": "What is the IUPAC name of the organic compound formed in the following chemical reaction? 2 5 2 (i) C H MgBr, dryEther (ii) H O, H Acetone Product + \u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u2192",
-          "options": {
-            "1": "2-methylbutan-2-ol",
-            "2": "2-methylpropan-2-ol",
-            "3": "pentan-2-ol",
-            "4": "pentan-3-ol"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_007",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2025,
-          "question_number": 76,
-          "question": "Which one of the following reactions does NOT belong to \"Lassaigne's test\"?\n(1) 2CuO + C \u2192 2Cu + CO2\n(2) Na + C + N \u2192 NaCN\n(3) 2Na + S \u2192 Na2S\n(4) Na + X \u2192 NaX",
-          "options": {
-            "1": "2CuO + C \u2192 2Cu + CO2",
-            "2": "Na + C + N \u2192 NaCN",
-            "3": "2Na + S \u2192 Na2S",
-            "4": "Na + X \u2192 NaX"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_8_015",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "11_2": {
-      "chapter": 2,
-      "class": 11,
-      "chapter_name": "Structure of Atom",
-      "subject": "Chemistry",
-      "total_count": 7,
+      "total_count": 16,
+      "by_year": {
+        "2021": 4,
+        "2022": 0,
+        "2023": 4,
+        "2024": 4,
+        "2025": 4
+      },
       "questions": [
         {
           "year": 2025,
@@ -4573,9 +3616,85 @@
             "4": "1/9"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_2_011",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 80,
+          "question": "Higher yield of NO in N\u2082(g) + O\u2082(g) \u21cc 2NO(g) can be obtained at",
+          "options": {
+            "1": "Higher temperature",
+            "2": "Lower temperature",
+            "3": "Higher concentration of N\u2082",
+            "4": "Higher concentration of O\u2082"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 85,
+          "question": "C(s) + 2H\u2082(g) \u2192 CH\u2084(g); \u0394H = -74.8 kJ mol\u207b\u00b9. Which of the following diagrams gives an accurate representation of the above reaction? [R \u2192 reactants; P \u2192 products]",
+          "options": {
+            "1": "Energy (kJ mol\u207b\u00b9) diagram with R below P, and 74.8 as the difference between P and R.",
+            "2": "Energy (kJ mol\u207b\u00b9) diagram with R above P, and 74.8 as the difference between R and P.",
+            "3": "Energy (kJ mol\u207b\u00b9) diagram with R below P, and 74.8 as the difference between R and P.",
+            "4": "Energy (kJ mol\u207b\u00b9) diagram with R above P, and 74.8 as the difference between R and P."
+          },
+          "correct_answer": "2",
+          "has_diagram": true
+        },
+        {
+          "year": 2025,
+          "question_number": 89,
+          "question": "For the reaction A(g) \u21cc 2B(g), the backward reaction rate constant is higher than the forward reaction rate constant by a factor of 2500, at 1000 K. [Given : R = 0.0831 L atm mol\u207b\u00b9 K\u207b\u00b9] Kp for the reaction at 1000 K is",
+          "options": {
+            "1": "0.021",
+            "2": "83.1",
+            "3": "2.077 \u00d7 10\u2075",
+            "4": "0.033"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 52,
+          "question": "Following data is for a reaction between reactants A and B :\nRate\nmol L\u207b\u00b9 s\u207b\u00b9\n2 \u00d7 10\u207b\u00b3\n4 \u00d7 10\u207b\u00b3\n1.6 \u00d7 10\u207b\u00b2\n[A]\n0.1 M\n0.1 M\n0.2 M\n[B]\n0.1 M\n0.2 M\n0.2 M\nThe order of the reaction with respect to A and B, respectively, are",
+          "options": {
+            "1": "1, 0",
+            "2": "0, 1",
+            "3": "1, 2",
+            "4": "2, 1"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2024,
+          "question_number": 61,
+          "question": "At a given temperature and pressure, the equilibrium constant values for the equilibria are given below: 3A2 + B2 \uf083 2A3B, K1 A3B 2 2 2 3 1 A B , K 2 2 + \uf083 The relation between K1 and K2 is :",
+          "options": {
+            "1": "2 1 2 K 2K =",
+            "2": "1 2 K K 2 =",
+            "3": "1 2 1 K K =",
+            "4": "2 1 1 K K ="
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 67,
+          "question": "Select the incorrect reaction among the following:",
+          "options": {
+            "1": "CH\u2083COCl H\u2082/\u0394 CH\u2083COOH",
+            "2": "CONH\u2082 (i) LiAlH\u2084 (ii) H\u2082O COOH",
+            "3": "CH\u2083CH\u2082OH (i)KMnO\u2084/OH\u207b (ii) H\u2083O\u207a CH\u2083COOH",
+            "4": "CH\u2083CH\u2082CH\u2082OH CrO\u2083-H\u2082SO\u2084 CH\u2083CH\u2082COOH"
+          },
+          "correct_answer": "2",
+          "has_diagram": true
         },
         {
           "year": 2024,
@@ -4588,222 +3707,21 @@
             "4": "Both Statement I and Statement II are false"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_2_011",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 83,
-          "question": "Energy and radius of first Bohr orbit of He$^+$ and Li$^{2+}$ are\n[Given R$_H$ = 2.18 \u00d7 10$^{-18}$ J, a$_0$ = 52.9 pm]",
-          "options": {
-            "1": "E$_n$(Li$^{2+}$) = -8.72 \u00d7 10$^{-16}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -19.62 \u00d7 10$^{-16}$ J;\nr$_n$(He$^+$) = 17.6 pm",
-            "2": "E$_n$(Li$^{2+}$) = -19.62 \u00d7 10$^{-18}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -8.72 \u00d7 10$^{-18}$ J;\nr$_n$(He$^+$) = 26.4 pm",
-            "3": "E$_n$(Li$^{2+}$) = -8.72 \u00d7 10$^{-18}$ J;\nr$_n$(Li$^{2+}$) = 26.4 pm\nE$_n$(He$^+$) = -19.62 \u00d7 10$^{-18}$ J;\nr$_n$(He$^+$) = 17.6 pm",
-            "4": "E$_n$(Li$^{2+}$) = -19.62 \u00d7 10$^{-16}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -8.72 \u00d7 10$^{-16}$ J;\nr$_n$(He$^+$) = 26.4 pm"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_2_012",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 57,
-          "question": "Tritium, a radioactive isotope of hydrogen, emits which of the following particles?",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_2_007",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 67,
-          "question": "A particular station of All India Radio, New Delhi broadcasts on a frequency of 1,368 kHz (kilohertz). The wavelength of the electromagnetic radiation emitted by the transmitter is : [speed of light c = 3.0 \u00d7 108 ms\u20131]",
-          "options": {
-            "1": "21.92 cm",
-            "2": "219.3 m",
-            "3": "219.2 m",
-            "4": "2192 m"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "NONE",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 76,
-          "question": "The quantum numbers of four electrons are given below : I. l 1 n 4; l 2; m 2; s 2 = = = \u2212 = \u2212 II. l 1 n 3; l 2; m 1; s 2 = = = = + III. l 1 n 4; l 1; m 0; s 2 = = = = + IV. l 1 n 3; l 1; m \u20131; s 2 = = = = + The correct decreasing order of energy of these electrons is",
-          "options": {
-            "1": "IV > II > III > I",
-            "2": "I > III > II > IV",
-            "3": "III > I > II > IV",
-            "4": "I > II > III > IV"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_2_015",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2023,
-          "question_number": 53,
-          "question": "The relation between $n_m$, ($n_m$ = the number of permissible values of magnetic quantum number ($m$)) for a given value of azimuthal quantum number ($l$), is",
+          "question_number": 54,
+          "question": "Which one is an example of heterogenous catalysis?",
           "options": {
-            "1": "$l = 2n_m + 1$",
-            "2": "$n_m = 2l^2 + 1$",
-            "3": "$n_m = l + 2$",
-            "4": "$l = \\frac{n_m-1}{2}$"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_2_015",
-          "mapping_status": "verified"
-        }
-      ]
-    },
-    "11_5": {
-      "chapter": 5,
-      "class": 11,
-      "chapter_name": "Thermodynamics",
-      "subject": "Chemistry",
-      "total_count": 8,
-      "questions": [
-        {
-          "year": 2025,
-          "question_number": 85,
-          "question": "C(s) + 2H\u2082(g) \u2192 CH\u2084(g); \u0394H = -74.8 kJ mol\u207b\u00b9. Which of the following diagrams gives an accurate representation of the above reaction? [R \u2192 reactants; P \u2192 products]",
-          "options": {
-            "1": "Energy (kJ mol\u207b\u00b9) diagram with R below P, and 74.8 as the difference between P and R.",
-            "2": "Energy (kJ mol\u207b\u00b9) diagram with R above P, and 74.8 as the difference between R and P.",
-            "3": "Energy (kJ mol\u207b\u00b9) diagram with R below P, and 74.8 as the difference between R and P.",
-            "4": "Energy (kJ mol\u207b\u00b9) diagram with R above P, and 74.8 as the difference between R and P."
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_5_006",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2021,
-          "question_number": 86,
-          "question": "For irreversible expansion of an ideal gas under isothermal condition, the correct option is:",
-          "options": {
-            "1": "\u0394U \u2260 0, \u0394Stotal = 0",
-            "2": "\u0394U = 0, \u0394Stotal = 0",
-            "3": "\u0394U \u2260 0, \u0394Stotal \u2260 0",
-            "4": "\u0394U = 0, \u0394Stotal \u2260 0"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_5_005",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 56,
-          "question": "The standard heat of formation, in kcal/mol of Ba$^{2+}$ is :\n[Given : standard heat of formation of SO$_{4}^{2-}$ ion (aq) = -216 kcal/mol, standard heat of crystallisation of BaSO$_{4}$(s) = -4.5 kcal/mol, standard heat of formation of BaSO$_{4}$(s) = -349 kcal/mol]",
-          "options": {
-            "1": "+ 220.5",
-            "2": "- 128.5",
-            "3": "- 133.0",
-            "4": "+ 133.0"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_5_008",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 64,
-          "question": "Choose the correct statement for the work done in the expansion and heat absorbed or released when 5 litres of an ideal gas at 10 atmospheric pressure isothermally expands into vacuum until volume is 15 litres :",
-          "options": {
-            "1": "Both the heat and work done will be greater than zero",
-            "2": "Heat absorbed will be less than zero and work done will be positive",
-            "3": "Work done will be zero and heat will also be zero",
-            "4": "Work done will be greater than zero and heat will remain zero"
+            "1": "Hydrolysis of sugar catalysed by H$^+$ ions",
+            "2": "Decomposition of ozone in presence of nitrogen monoxide",
+            "3": "Combination between dinitrogen and dihydrogen to form ammonia in the presence of finely divided iron",
+            "4": "Oxidation of sulphur dioxide into sulphur trioxide in the presence of oxides of nitrogen"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_5_005",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
-        {
-          "year": 2024,
-          "question_number": 79,
-          "question": "For an endothermic reaction:\n(A) qp is negative.\n(B) \u0394rH is positive.\n(C) \u0394rH is negative.\n(D) qp is positive.\nChoose the correct answer from the options given, below:",
-          "options": {
-            "1": "B and D",
-            "2": "C and D",
-            "3": "A and B",
-            "4": "A and C"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_5_006",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 77,
-          "question": "Which of the following p-V curve represents maximum work done?",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_11_5_005",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2021,
-          "question_number": 55,
-          "question": "Which one among the following is the correct option for right relationship between CP and CV for one mole of ideal gas?",
-          "options": {
-            "1": "CV = RCP",
-            "2": "CP + CV = R",
-            "3": "CP \u2013 CV = R",
-            "4": "CP = RCV"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_5_004",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2021,
-          "question_number": 72,
-          "question": "For a reaction A \u2192 B, enthalpy of reaction is \u20134.2 kJ mol\u20131 and enthalpy of activation is 9.6 kJ mol\u20131. The correct potential energy profile for the reaction is shown in option.",
-          "options": {
-            "1": "PE Reaction Progress A B",
-            "2": "Reaction Progress PE A B",
-            "3": "Reaction Progress PE B A"
-          },
-          "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_11_5_006",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "11_1": {
-      "chapter": 1,
-      "class": 11,
-      "chapter_name": "Some Basic Concepts of Chemistry",
-      "subject": "Chemistry",
-      "total_count": 9,
-      "questions": [
         {
           "year": 2023,
           "question_number": 55,
@@ -4815,9 +3733,46 @@
             "4": ""
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_11_1_005",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 65,
+          "question": "Taking stability as the factor, which one of the following represents correct relationship?",
+          "options": {
+            "1": "InI3 > InI",
+            "2": "AlCl > AlCl3",
+            "3": "T\uf06cI > T\uf06cI3",
+            "4": "T\uf06cCI3 > T\uf06cCI"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 69,
+          "question": "Given below are two statements: one is labelled as Assertion A and the other is labelled as Reason R Assertion A : In equation \u0394rG = \u2013nFEcell value of \u0394rG depends on n. Reason R : Ecell is an intensive property and \u0394rG is an extensive property.",
+          "options": {
+            "1": "Both A and R are true and R is NOT the correct explanation of A",
+            "2": "A is true but R is false",
+            "3": "A is false but R is true",
+            "4": "Both A and R are true and R is the correct explanation of A"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 49,
+          "question": "A particle moving in a circle of radius R with a uniform speed takes a time T to complete one revolution. If this particle were projected with the same speed at an angle '\uf071' to the horizontal, the maximum height attained by it equals 4R. The angle of projection, \uf071, is then given by :",
+          "options": {
+            "1": "1 2 2 1 2 2 sin gT R \uf02d\uf0e6 \uf0f6 \uf071\uf03d \uf0e7 \uf0f7 \uf070 \uf0e8 \uf0f8",
+            "2": "1 2 2 1 2 cos gT R \uf02d\uf0e6 \uf0f6 \uf071\uf03d \uf0e7 \uf0f7 \uf070 \uf0e8 \uf0f8",
+            "3": "1 2 2 1 2 cos R gT \uf02d\uf0e6 \uf0f6 \uf070 \uf071\uf03d \uf0e7 \uf0f7 \uf0e8 \uf0f8",
+            "4": "1 2 2 1 2 sin R gT \uf02d\uf0e6 \uf0f6 \uf070 \uf071\uf03d \uf0e7 \uf0f7 \uf0e8 \uf0f8"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -4830,238 +3785,8 @@
             "4": ""
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_11_1_005",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
         },
-        {
-          "year": 2025,
-          "question_number": 54,
-          "question": "Among the following, choose the ones with equal number of atoms.\nA. 212 g of Na\u2082CO\u2083(s) [molar mass = 106 g]\nB. 248 g of Na\u2082O(s) [molar mass = 62 g]\nC. 240 g of NaOH(s) [molar mass = 40 g]\nD. 12 g of H\u2082(g) [molar mass = 2 g]\nE. 220 g of CO\u2082(g) [molar mass = 44 g]\nChoose the correct answer from the options given below :",
-          "options": {
-            "1": "B, D, and E only",
-            "2": "A, B, and C only",
-            "3": "A, B, and D only",
-            "4": "B, C, and D only"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_9_2_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 80,
-          "question": "1.0 g of H\u2082 has same number of molecules as in:",
-          "options": {
-            "1": "14 g of N\u2082",
-            "2": "18 g of H\u2082O",
-            "3": "16 g of CO",
-            "4": "28 g of N\u2082"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_9_2_001",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 47,
-          "question": "According to the law of equipartition of energy, the number of vibrational modes of a polyatomic gas of constant $\\gamma = \\frac{C_p}{C_v}$ is (Cp where Cv are the specific heat capacities of the gas at constant pressure and constant volume, respectively):",
-          "options": {
-            "1": "\\frac{4+3\\gamma}{\\gamma-1}",
-            "2": "\\frac{3+4\\gamma}{\\gamma-1}",
-            "3": "\\frac{4-3\\gamma}{\\gamma-1}",
-            "4": "\\frac{3-4\\gamma}{\\gamma-1}"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_1_004",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2023,
-          "question_number": 66,
-          "question": "Which of the following statements are NOT correct? A. Hydrogen is used to reduce heavy metal oxides to metals. B. Heavy water is used to study reaction mechanism. C. Hydrogen is used to make saturated fats from oils. D. The H\u2013H bond dissociation enthalpy is lowest as compared to a single bond between two atoms of any elements. E. Hydrogen reduces oxides of metals that are more active than iron.",
-          "options": {
-            "1": "B, D only",
-            "2": "D, E only",
-            "3": "A, B, C only",
-            "4": "B, C, D, E only"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_1_003",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 79,
-          "question": "Dalton's Atomic theory could not explain which of the following?",
-          "options": {
-            "1": "Law of gaseous volume",
-            "2": "Law of conservation of mass",
-            "3": "Law of constant proportion",
-            "4": "Law of multiple proportion"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_1_002",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 78,
-          "question": "Match List-I with List-II.",
-          "options": {
-            "1": "(a) - (iv), (b) - (iii), (c) - (ii), (d) - (i)",
-            "2": "(a) - (iii), (b) - (iv), (c) - (ii), (d) - (i)",
-            "3": "(a) - (ii), (b) - (iii), (c) - (iv), (d) - (i)",
-            "4": "(a) - (i), (b) - (iii), (c) - (ii), (d) - (iv)"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2022,
-          "question_number": 89,
-          "question": "A 10.0 L flask contains 64 g of oxygen at 27\u00b0C. (Assume O2 gas is behaving ideally). The pressure inside the flask in bar is (Given R = 0.0831 L bar K\u22121 mol\u22121)",
-          "options": {
-            "1": "4.9",
-            "2": "2.5",
-            "3": "498.6",
-            "4": "49.8"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_1_009",
-          "mapping_status": "verified"
-        }
-      ]
-    },
-    "12_2": {
-      "chapter": 2,
-      "class": 12,
-      "chapter_name": "Electrochemistry",
-      "subject": "Chemistry",
-      "total_count": 7,
-      "questions": [
-        {
-          "year": 2023,
-          "question_number": 69,
-          "question": "Given below are two statements: one is labelled as Assertion A and the other is labelled as Reason R Assertion A : In equation \u0394rG = \u2013nFEcell value of \u0394rG depends on n. Reason R : Ecell is an intensive property and \u0394rG is an extensive property.",
-          "options": {
-            "1": "Both A and R are true and R is NOT the correct explanation of A",
-            "2": "A is true but R is false",
-            "3": "A is false but R is true",
-            "4": "Both A and R are true and R is the correct explanation of A"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_2_005",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 52,
-          "question": "At 298 K, the standard electrode potentials of Cu2+ / Cu, Zn2+ / Zn, Fe2+ / Fe and Ag+ / Ag are 0.34 V, \u20130.76 V, \u20130.44 V and 0.80 V, respectively. On the basis of standard electrode potential, predict which of the following reaction cannot occur?",
-          "options": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": ""
-          },
-          "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_12_2_002",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 46,
-          "question": "The given circuit shows a uniform straight wire $AB$ of $40$ cm length fixed at both ends. In order to get zero reading in the galvanometer $G$, the free end of $J$ is to be placed from $B$ at:",
-          "options": {
-            "1": "32 cm",
-            "2": "8 cm",
-            "3": "16 cm",
-            "4": "24 cm"
-          },
-          "correct_answer": "4",
-          "has_diagram": true,
-          "concept_id": "N/A",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 90,
-          "question": "The standard cell potential of the following cell Zn|Zn2+(aq)|Fe2+(aq)|Fe is 0.32 V. Calculate the standard Gibbs energy change for the reaction :\nZn(s) + Fe2+(aq) \u2192 Zn2+(aq) + Fe(s)\n(Given : 1 F = 96487 C)",
-          "options": {
-            "1": "\u201361.75 kJ mol\u20131",
-            "2": "+5.006 kJ mol\u20131",
-            "3": "\u20135.006 kJ mol\u20131",
-            "4": "+61.75 kJ mol\u20131"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_2_005",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 73,
-          "question": "The stability of $Cu^{2+}$ is more than $Cu^+$ salts in aqueous solution due to",
-          "options": {
-            "1": "Enthalpy of atomization",
-            "2": "Hydration energy",
-            "3": "Second ionisation enthalpy",
-            "4": "First ionisation enthalpy"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_2_002",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 63,
-          "question": "Given below are half cell reactions: \u2212 + \u2212 + + + \u2192 + 2 4 2 MnO 8H 5e Mn 4H O + \u2212= \u2212 2 4 \u00ba Mn /MnO E 1.510 V + \u2212 + + \u2192 2 2 1O 2H 2e H O 2 = + 2 2 \u00ba O /H O E 1.223 V Will the permanganate ion, \u2013 4 MnO liberate O2 from water in the presence of an acid?",
-          "options": {
-            "1": "No, because \uf0b0 = \u2212 cell E 2.733 V",
-            "2": "Yes, because \uf0b0 = + cell E 0.287 V",
-            "3": "No, because \uf0b0 = cell E \u2013 0.287 V",
-            "4": "Yes, because \uf0b0 = + cell E 2.733 V"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_2_002",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2021,
-          "question_number": 62,
-          "question": "The molar conductance of NaCl, HCl and CH3COONa at infinite dilution are 126.45, 426.16 and 91.0 S cm2 mol\u20131 respectively. The molar conductance of CH3COOH at infinite dilution is. Choose the right option for your answer.",
-          "options": {
-            "1": "540.48 S cm2 mol\u20131",
-            "2": "201.28 S cm2 mol\u20131",
-            "3": "390.71 S cm2 mol\u20131",
-            "4": "698.28 S cm2 mol\u20131"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_2_008",
-          "mapping_status": "verified"
-        }
-      ]
-    },
-    "9_2": {
-      "chapter": 2,
-      "class": 9,
-      "chapter_name": "Is Matter Around Us Pure",
-      "subject": "Chemistry",
-      "total_count": 2,
-      "questions": [
         {
           "year": 2021,
           "question_number": 54,
@@ -5073,33 +3798,35 @@
             "4": "Starch solution"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_9_2_009",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
         },
         {
-          "year": 2025,
-          "question_number": 82,
-          "question": "Match List-I with List-II\nList-I\n(Example)\nA. Humidity\nB. Alloys\nC. Amalgams\nD. Smoke\nChoose the correct answer from the options given below:\nList-II\n(Type of Solution)\nI. Solid in solid\nII. Liquid in gas\nIII. Solid in gas\nIV. Liquid in solid",
+          "year": 2021,
+          "question_number": 86,
+          "question": "For irreversible expansion of an ideal gas under isothermal condition, the correct option is:",
           "options": {
-            "1": "A-III, B-II, C-I, D-IV",
-            "2": "A-II, B-IV, C-I, D-III",
-            "3": "A-II, B-I, C-IV, D-III",
-            "4": "A-III, B-I, C-IV, D-II"
+            "1": "\u0394U \u2260 0, \u0394Stotal = 0",
+            "2": "\u0394U = 0, \u0394Stotal = 0",
+            "3": "\u0394U \u2260 0, \u0394Stotal \u2260 0",
+            "4": "\u0394U = 0, \u0394Stotal \u2260 0"
           },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_9_2_002",
-          "mapping_status": "chapter_corrected"
+          "correct_answer": "4",
+          "has_diagram": false
         }
       ]
     },
     "12_5": {
-      "chapter": 5,
       "class": 12,
+      "chapter": 5,
       "chapter_name": "Coordination Compounds",
-      "subject": "Chemistry",
       "total_count": 10,
+      "by_year": {
+        "2021": 2,
+        "2022": 2,
+        "2023": 2,
+        "2024": 2,
+        "2025": 2
+      },
       "questions": [
         {
           "year": 2025,
@@ -5112,9 +3839,7 @@
             "4": "[Ti(H2O)6]3+"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_016",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2025,
@@ -5127,9 +3852,7 @@
             "4": "[Co(NH$_{3}$)$_{6}$]Cl$_{3}$"
           },
           "correct_answer": "2,3",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_009",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5142,9 +3865,7 @@
             "4": "CN\u2013"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_003",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5157,9 +3878,7 @@
             "4": "bidentate ligand"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_003",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -5172,9 +3891,7 @@
             "4": ""
           },
           "correct_answer": "4",
-          "has_diagram": true,
-          "concept_id": "chem_12_5_008",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2023,
@@ -5187,9 +3904,20 @@
             "4": "[Co(NH3)4(H2O)Br](NO3)2"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_015",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 53,
+          "question": "The IUPAC name of an element with atomic number 119 is",
+          "options": {
+            "1": "ununoctium",
+            "2": "ununennium",
+            "3": "unnilennium",
+            "4": "unununnium"
+          },
+          "correct_answer": "",
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -5202,9 +3930,7 @@
             "4": "dicyanidosilver(I) diaquaargentate(I)"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_009",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5217,9 +3943,7 @@
             "4": "Bidentate ligand with two \"N\" donor atoms"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_003",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5232,117 +3956,22 @@
             "4": ""
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_12_5_014",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 54,
-          "question": "Given below are two statements Statement I: In the coagulation of a negative sol, the flocculating power of the three given ions is in the order Al3+ > Ba2+ > Na+ Statement II: In the coagulation of a positive sol, the flocculating power of the three given salts is in the order NaCl > Na2SO4 > Na3PO4 In the light of the above statements, choose the most appropriate answer from the options given below",
-          "options": {
-            "1": "Statement I is incorrect but Statement II is correct.",
-            "2": "Both Statement I and Statement II are correct.",
-            "3": "Both Statement I and Statement II are incorrect.",
-            "4": "Statement I is correct but Statement II is incorrect."
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_5_005",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_4": {
-      "chapter": 4,
-      "class": 12,
-      "chapter_name": "d and f Block Elements",
-      "subject": "Chemistry",
-      "total_count": 5,
-      "questions": [
-        {
-          "year": 2022,
-          "question_number": 53,
-          "question": "The IUPAC name of an element with atomic number 119 is",
-          "options": {
-            "1": "ununoctium",
-            "2": "ununennium",
-            "3": "unnilennium",
-            "4": "unununnium"
-          },
-          "correct_answer": "",
-          "has_diagram": false,
-          "concept_id": "chem_12_4_015",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2025,
-          "question_number": 64,
-          "question": "Given below are two statements :\nStatement I : Ferromagnetism is considered as an extreme form of paramagnetism.\nStatement II : The number of unpaired electrons in a Cr2+ ion (Z = 24) is the same as that of a Nd3+ ion (Z = 60).\nIn the light of the above statements, choose the correct answer from the options given below :\n(1) Statement I is false but Statement II is true\n(3) Both Statement I and Statement II are false",
-          "options": {
-            "1": "Statement I is false but Statement II is true",
-            "2": "Both Statement I and Statement II are true",
-            "3": "Both Statement I and Statement II are false",
-            "4": "Statement I is true but Statement II is false"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_4_007",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 60,
-          "question": "Which of the following pairs of ions will have same spin only magnetic moment values within the pair? A. Zn2+, Ti2+ B. Cr2+, Fe2+ C. Ti3+, Cu2+ D. V2+, Cu+ Choose the correct answer from the options given below :",
-          "options": {
-            "1": "C and D only",
-            "2": "A and D only",
-            "3": "A and B only",
-            "4": "B and C only"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_4_007",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2024,
-          "question_number": 68,
-          "question": "The UV-visible absorption bands in the spectra of lanthanoid ions are 'X', probably because of the excitation of electrons involving 'Y'. The 'X' and 'Y', respectively, are :",
-          "options": {
-            "1": "Broad and f orbitals",
-            "2": "Narrow and f orbitals",
-            "3": "Broad and d and f orbitals",
-            "4": "Narrow and d and f orbitals"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_12_4_008",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2022,
-          "question_number": 85,
-          "question": "Gadolinium has a low value of third ionisation enthalpy because of",
-          "options": {
-            "1": "high basic character",
-            "2": "small size",
-            "3": "high exchange enthalpy",
-            "4": "high electronegativity"
-          },
-          "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_12_4_005",
-          "mapping_status": "verified"
+          "has_diagram": true
         }
       ]
     },
     "10_4": {
-      "chapter": 4,
       "class": 10,
+      "chapter": 4,
       "chapter_name": "Carbon and its Compounds",
-      "subject": "Chemistry",
-      "total_count": 13,
+      "total_count": 20,
+      "by_year": {
+        "2021": 7,
+        "2022": 0,
+        "2023": 4,
+        "2024": 5,
+        "2025": 4
+      },
       "questions": [
         {
           "year": 2025,
@@ -5355,9 +3984,7 @@
             "4": "A-III, B-IV, C-I, D-II"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_10_4_013",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -5370,9 +3997,33 @@
             "4": "CH = CH2"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_10_4_004",
-          "mapping_status": "verified"
+          "has_diagram": true
+        },
+        {
+          "year": 2025,
+          "question_number": 71,
+          "question": "Which of the following aqueous solution will exhibit highest boiling point?",
+          "options": {
+            "1": "0.015M C\u2086H\u2081\u2082O\u2086",
+            "2": "0.01M Urea",
+            "3": "0.01M KNO\u2083",
+            "4": "0.01M Na\u2082SO\u2084"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 78,
+          "question": "Sugar 'X'\nA. is found in honey\nB. is a keto sugar\nC. exists in \u03b1 and \u03b2 \u2013 anomeric forms.\nD. Is laevorotatory.\n'X' is :",
+          "options": {
+            "1": "Sucrose",
+            "2": "D-Glucose",
+            "3": "D-Fructose",
+            "4": "Maltose"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
         },
         {
           "year": 2024,
@@ -5385,9 +4036,7 @@
             "4": "Propyne"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_010",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5400,9 +4049,7 @@
             "4": "Triethylamine"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_006",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5415,9 +4062,46 @@
             "4": "close to but below 100\u00b0C"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_008",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 83,
+          "question": "Given below are two statements : Statement I : Glycogen is similar to amylose in its structure. Statement II : Glycogen is found in yeast and fungi also. In the light of the above statements, choose the correct answer from the options given below :",
+          "options": {
+            "1": "Statement I is true but Statement II is false.",
+            "2": "Statement I is false but Statement II is true.",
+            "3": "Both Statement I and Statement II are true.",
+            "4": "Both Statement I and Statement II are false."
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 86,
+          "question": "Identify D in the following sequence of reactions: CH\u2083CH\u2082OH \u2192 P + I\u2082 / dry ether A \u2192 Mg B \u2192 HCHO C \u2192 H\u2082O D (major)",
+          "options": {
+            "1": "n-propyl alcohol",
+            "2": "isopropyl alcohol",
+            "3": "propanal",
+            "4": "propionic acid"
+          },
+          "correct_answer": "1",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 48,
+          "question": "The resistance of platinum wire at 0^{\\circ}C is 2 \\Omega and 6.8 \\Omega at 80^{\\circ}C. The temperature coefficient of resistance of the wire is",
+          "options": {
+            "1": "3 \\\\times 10^{-3} ^{\\\\circ}C^{-1}",
+            "2": "3 \\\\times 10^{-2} ^{\\\\circ}C^{-1}",
+            "3": "3 \\\\times 10^{-1} ^{\\\\circ}C^{-1}",
+            "4": "3 \\\\times 10^{-4} ^{\\\\circ}C^{-1}"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -5430,9 +4114,7 @@
             "4": "Benzylic halide"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
         },
         {
           "year": 2023,
@@ -5445,9 +4127,20 @@
             "4": "16"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_009",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 70,
+          "question": "Amongst the following the total number of species NOT having eight electrons around central atom in its outermost shell, is $NH_3, AlCl_3, BeCl_2, CCl_4, PCl_5 :$",
+          "options": {
+            "1": "2",
+            "2": "4",
+            "3": "1",
+            "4": "3"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5460,9 +4153,7 @@
             "4": "Hofmann Rule"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_010",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5475,9 +4166,7 @@
             "4": "C3H6O"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_005",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5490,9 +4179,20 @@
             "4": "CH3 CH3 CH CH CH3 Br"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_010",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 79,
+          "question": "Identify the compound that will react with Hinsberg's reagent to give a solid which dissolves in alkali.",
+          "options": {
+            "1": "CH3 CH2 CH2 CH3 CH3 N",
+            "2": "CH3 CH2 NO2",
+            "3": "CH3 CH2 NH CH3",
+            "4": "CH3 CH2 NH2"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5505,63 +4205,7 @@
             "4": "CH3"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_002",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2021,
-          "question_number": 90,
-          "question": "CH3CH2COO\u2013 Na+ NaOH, +? Heat CH3CH3 + Na2CO3. Consider the above reaction and identify the missing reagent/chemical.",
-          "options": {
-            "1": "DIBAL-H",
-            "2": "B2H6",
-            "3": "Red Phosphorus",
-            "4": "CaO"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_009",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 79,
-          "question": "Match List-I with List-II. List-I List-II A. Coke I. Carbon atoms are sp3 hybridised B. Diamond II. Used as a dry lubricant C. Fullerene III. Used as a reducing agent D. Graphite IV. Cage like molecules Choose the correct answer from the options given below :",
-          "options": {
-            "1": "A-IV, B-I, C-II, D-III",
-            "2": "A-III, B-I, C-IV, D-II",
-            "3": "A-III, B-IV, C-I, D-II",
-            "4": "A-II, B-IV, C-I, D-III"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_10_4_015",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_8": {
-      "chapter": 8,
-      "class": 12,
-      "chapter_name": "Aldehydes, Ketones and Carboxylic Acids",
-      "subject": "Chemistry",
-      "total_count": 5,
-      "questions": [
-        {
-          "year": 2024,
-          "question_number": 86,
-          "question": "Identify D in the following sequence of reactions: CH\u2083CH\u2082OH \u2192 P + I\u2082 / dry ether A \u2192 Mg B \u2192 HCHO C \u2192 H\u2082O D (major)",
-          "options": {
-            "1": "n-propyl alcohol",
-            "2": "isopropyl alcohol",
-            "3": "propanal",
-            "4": "propionic acid"
-          },
-          "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_12_8_010",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5574,10 +4218,36 @@
             "4": "OH CH3 CH \u2013 2 3 C\u2013CH H OH"
           },
           "correct_answer": "",
-          "has_diagram": false,
-          "concept_id": "chem_12_8_010",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
         },
+        {
+          "year": 2021,
+          "question_number": 90,
+          "question": "CH3CH2COO\u2013 Na+ NaOH, +? Heat CH3CH3 + Na2CO3. Consider the above reaction and identify the missing reagent/chemical.",
+          "options": {
+            "1": "DIBAL-H",
+            "2": "B2H6",
+            "3": "Red Phosphorus",
+            "4": "CaO"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_9": {
+      "class": 11,
+      "chapter": 9,
+      "chapter_name": "Hydrocarbons",
+      "total_count": 15,
+      "by_year": {
+        "2021": 1,
+        "2022": 2,
+        "2023": 3,
+        "2024": 2,
+        "2025": 7
+      },
+      "questions": [
         {
           "year": 2025,
           "question_number": 52,
@@ -5589,48 +4259,8 @@
             "4": "A chemical structure of a tertiary alcohol with a phenyl group and two methyl groups attached to one carbon, and a three-carbon chain attached to that carbon with a hydroxyl group at the end."
           },
           "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_12_8_005",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
         },
-        {
-          "year": 2025,
-          "question_number": 75,
-          "question": "The correct order of decreasing acidity of the following aliphatic acids is\n(1) HCOOH > (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH\n(2) (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH > HCOOH\n(3) CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH > HCOOH\n(4) HCOOH > CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH",
-          "options": {
-            "1": "HCOOH > (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH",
-            "2": "(CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH > HCOOH",
-            "3": "CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH > HCOOH",
-            "4": "HCOOH > CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_12_8_014",
-          "mapping_status": "chapter_corrected"
-        },
-        {
-          "year": 2022,
-          "question_number": 56,
-          "question": "+ 3 H O dry 2 ether RMgX+CO Y RCOOH \u23af\u23af\u23af\u2192 \u23af\u23af\u23af\u2192 What is Y in the above reaction?",
-          "options": {
-            "2": "RCOO\u2013Mg+X",
-            "3": "R3CO\u2013Mg+X",
-            "4": "RCOO\u2013X+"
-          },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_12_8_013",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "11_9": {
-      "chapter": 9,
-      "class": 11,
-      "chapter_name": "Hydrocarbons",
-      "subject": "Chemistry",
-      "total_count": 12,
-      "questions": [
         {
           "year": 2025,
           "question_number": 55,
@@ -5642,9 +4272,7 @@
             "4": "III > II > I"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_9_005",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -5657,9 +4285,7 @@
             "4": "H-C\u2261C-H\nred hot Iron Tube\nat 873 K"
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_11_9_012",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -5672,9 +4298,7 @@
             "4": "(i) NaBH\u2084, (ii) H\u207a/H\u2082O"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -5687,9 +4311,7 @@
             "4": "5"
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_11_9_006",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2025,
@@ -5702,9 +4324,20 @@
             "4": "A cyclic structure with a CH3 group and a CN group attached to adjacent carbons."
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
+        },
+        {
+          "year": 2025,
+          "question_number": 88,
+          "question": "Total number of possible isomers (both structural as well as stereoisomers) of cyclic ethers of molecular formula C\u2084H\u2088O is :",
+          "options": {
+            "1": "11",
+            "2": "6",
+            "3": "8",
+            "4": "10"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5717,9 +4350,7 @@
             "4": "C2H5"
           },
           "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
         },
         {
           "year": 2024,
@@ -5732,9 +4363,7 @@
             "4": "1-ethyl-4-fluoro-3-nitrobenzene"
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_11_9_002",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2023,
@@ -5747,9 +4376,33 @@
             "4": ""
           },
           "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 79,
+          "question": "Match List-I with List-II. List-I List-II A. Coke I. Carbon atoms are sp3 hybridised B. Diamond II. Used as a dry lubricant C. Fullerene III. Used as a reducing agent D. Graphite IV. Cage like molecules Choose the correct answer from the options given below :",
+          "options": {
+            "1": "A-IV, B-I, C-II, D-III",
+            "2": "A-III, B-I, C-IV, D-II",
+            "3": "A-III, B-IV, C-I, D-II",
+            "4": "A-II, B-IV, C-I, D-III"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 81,
+          "question": "Which amongst the following molecules on polymerization produces neoprene?",
+          "options": {
+            "1": "2 2 Cl | H C C\u2013 CH CH \uf03d \uf03d",
+            "2": "2 H C CH \u2013 C CH \uf03d \uf0ba",
+            "3": "| 2 2 CH3 H C C \u2013 CH CH \uf03d \uf03d",
+            "4": "2 2 H C CH \u2013 CH CH \uf03d \uf03d"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -5762,9 +4415,20 @@
             "4": ""
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_9_013",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 81,
+          "question": "Given below are two statements : Statement I : The boiling points of aldehydes and ketones are higher than hydrocarbons of comparable molecular masses because of weak molecular association in aldehydes and ketones due to dipole - dipole interactions. Statement II : The boiling points of aldehydes and ketones are lower than the alcohols of similar molecular masses due to the absence of H-bonding. In the light of the above statements, choose the most appropriate answer from the given below",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct",
+            "2": "Both Statement I and Statement II are correct",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -5776,87 +4440,182 @@
             "3": ""
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_9_007",
-          "mapping_status": "verified"
+          "has_diagram": true
+        }
+      ]
+    },
+    "9_2": {
+      "class": 9,
+      "chapter": 2,
+      "chapter_name": "Atoms and Molecules",
+      "total_count": 2,
+      "by_year": {
+        "2021": 0,
+        "2022": 0,
+        "2023": 0,
+        "2024": 1,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 54,
+          "question": "Among the following, choose the ones with equal number of atoms.\nA. 212 g of Na\u2082CO\u2083(s) [molar mass = 106 g]\nB. 248 g of Na\u2082O(s) [molar mass = 62 g]\nC. 240 g of NaOH(s) [molar mass = 40 g]\nD. 12 g of H\u2082(g) [molar mass = 2 g]\nE. 220 g of CO\u2082(g) [molar mass = 44 g]\nChoose the correct answer from the options given below :",
+          "options": {
+            "1": "B, D, and E only",
+            "2": "A, B, and C only",
+            "3": "A, B, and D only",
+            "4": "B, C, and D only"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
         },
         {
           "year": 2024,
-          "question_number": 54,
-          "question": "Baeyer's reagent is :",
+          "question_number": 80,
+          "question": "1.0 g of H\u2082 has same number of molecules as in:",
           "options": {
-            "1": "Acidic potassium permanganate solution",
-            "2": "Acidic potassium dichromate solution",
-            "3": "Cold, dilute, aqueous solution of potassium permanganate",
-            "4": "Hot, concentrated solution of potassium permanganate"
+            "1": "14 g of N\u2082",
+            "2": "18 g of H\u2082O",
+            "3": "16 g of CO",
+            "4": "28 g of N\u2082"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_5": {
+      "class": 11,
+      "chapter": 5,
+      "chapter_name": "Thermodynamics",
+      "total_count": 8,
+      "by_year": {
+        "2021": 1,
+        "2022": 1,
+        "2023": 1,
+        "2024": 4,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 56,
+          "question": "The standard heat of formation, in kcal/mol of Ba$^{2+}$ is :\n[Given : standard heat of formation of SO$_{4}^{2-}$ ion (aq) = -216 kcal/mol, standard heat of crystallisation of BaSO$_{4}$(s) = -4.5 kcal/mol, standard heat of formation of BaSO$_{4}$(s) = -349 kcal/mol]",
+          "options": {
+            "1": "+ 220.5",
+            "2": "- 128.5",
+            "3": "- 133.0",
+            "4": "+ 133.0"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 47,
+          "question": "According to the law of equipartition of energy, the number of vibrational modes of a polyatomic gas of constant $\\gamma = \\frac{C_p}{C_v}$ is (Cp where Cv are the specific heat capacities of the gas at constant pressure and constant volume, respectively):",
+          "options": {
+            "1": "\\frac{4+3\\gamma}{\\gamma-1}",
+            "2": "\\frac{3+4\\gamma}{\\gamma-1}",
+            "3": "\\frac{4-3\\gamma}{\\gamma-1}",
+            "4": "\\frac{3-4\\gamma}{\\gamma-1}"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_11_9_008",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 64,
+          "question": "Choose the correct statement for the work done in the expansion and heat absorbed or released when 5 litres of an ideal gas at 10 atmospheric pressure isothermally expands into vacuum until volume is 15 litres :",
+          "options": {
+            "1": "Both the heat and work done will be greater than zero",
+            "2": "Heat absorbed will be less than zero and work done will be positive",
+            "3": "Work done will be zero and heat will also be zero",
+            "4": "Work done will be greater than zero and heat will remain zero"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 79,
+          "question": "For an endothermic reaction:\n(A) qp is negative.\n(B) \u0394rH is positive.\n(C) \u0394rH is negative.\n(D) qp is positive.\nChoose the correct answer from the options given, below:",
+          "options": {
+            "1": "B and D",
+            "2": "C and D",
+            "3": "A and B",
+            "4": "A and C"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 81,
+          "question": "Which of the following plot represents the variation of ln k versus 1/T in accordance with Arrhenius equation?",
+          "options": {
+            "1": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line.",
+            "2": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line starting from origin.",
+            "3": "Graph with ln k on y-axis, 1/T on x-axis, showing a downward sloping line.",
+            "4": "Graph with ln k on y-axis, 1/T on x-axis, showing an upward sloping line."
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 51,
+          "question": "The element expected to form largest ion to achieve the nearest noble gas configuration is",
+          "options": {
+            "1": "F",
+            "2": "N",
+            "3": "Na",
+            "4": "O"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2022,
-          "question_number": 55,
-          "question": "Which of the following statement is not correct about diborane?",
+          "question_number": 77,
+          "question": "Which of the following p-V curve represents maximum work done?",
           "options": {
-            "1": "Both the Boron atoms are sp2 hybridised.",
-            "2": "There are two 3-centre-2-electron bonds.",
-            "3": "The four terminal B-H bonds are two centre two electron bonds.",
-            "4": "The four terminal Hydrogen atoms and the two Boron atoms lie in one plane."
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
           },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_9_004",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "12_6": {
-      "chapter": 6,
-      "class": 12,
-      "chapter_name": "Haloalkanes and Haloarenes",
-      "subject": "Chemistry",
-      "total_count": 2,
-      "questions": [
-        {
-          "year": 2023,
-          "question_number": 81,
-          "question": "Which amongst the following molecules on polymerization produces neoprene?",
-          "options": {
-            "1": "2 2 Cl | H C C\u2013 CH CH \uf03d \uf03d",
-            "2": "2 H C CH \u2013 C CH \uf03d \uf0ba",
-            "3": "| 2 2 CH3 H C C \u2013 CH CH \uf03d \uf03d",
-            "4": "2 2 H C CH \u2013 CH CH \uf03d \uf03d"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_12_6_015",
-          "mapping_status": "chapter_corrected"
+          "correct_answer": "3",
+          "has_diagram": true
         },
         {
-          "year": 2025,
-          "question_number": 74,
-          "question": "Given below are two statements : one is labelled as Assertion (A) and the other is labelled as Reason (R).\nAssertion (A) :  undergoes SN2 reaction faster than .\nReason (R) : Iodine is a better leaving group because of its large size.\nIn the light of the above statements, choose the correct answer from the options given below:\n(1) A is false but R is true\n(2) Both A and R are true and R is the correct explanation of A\n(3) Both A and R are true but R is not the correct explanation of A\n(4) A is true but R is false",
+          "year": 2021,
+          "question_number": 55,
+          "question": "Which one among the following is the correct option for right relationship between CP and CV for one mole of ideal gas?",
           "options": {
-            "1": "A is false but R is true",
-            "2": "Both A and R are true and R is the correct explanation of A",
-            "3": "Both A and R are true but R is not the correct explanation of A",
-            "4": "A is true but R is false"
+            "1": "CV = RCP",
+            "2": "CP + CV = R",
+            "3": "CP \u2013 CV = R",
+            "4": "CP = RCV"
           },
-          "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_12_6_010",
-          "mapping_status": "chapter_corrected"
+          "correct_answer": "3",
+          "has_diagram": false
         }
       ]
     },
-    "11_7": {
-      "chapter": 7,
-      "class": 11,
-      "chapter_name": "Redox Reactions",
-      "subject": "Chemistry",
-      "total_count": 6,
+    "10_2": {
+      "class": 10,
+      "chapter": 2,
+      "chapter_name": "Acids, Bases and Salts",
+      "total_count": 13,
+      "by_year": {
+        "2021": 2,
+        "2022": 4,
+        "2023": 2,
+        "2024": 2,
+        "2025": 3
+      },
       "questions": [
         {
           "year": 2025,
@@ -5869,94 +4628,8 @@
             "4": "+1, -2, and +4"
           },
           "correct_answer": "2",
-          "has_diagram": true,
-          "concept_id": "chem_11_7_004",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
         },
-        {
-          "year": 2024,
-          "question_number": 84,
-          "question": "The oxidation states not shown by Mn in given reaction is : 2 4 4 2 2 3MnO 4H 2MnO MnO 2H O \u2212 + \u2212 + \uf8e7\uf8e7\u2192 + + A. +6 B. +2 C. +4 D. +7 E. +3 Choose the most appropriate answer from the options given below :",
-          "options": {
-            "1": "D and E only",
-            "2": "B and D only",
-            "3": "A and B only",
-            "4": "B and E only"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_11_7_003",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2023,
-          "question_number": 76,
-          "question": "Which one of the following statements is correct?",
-          "options": {
-            "1": "All enzymes that utilise ATP in phosphate transfer require Ca as the cofactor",
-            "2": "The bone in human body is an inert and unchanging substance",
-            "3": "Mg plays roles in neuromuscular function and interneuronal transmission",
-            "4": "The daily requirement of Mg and Ca in the human body is estimated to be 0.2-0.3 g"
-          },
-          "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2022,
-          "question_number": 68,
-          "question": "Identify the incorrect statement from the following.",
-          "options": {
-            "1": "The shapes of dxy, dyz and dzx orbitals are similar to each other; and \u2212 2 2 x y d and 2 z d are similar to each other.",
-            "2": "All the five 5d orbitals are different in size when compared to the respective 4d orbitals.",
-            "3": "All the five 4d orbitals have shapes similar to the respective 3d orbitals.",
-            "4": "In an atom, all the five 3d orbitals are equal in energy in free state."
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
-        },
-        {
-          "year": 2022,
-          "question_number": 88,
-          "question": "In the neutral or faintly alkaline medium, KMnO4 oxidises iodide into iodate. The change in oxidation state of manganese in this reaction is from",
-          "options": {
-            "1": "+6 to +5",
-            "2": "+7 to +4",
-            "3": "+6 to +4",
-            "4": "+7 to +3"
-          },
-          "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_11_7_005",
-          "mapping_status": "verified"
-        },
-        {
-          "year": 2024,
-          "question_number": 66,
-          "question": "Which of the following set of ions act as oxidising agents?",
-          "options": {
-            "1": "Ce\u2074\u207a and Tb\u2074\u207a",
-            "2": "La\u00b3\u207a and Lu\u00b3\u207a",
-            "3": "Eu\u00b2\u207a and Yb\u00b2\u207a",
-            "4": "Eu\u00b2\u207a and Tb\u2074\u207a"
-          },
-          "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_11_7_002",
-          "mapping_status": "chapter_corrected"
-        }
-      ]
-    },
-    "10_2": {
-      "chapter": 2,
-      "class": 10,
-      "chapter_name": "Acids, Bases and Salts",
-      "subject": "Chemistry",
-      "total_count": 8,
-      "questions": [
         {
           "year": 2025,
           "question_number": 81,
@@ -5968,9 +4641,33 @@
             "4": "D. XeF\u2086 (IV) sp\u00b3d\u00b2; square pyramidal"
           },
           "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": true
+        },
+        {
+          "year": 2025,
+          "question_number": 82,
+          "question": "Match List-I with List-II\nList-I\n(Example)\nA. Humidity\nB. Alloys\nC. Amalgams\nD. Smoke\nChoose the correct answer from the options given below:\nList-II\n(Type of Solution)\nI. Solid in solid\nII. Liquid in gas\nIII. Solid in gas\nIV. Liquid in solid",
+          "options": {
+            "1": "A-III, B-II, C-I, D-IV",
+            "2": "A-II, B-IV, C-I, D-III",
+            "3": "A-II, B-I, C-IV, D-III",
+            "4": "A-III, B-I, C-IV, D-II"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 54,
+          "question": "Baeyer's reagent is :",
+          "options": {
+            "1": "Acidic potassium permanganate solution",
+            "2": "Acidic potassium dichromate solution",
+            "3": "Cold, dilute, aqueous solution of potassium permanganate",
+            "4": "Hot, concentrated solution of potassium permanganate"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
         },
         {
           "year": 2024,
@@ -5983,9 +4680,33 @@
             "4": "A-III, B-IV, C-II, D-I"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_10_2_001",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 66,
+          "question": "Which of the following statements are NOT correct? A. Hydrogen is used to reduce heavy metal oxides to metals. B. Heavy water is used to study reaction mechanism. C. Hydrogen is used to make saturated fats from oils. D. The H\u2013H bond dissociation enthalpy is lowest as compared to a single bond between two atoms of any elements. E. Hydrogen reduces oxides of metals that are more active than iron.",
+          "options": {
+            "1": "B, D only",
+            "2": "D, E only",
+            "3": "A, B, C only",
+            "4": "B, C, D, E only"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 77,
+          "question": "Which of the following reactions will NOT give primary amine as the product?",
+          "options": {
+            "1": "CH3CNxE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
+            "2": "CH3NCxE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
+            "3": "CH3CONH2xE2x86x92(i)LiAlH4xE2x86x92(ii)H3O+ Product",
+            "4": "CH3CONH2xE2x86x92Br2/KOH Product"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -5998,9 +4719,7 @@
             "4": "3.65 g"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_10_2_006",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -6013,9 +4732,7 @@
             "4": "2 H +  ion has one electron"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -6028,9 +4745,20 @@
             "4": "Ionisation enthalpy of alkali metals decreases from top to bottom in the group."
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 80,
+          "question": "The Kjeldahl's method for the estimation of nitrogen can be used to estimate the amount of nitrogen in which one of the following compounds?",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
+          },
+          "correct_answer": "4",
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -6043,9 +4771,7 @@
             "4": "Lanthanoids are good conductors of heat and electricity"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -6058,34 +4784,769 @@
             "4": "NH3 < PH3 : Increasing < AsH3 < SbH3 acidic character"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_7": {
+      "class": 11,
+      "chapter": 7,
+      "chapter_name": "Redox Reactions",
+      "total_count": 10,
+      "by_year": {
+        "2021": 1,
+        "2022": 4,
+        "2023": 1,
+        "2024": 2,
+        "2025": 2
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 64,
+          "question": "Given below are two statements :\nStatement I : Ferromagnetism is considered as an extreme form of paramagnetism.\nStatement II : The number of unpaired electrons in a Cr2+ ion (Z = 24) is the same as that of a Nd3+ ion (Z = 60).\nIn the light of the above statements, choose the correct answer from the options given below :\n(1) Statement I is false but Statement II is true\n(3) Both Statement I and Statement II are false",
+          "options": {
+            "1": "Statement I is false but Statement II is true",
+            "2": "Both Statement I and Statement II are true",
+            "3": "Both Statement I and Statement II are false",
+            "4": "Statement I is true but Statement II is false"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 74,
+          "question": "Given below are two statements : one is labelled as Assertion (A) and the other is labelled as Reason (R).\nAssertion (A) :  undergoes SN2 reaction faster than .\nReason (R) : Iodine is a better leaving group because of its large size.\nIn the light of the above statements, choose the correct answer from the options given below:\n(1) A is false but R is true\n(2) Both A and R are true and R is the correct explanation of A\n(3) Both A and R are true but R is not the correct explanation of A\n(4) A is true but R is false",
+          "options": {
+            "1": "A is false but R is true",
+            "2": "Both A and R are true and R is the correct explanation of A",
+            "3": "Both A and R are true but R is not the correct explanation of A",
+            "4": "A is true but R is false"
+          },
+          "correct_answer": "2",
+          "has_diagram": true
         },
         {
           "year": 2024,
-          "question_number": 57,
-          "question": "Which indicator is used in the titration of sodium hydroxide against oxalic acid and what is the colour change at the end point?",
+          "question_number": 60,
+          "question": "Which of the following pairs of ions will have same spin only magnetic moment values within the pair? A. Zn2+, Ti2+ B. Cr2+, Fe2+ C. Ti3+, Cu2+ D. V2+, Cu+ Choose the correct answer from the options given below :",
           "options": {
-            "1": "Phenolphthalein, pink to yellow",
-            "2": "Alkaline KMnO4, colourless to pink",
-            "3": "Phenolphthalein, colourless to pink",
-            "4": "Methyl orange, yellow to pinkish red colour"
+            "1": "C and D only",
+            "2": "A and D only",
+            "3": "A and B only",
+            "4": "B and C only"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 84,
+          "question": "The oxidation states not shown by Mn in given reaction is : 2 4 4 2 2 3MnO 4H 2MnO MnO 2H O \u2212 + \u2212 + \uf8e7\uf8e7\u2192 + + A. +6 B. +2 C. +4 D. +7 E. +3 Choose the most appropriate answer from the options given below :",
+          "options": {
+            "1": "D and E only",
+            "2": "B and D only",
+            "3": "A and B only",
+            "4": "B and E only"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 76,
+          "question": "Which one of the following statements is correct?",
+          "options": {
+            "1": "All enzymes that utilise ATP in phosphate transfer require Ca as the cofactor",
+            "2": "The bone in human body is an inert and unchanging substance",
+            "3": "Mg plays roles in neuromuscular function and interneuronal transmission",
+            "4": "The daily requirement of Mg and Ca in the human body is estimated to be 0.2-0.3 g"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 61,
+          "question": "Given below are two statements: one is labelled as Assertion (A) and the other is labelled as Reason (R). Assertion (A): In a particular point defect, an ionic solid is electrically neutral, even if few of its cations are missing from its unit cells. Reason (R): In an ionic solid, Frenkel defect arises due to dislocation of cation from its lattice site to interstitial site, maintaining overall electrical neutrality. In the light of the above statements, choose the most appropriate answer from the options given below:",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": "chem_10_2_001",
-          "mapping_status": "chapter_corrected"
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 67,
+          "question": "The incorrect statement regarding enzymes is",
+          "options": {
+            "1": "Enzymes are very specific for a particular reaction and substrate.",
+            "2": "Enzymes are biocatalysts.",
+            "3": "Like chemical catalysts enzymes reduce the activation energy of bio processes.",
+            "4": "Enzymes are polysaccharides."
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 68,
+          "question": "Identify the incorrect statement from the following.",
+          "options": {
+            "1": "The shapes of dxy, dyz and dzx orbitals are similar to each other; and \u2212 2 2 x y d and 2 z d are similar to each other.",
+            "2": "All the five 5d orbitals are different in size when compared to the respective 4d orbitals.",
+            "3": "All the five 4d orbitals have shapes similar to the respective 3d orbitals.",
+            "4": "In an atom, all the five 3d orbitals are equal in energy in free state."
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 88,
+          "question": "In the neutral or faintly alkaline medium, KMnO4 oxidises iodide into iodate. The change in oxidation state of manganese in this reaction is from",
+          "options": {
+            "1": "+6 to +5",
+            "2": "+7 to +4",
+            "3": "+6 to +4",
+            "4": "+7 to +3"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 70,
+          "question": "The correct option for the number of body centred unit cells in all 14 types of Bravais lattice unit cells is :",
+          "options": {
+            "1": "3",
+            "2": "7",
+            "3": "5",
+            "4": "2"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_3": {
+      "class": 11,
+      "chapter": 3,
+      "chapter_name": "Classification of Elements and Periodicity",
+      "total_count": 16,
+      "by_year": {
+        "2021": 3,
+        "2022": 0,
+        "2023": 5,
+        "2024": 4,
+        "2025": 4
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 65,
+          "question": "If the half-life (t1/2) for a first order reaction is 1 minute, then the time required for 99.9% completion of the reaction is closest to :",
+          "options": {
+            "1": "10 minutes",
+            "2": "2 minutes",
+            "3": "4 minutes",
+            "4": "5 minutes"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 69,
+          "question": "Which of the following statements are true?\nA. Unlike Ga that has a very high melting point, Cs has a very low melting point.\nB. On Pauling scale, the electronegativity values of N and Cl are not the same.\nC. Ar, K\u207a, Cl\u207b, Ca\u00b2\u207a, and S\u00b2\u207b are all isoelectronic species.\nD. The correct order of the first ionization enthalpies of Na, Mg, Al, and Si is Si >Al > Mg > Na.\nE. The atomic radius of Cs is greater than that of Li and Rb.",
+          "options": {
+            "1": "A, C and E only",
+            "2": "A, B and E only",
+            "3": "C and E only",
+            "4": "C and D only"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 83,
+          "question": "Energy and radius of first Bohr orbit of He$^+$ and Li$^{2+}$ are\n[Given R$_H$ = 2.18 \u00d7 10$^{-18}$ J, a$_0$ = 52.9 pm]",
+          "options": {
+            "1": "E$_n$(Li$^{2+}$) = -8.72 \u00d7 10$^{-16}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -19.62 \u00d7 10$^{-16}$ J;\nr$_n$(He$^+$) = 17.6 pm",
+            "2": "E$_n$(Li$^{2+}$) = -19.62 \u00d7 10$^{-18}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -8.72 \u00d7 10$^{-18}$ J;\nr$_n$(He$^+$) = 26.4 pm",
+            "3": "E$_n$(Li$^{2+}$) = -8.72 \u00d7 10$^{-18}$ J;\nr$_n$(Li$^{2+}$) = 26.4 pm\nE$_n$(He$^+$) = -19.62 \u00d7 10$^{-18}$ J;\nr$_n$(He$^+$) = 17.6 pm",
+            "4": "E$_n$(Li$^{2+}$) = -19.62 \u00d7 10$^{-16}$ J;\nr$_n$(Li$^{2+}$) = 17.6 pm\nE$_n$(He$^+$) = -8.72 \u00d7 10$^{-16}$ J;\nr$_n$(He$^+$) = 26.4 pm"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 84,
+          "question": "Which among the following electronic configurations belong to main group elements?\nA. [Ne]3s$^1$\nC. [Kr]4d$^{10}$ 5s$^2$5p$^5$\nE. [Rn]5f$^6$6d$^2$7s$^2$\nChoose the correct answer from the option given below :\n(1) A, C and D only\n(2) B and E only\n(3) A and C only\n(4) D and E only",
+          "options": {
+            "1": "A, C and D only",
+            "2": "B and E only",
+            "3": "A and C only",
+            "4": "D and E only"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 49,
+          "question": "The amplitude of the charge oscillating in a circuit decreases exponentially as $Q = Q_0 e^{-Rt/2L}$, where $Q_0$ is the charge at $t=0$s. The time at which charge amplitude decreases to $0.50 Q_0$ is nearly:",
+          "options": {
+            "1": "19.01 ms",
+            "2": "11.09 ms",
+            "3": "19.01 s",
+            "4": "11.09 s"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 51,
+          "question": "The correct decreasing order of atomic radii (pm) of Li, Be, B and C is",
+          "options": {
+            "1": "Be > Li > B > C",
+            "2": "Li > Be > B > C",
+            "3": "C > B > Be > Li",
+            "4": "Li > C > Be > B"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 58,
+          "question": "Match List-I with List-II :",
+          "options": {
+            "1": "A-III, B-I, C-IV, D-II",
+            "2": "A-I, B-IV, C-III, D-II",
+            "3": "A-II, B-IV, C-I, D-III",
+            "4": "A-III, B-IV, C-I, D-II"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 74,
+          "question": "Match List-I with List-II: List-I (Block/group in periodic table) List-II (Element) A. Lanthanoid I. Ce B. d-block element II. As C. p-block element III. Cs D. s-block element IV. Mn Choose the correct answer from the options given below:",
+          "options": {
+            "1": "A-I, B-II, C-IV, D-III",
+            "2": "A-I, B-IV, C-III, D-II",
+            "3": "A-I, B-IV, C-II, D-III",
+            "4": "A-IV, B-I, C-II, D-III"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 50,
+          "question": "A bullet from a gun is fired on a rectangular wooden block with velocity u. When bullet travels 24 cm through the block along its length horizontally, velocity of bullet becomes \\frac{u}{3}. Then it further penetrates into the block in the same direction before coming to rest exactly at the other end of the block. The total length of the block is",
+          "options": {
+            "1": "24 cm",
+            "2": "28 cm",
+            "3": "30 cm",
+            "4": "27 cm"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 64,
+          "question": "For a certain reaction, the rate = k[A]2[B], when the initial concentration of A is tripled keeping concentration of B constant, the initial rate would",
+          "options": {
+            "1": "Increase by a factor of six",
+            "2": "Increase by a factor of nine",
+            "3": "Increase by a factor of three",
+            "4": "Decrease by a factor of nine"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 72,
+          "question": "A compound is formed by two elements A and B. The element B forms cubic close packed structure and atoms of A occupy $1/3$ of tetrahedral voids. If the formula of the compound is $A_xB_y$, then the value of $x + y$ is in option",
+          "options": {
+            "1": "4",
+            "2": "3",
+            "3": "2",
+            "4": "5"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 84,
+          "question": "Given below are two statements : one is labelled as Assertion A and the other is labelled as Reason R : Assertion A : A reaction can have zero activation energy. Reasons R : The minimum extra amount of energy absorbed by reactant molecules so that their energy becomes equal to threshold value, is called activation energy. In the light of the above statements, choose the correct answer from the options given below :",
+          "options": {
+            "1": "Both A and R are true and R is NOT the correct explanation of A",
+            "2": "A is true but R is false",
+            "3": "A is false but R is true",
+            "4": "Both A and R are true and R is the correct explanation of A"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 85,
+          "question": "Select the correct statements from the following",
+          "options": {
+            "1": "C, D and E only",
+            "2": "A and E only",
+            "3": "B, C and E only",
+            "4": "A, B and C only"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 48,
+          "question": "A uniform rod of length 200 cm and mass 500 g is balanced on a wedge placed at 40 cm mark. A mass of 2 kg is suspended from the rod at 20 cm and another unknown mass 'm' is suspended from the rod at 160 cm mark as shown in the figure. Find the value of 'm' such that the rod is in equilibrium. (g = 10 m/s2) 0 2 kg m 20 cm 40 cm 160 cm",
+          "options": {
+            "1": "1 12  kg",
+            "2": "1 2  kg",
+            "3": "1 3  kg",
+            "4": "1 6  kg"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 52,
+          "question": "Zr (Z = 40) and Hf (Z = 72) have similar atomic and ionic radii because of :",
+          "options": {
+            "1": "Having similar chemical properties",
+            "2": "Belonging to same group",
+            "3": "Diagonal relationship",
+            "4": "Lanthanoid contraction"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 72,
+          "question": "For a reaction A \u2192 B, enthalpy of reaction is \u20134.2 kJ mol\u20131 and enthalpy of activation is 9.6 kJ mol\u20131. The correct potential energy profile for the reaction is shown in option.",
+          "options": {
+            "1": "PE Reaction Progress A B",
+            "2": "Reaction Progress PE A B",
+            "3": "Reaction Progress PE B A"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        }
+      ]
+    },
+    "12_10": {
+      "class": 12,
+      "chapter": 10,
+      "chapter_name": "Amines",
+      "total_count": 2,
+      "by_year": {
+        "2021": 0,
+        "2022": 0,
+        "2023": 0,
+        "2024": 0,
+        "2025": 2
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 66,
+          "question": "The correct order of decreasing basic strength of the given amines is:",
+          "options": {
+            "1": "benzenamine > ethanamine > N-methylaniline > N-ethylethanamine",
+            "2": "N-methylaniline > benzenamine > ethanamine > N-ethylethanamine",
+            "3": "N-ethylethanamine > ethanamine > benzenamine > N-methylaniline",
+            "4": "N-ethylethanamine > ethanamine > N-methylaniline > benzenamine"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 67,
+          "question": "Match List I with List II",
+          "options": {},
+          "correct_answer": "None",
+          "has_diagram": true
+        }
+      ]
+    },
+    "12_6": {
+      "class": 12,
+      "chapter": 6,
+      "chapter_name": "Class 12 Chapter 6",
+      "total_count": 3,
+      "by_year": {
+        "2021": 1,
+        "2022": 1,
+        "2023": 0,
+        "2024": 0,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 68,
+          "question": "Phosphoric acid ionizes in three steps with their ionization constant values K_{a1}, K_{a2} and K_{a3}, respectively, while K is the overall ionization constant. Which of the following statements are true?\nA. log K = log K_{a1} + log K_{a2} + log K_{a3}\nB. H\u2083PO\u2084 is a stronger acid than H\u2082PO\u2084\u207b and HPO\u2084\u00b2\u207b\nC. K_{a1} > K_{a2} > K_{a3}\nD. K = \nK_{a3} + K_{a2}\n2",
+          "options": {
+            "1": "A, B and C only",
+            "2": "A and B only",
+            "3": "A and C only",
+            "4": "B, C and D only"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 52,
+          "question": "At 298 K, the standard electrode potentials of Cu2+ / Cu, Zn2+ / Zn, Fe2+ / Fe and Ag+ / Ag are 0.34 V, \u20130.76 V, \u20130.44 V and 0.80 V, respectively. On the basis of standard electrode potential, predict which of the following reaction cannot occur?",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
+          },
+          "correct_answer": "1",
+          "has_diagram": true
+        },
+        {
+          "year": 2021,
+          "question_number": 47,
+          "question": "A series LCR circuit containing 5.0 H inductor, 80 \uf06dF capacitor and 40 \uf057 resistor is connected to 230 V variable frequency ac source. The angular frequencies of the source at which power transferred to the circuit is half the power at the resonant angular frequency are likely to be",
+          "options": {
+            "1": "42 rad/s and 58 rad/s",
+            "2": "25 rad/s and 75 rad/s",
+            "3": "50 rad/s and 25 rad/s",
+            "4": "46 rad/s and 54 rad/s"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_8": {
+      "class": 11,
+      "chapter": 8,
+      "chapter_name": "Organic Chemistry - Basic Principles",
+      "total_count": 13,
+      "by_year": {
+        "2021": 4,
+        "2022": 3,
+        "2023": 3,
+        "2024": 1,
+        "2025": 2
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 70,
+          "question": "Given below are two statements :\nStatement I : Like nitrogen that can form ammonia, arsenic can form arsine.\nStatement II : Antimony cannot form antimony pentoxide.\nIn the light of the above statements, choose the most appropriate answer from the options given below :\n(1) Statement I is incorrect but Statement II is correct\n(2) Both Statement I and Statement II are correct\n(3) Both Statement I and Statement II are incorrect\n(4) Statement I is correct but Statement II is incorrect",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct",
+            "2": "Both Statement I and Statement II are correct",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2025,
+          "question_number": 72,
+          "question": "Given below are two statements :\nStatement-I : Benzenediazonium salt is prepared by the reaction of aniline with nitrous acid at 273 \u2013 278 K. It decomposes easily in the dry state.\nStatement-II : Insertion of iodine into the benzene ring is difficult and hence iodobenzene is prepared through the reaction of benzenediazonium salt with KI.\nIn the light of the above statements, choose the most appropriate answer from the options given below :\n(1) Statement I is incorrect but Statement II is correct\n(2) Both Statement I and Statement II are correct\n(3) Both Statement I and Statement II are incorrect\n(4) Statement I is correct but Statement II is incorrect",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct",
+            "2": "Both Statement I and Statement II are correct",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect"
+          },
+          "correct_answer": "2",
+          "has_diagram": true
+        },
+        {
+          "year": 2024,
+          "question_number": 53,
+          "question": "Given below are two statements:\nStatement I: Propene on treatment with diborane gives an addition product with the formula ((CH\u2083)\u2082 \u2013 CH)\u2082B.\nStatement II: Oxidation of ((CH\u2083)\u2082 \u2013 CH)\u2082B with hydrogen peroxide in presence of NaOH gives propan-2-ol.\nIn the light of the above statements, choose the most appropriate answer from the options given below:",
+          "options": {
+            "1": "Statement I is correct but Statement II is incorrect",
+            "2": "Statement I is incorrect but Statement II is correct",
+            "3": "Both Statement I and Statement II are correct",
+            "4": "Both Statement I and Statement II are incorrect"
+          },
+          "correct_answer": "2",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 52,
+          "question": "In Lassaigne's extract of an organic compound, both nitrogen and sulphur are present, which gives blood red colour with Fe$^{3+}$ due to the formation of",
+          "options": {
+            "1": "NaSCN",
+            "2": "[Fe(CN)$_5$NOS]$^{4-}$",
+            "3": "[Fe(SCN)]$^{2+}$",
+            "4": "Fe$_4$[Fe(CN)$_6$]$_3$\u00b7xH$_2$O"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 75,
+          "question": "Given below are two statements : Statement I : A unit formed by the attachment of a base to 1' position of sugar is known as nucleoside. Statement II : When nucleoside is linked to phosphorous acid at 5' -position of sugar moiety, we get nucleotide. In the light of the above statements, choose the correct answer from the options given below :",
+          "options": {
+            "1": "Both Statement I and Statement II are false",
+            "2": "Statement I is true but Statement II is false",
+            "3": "Statement I is false but Statement II is true",
+            "4": "Both Statement I and Statement II are true"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 82,
+          "question": "Some tranquilizers are listed below. Which one from the following belongs to barbiturates?",
+          "options": {
+            "1": "Meprobamate",
+            "2": "Valium",
+            "3": "Veronal",
+            "4": "Chlordiazepoxide"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 66,
+          "question": "Match List-I with List-II. List-I List-II (Drug class) (Drug molecule) (a) Antacids (i) Salvarsan (b) Antihistamines (ii) Morphine (c) Analgesics (iii) Cimetidine (d) Antimicrobials (iv) Seldane Choose the correct answer from the options given below :",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 69,
+          "question": "The incorrect statement regarding chirality is",
+          "options": {
+            "1": "A racemic mixture shows zero optical rotation",
+            "2": "S N1 reaction yields 1 : 1 mixture of both enantiomers",
+            "3": "The product obtained by S N2 reaction of haloalkane having chirality at the reactive site shows inversion of configuration",
+            "4": "Enantiomers are superimposable mirror images on each other"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 90,
+          "question": "Given below are two statements:\n\nStatement I:\nIn Lucas test, primary, secondary and tertiary alcohols are distinguished on the basis of their reactivity with conc. HCl + ZnCl2, known as Lucas Reagent.\n\nStatement II:\nPrimary alcohols are most reactive and immediately produce turbidity at room temperature on reaction with Lucas Reagent.\n\nIn the light of the above statements, choose the most appropriate answer from the options given below:",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct",
+            "2": "Both Statement I and Statement II are correct",
+            "3": "Both Statement I and Statement II are incorrect",
+            "4": "Statement I is correct but Statement II is incorrect"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 57,
+          "question": "Tritium, a radioactive isotope of hydrogen, emits which of the following particles?",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
+          },
+          "correct_answer": "2",
+          "has_diagram": true
+        },
+        {
+          "year": 2021,
+          "question_number": 60,
+          "question": "What is the IUPAC name of the organic compound formed in the following chemical reaction? 2 5 2 (i) C H MgBr, dryEther (ii) H O, H Acetone Product + \u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u2192",
+          "options": {
+            "1": "2-methylbutan-2-ol",
+            "2": "2-methylpropan-2-ol",
+            "3": "pentan-2-ol",
+            "4": "pentan-3-ol"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 61,
+          "question": "The RBC deficiency is deficiency disease of :",
+          "options": {
+            "1": "Vitamin B2",
+            "2": "Vitamin B12",
+            "3": "Vitamin B6",
+            "4": "Vitamin B1"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 76,
+          "question": "Given below are two statements : Statement I : Aspirin and Paracetamol belong to the class of narcotic analgesics. Statement II : Morphine and Heroin are non-narcotic analgesics. In the light of the above statements, choose the correct answer from the options given below.",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is true.",
+            "2": "Both Statement I and Statement II are true",
+            "3": "Both Statement I and Statement II are false",
+            "4": "Statement I is correct but Statement II is false"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        }
+      ]
+    },
+    "12_9": {
+      "class": 12,
+      "chapter": 9,
+      "chapter_name": "Aldehydes, Ketones and Carboxylic Acids",
+      "total_count": 6,
+      "by_year": {
+        "2021": 0,
+        "2022": 3,
+        "2023": 2,
+        "2024": 0,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 75,
+          "question": "The correct order of decreasing acidity of the following aliphatic acids is\n(1) HCOOH > (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH\n(2) (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH > HCOOH\n(3) CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH > HCOOH\n(4) HCOOH > CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH",
+          "options": {
+            "1": "HCOOH > (CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH",
+            "2": "(CH3)3CCOOH > (CH3)2CHCOOH > CH3COOH > HCOOH",
+            "3": "CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH > HCOOH",
+            "4": "HCOOH > CH3COOH > (CH3)2CHCOOH > (CH3)3CCOOH"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 74,
+          "question": "Identify the product in the following reaction:",
+          "options": {
+            "1": "<img src='https://example.com/1.png'>",
+            "2": "<img src='https://example.com/2.png'>",
+            "3": "<img src='https://example.com/3.png'>",
+            "4": "<img src='https://example.com/4.png'>"
+          },
+          "correct_answer": "1",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 78,
+          "question": "Identify product (A) in the following reaction:",
+          "options": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": ""
+          },
+          "correct_answer": "4",
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 55,
+          "question": "Which of the following statement is not correct about diborane?",
+          "options": {
+            "1": "Both the Boron atoms are sp2 hybridised.",
+            "2": "There are two 3-centre-2-electron bonds.",
+            "3": "The four terminal B-H bonds are two centre two electron bonds.",
+            "4": "The four terminal Hydrogen atoms and the two Boron atoms lie in one plane."
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 56,
+          "question": "+ 3 H O dry 2 ether RMgX+CO Y RCOOH \u23af\u23af\u23af\u2192 \u23af\u23af\u23af\u2192 What is Y in the above reaction?",
+          "options": {
+            "2": "RCOO\u2013Mg+X",
+            "3": "R3CO\u2013Mg+X",
+            "4": "RCOO\u2013X+"
+          },
+          "correct_answer": "2",
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 86,
+          "question": "Compound X on reaction with O3 followed by Zn/H2O gives formaldehyde and 2-methyl propanal as products. The compound X is",
+          "options": {
+            "1": "Pent-2-ene",
+            "2": "3-Methylbut-1-ene",
+            "3": "2-Methylbut-1-ene",
+            "4": "2-Methylbut-2-ene"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
         }
       ]
     },
     "10_1": {
-      "chapter": 1,
       "class": 10,
+      "chapter": 1,
       "chapter_name": "Chemical Reactions and Equations",
-      "subject": "Chemistry",
-      "total_count": 2,
+      "total_count": 5,
+      "by_year": {
+        "2021": 1,
+        "2022": 1,
+        "2023": 1,
+        "2024": 1,
+        "2025": 1
+      },
       "questions": [
+        {
+          "year": 2025,
+          "question_number": 76,
+          "question": "Which one of the following reactions does NOT belong to \"Lassaigne's test\"?\n(1) 2CuO + C \u2192 2Cu + CO2\n(2) Na + C + N \u2192 NaCN\n(3) 2Na + S \u2192 Na2S\n(4) Na + X \u2192 NaX",
+          "options": {
+            "1": "2CuO + C \u2192 2Cu + CO2",
+            "2": "Na + C + N \u2192 NaCN",
+            "3": "2Na + S \u2192 Na2S",
+            "4": "Na + X \u2192 NaX"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
         {
           "year": 2024,
           "question_number": 87,
@@ -6097,9 +5558,7 @@
             "4": "Nitrogen cannot form d\u03c0-p\u03c0 bond as other heavier elements of its group"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "uncertain"
+          "has_diagram": false
         },
         {
           "year": 2023,
@@ -6112,19 +5571,237 @@
             "4": "1.12 g"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_10_1_005",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 83,
+          "question": "In one molal solution that contains 0.5 mole of a solute, there is",
+          "options": {
+            "1": "1000 g of solvent",
+            "2": "500 mL of solvent",
+            "3": "500 g of solvent",
+            "4": "100 mL of solvent"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 69,
+          "question": "The following solutions were prepared by dissolving 10 g of glucose (C6H12O6) in 250 ml of water (P1), 10 g of urea (CH4N2O) in 250 ml of water (P2) and 10 g of sucrose (C12H22O11) in 250 ml of water (P3). The right option for the decreasing order of osmotic pressure of these solutions is :",
+          "options": {
+            "1": "P3 > P1 > P2",
+            "2": "P2 > P1 > P3",
+            "3": "P1 > P2 > P3",
+            "4": "P2 > P3 > P1"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_1": {
+      "class": 11,
+      "chapter": 1,
+      "chapter_name": "Some Basic Concepts of Chemistry",
+      "total_count": 5,
+      "by_year": {
+        "2021": 2,
+        "2022": 2,
+        "2023": 0,
+        "2024": 0,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 79,
+          "question": "Dalton's Atomic theory could not explain which of the following?",
+          "options": {
+            "1": "Law of gaseous volume",
+            "2": "Law of conservation of mass",
+            "3": "Law of constant proportion",
+            "4": "Law of multiple proportion"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 78,
+          "question": "Match List-I with List-II.",
+          "options": {
+            "1": "(a) - (iv), (b) - (iii), (c) - (ii), (d) - (i)",
+            "2": "(a) - (iii), (b) - (iv), (c) - (ii), (d) - (i)",
+            "3": "(a) - (ii), (b) - (iii), (c) - (iv), (d) - (i)",
+            "4": "(a) - (i), (b) - (iii), (c) - (ii), (d) - (iv)"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 89,
+          "question": "A 10.0 L flask contains 64 g of oxygen at 27\u00b0C. (Assume O2 gas is behaving ideally). The pressure inside the flask in bar is (Given R = 0.0831 L bar K\u22121 mol\u22121)",
+          "options": {
+            "1": "4.9",
+            "2": "2.5",
+            "3": "498.6",
+            "4": "49.8"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 51,
+          "question": "Right option for the number of tetrahedral and octahedral voids in hexagonal primitive unit cell are :",
+          "options": {
+            "1": "12, 6",
+            "2": "8, 4",
+            "3": "6, 12",
+            "4": "2, 1"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 83,
+          "question": "Noble gases are named because of their inertness towards reactivity. Identify an incorrect statement about them.",
+          "options": {
+            "1": "Noble gases have large positive values of electron gain enthalpy",
+            "2": "Noble gases are sparingly soluble in water",
+            "3": "Noble gases have very high melting and boiling points",
+            "4": "Noble gases have weak dispersion forces"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        }
+      ]
+    },
+    "12_1": {
+      "class": 12,
+      "chapter": 1,
+      "chapter_name": "Solutions",
+      "total_count": 3,
+      "by_year": {
+        "2021": 0,
+        "2022": 2,
+        "2023": 0,
+        "2024": 0,
+        "2025": 1
+      },
+      "questions": [
+        {
+          "year": 2025,
+          "question_number": 90,
+          "question": "5 moles of liquid X and 10 moles of liquid Y make a solution having a vapour pressure of 70 torr. The vapour pressures of pure X and Y are 63 torr and 78 torr respectively. Which of the following is true regarding the described solution?",
+          "options": {
+            "1": "The solution has volume greater than the sum of individual volumes.",
+            "2": "The solution shows positive deviation.",
+            "3": "The solution shows negative deviation.",
+            "4": "The solution is ideal."
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 54,
+          "question": "Given below are two statements Statement I: In the coagulation of a negative sol, the flocculating power of the three given ions is in the order Al3+ > Ba2+ > Na+ Statement II: In the coagulation of a positive sol, the flocculating power of the three given salts is in the order NaCl > Na2SO4 > Na3PO4 In the light of the above statements, choose the most appropriate answer from the options given below",
+          "options": {
+            "1": "Statement I is incorrect but Statement II is correct.",
+            "2": "Both Statement I and Statement II are correct.",
+            "3": "Both Statement I and Statement II are incorrect.",
+            "4": "Statement I is correct but Statement II is incorrect."
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 76,
+          "question": "The pH of the solution containing 50 mL each of 0.10 M sodium acetate and 0.01 M acetic acid is [Given pKa of CH3COOH = 4.57]",
+          "options": {
+            "1": "2.57",
+            "2": "5.57",
+            "3": "3.57",
+            "4": "4.57"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        }
+      ]
+    },
+    "9_3": {
+      "class": 9,
+      "chapter": 3,
+      "chapter_name": "Structure of the Atom",
+      "total_count": 1,
+      "by_year": {
+        "2021": 0,
+        "2022": 0,
+        "2023": 0,
+        "2024": 1,
+        "2025": 0
+      },
+      "questions": [
+        {
+          "year": 2024,
+          "question_number": 46,
+          "question": "The given circuit shows a uniform straight wire $AB$ of $40$ cm length fixed at both ends. In order to get zero reading in the galvanometer $G$, the free end of $J$ is to be placed from $B$ at:",
+          "options": {
+            "1": "32 cm",
+            "2": "8 cm",
+            "3": "16 cm",
+            "4": "24 cm"
+          },
+          "correct_answer": "4",
+          "has_diagram": true
         }
       ]
     },
     "9_1": {
-      "chapter": 1,
       "class": 9,
-      "chapter_name": "Matter in Our Surroundings",
-      "subject": "Chemistry",
-      "total_count": 1,
+      "chapter": 1,
+      "chapter_name": "Is Matter Around Us Pure",
+      "total_count": 5,
+      "by_year": {
+        "2021": 2,
+        "2022": 1,
+        "2023": 1,
+        "2024": 1,
+        "2025": 0
+      },
       "questions": [
+        {
+          "year": 2024,
+          "question_number": 48,
+          "question": "The output Y for the inputs A and B of the given logic circuit is :",
+          "options": {
+            "1": "A \u00b7 B",
+            "2": "\\overline{A} \\cdot \\overline{B}",
+            "3": "A + B",
+            "4": "\\overline{A} + \\overline{B}"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 47,
+          "question": "A horizontal bridge is built across a river. A student standing on the bridge throws a small ball vertically upwards with a velocity 4 m s^{-1}. The ball strikes the water surface after 4 s. The height of bridge above water surface is (Take g=10 m s^{-2})",
+          "options": {
+            "1": "60 m",
+            "2": "64 m",
+            "3": "68 m",
+            "4": "56 m"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
         {
           "year": 2022,
           "question_number": 47,
@@ -6136,18 +5813,193 @@
             "4": "1382.5"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "NONE",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 46,
+          "question": "A ball of mass 0.15 kg is dropped from a height 10 m, strikes the ground and rebounds to the same height. The magnitude of impulse imparted to the ball is (g = 10 m/s2) nearly",
+          "options": {
+            "1": "1.4 kg m/s",
+            "2": "0 kg m/s",
+            "3": "4.2 kg m/s",
+            "4": "2.1 kg m/s"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 67,
+          "question": "A particular station of All India Radio, New Delhi broadcasts on a frequency of 1,368 kHz (kilohertz). The wavelength of the electromagnetic radiation emitted by the transmitter is : [speed of light c = 3.0 \u00d7 108 ms\u20131]",
+          "options": {
+            "1": "21.92 cm",
+            "2": "219.3 m",
+            "3": "219.2 m",
+            "4": "2192 m"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        }
+      ]
+    },
+    "12_2": {
+      "class": 12,
+      "chapter": 2,
+      "chapter_name": "Electrochemistry",
+      "total_count": 10,
+      "by_year": {
+        "2021": 1,
+        "2022": 4,
+        "2023": 2,
+        "2024": 3,
+        "2025": 0
+      },
+      "questions": [
+        {
+          "year": 2024,
+          "question_number": 50,
+          "question": "The steady state current in the circuit shown below is :",
+          "options": {
+            "1": "0.67 A",
+            "2": "1.5 A",
+            "3": "2 A",
+            "4": "1 A"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2024,
+          "question_number": 57,
+          "question": "Which indicator is used in the titration of sodium hydroxide against oxalic acid and what is the colour change at the end point?",
+          "options": {
+            "1": "Phenolphthalein, pink to yellow",
+            "2": "Alkaline KMnO4, colourless to pink",
+            "3": "Phenolphthalein, colourless to pink",
+            "4": "Methyl orange, yellow to pinkish red colour"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        },
+        {
+          "year": 2024,
+          "question_number": 90,
+          "question": "The standard cell potential of the following cell Zn|Zn2+(aq)|Fe2+(aq)|Fe is 0.32 V. Calculate the standard Gibbs energy change for the reaction :\nZn(s) + Fe2+(aq) \u2192 Zn2+(aq) + Fe(s)\n(Given : 1 F = 96487 C)",
+          "options": {
+            "1": "\u201361.75 kJ mol\u20131",
+            "2": "+5.006 kJ mol\u20131",
+            "3": "\u20135.006 kJ mol\u20131",
+            "4": "+61.75 kJ mol\u20131"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 49,
+          "question": "An electric dipole is placed as shown in the figure. The electric potential (in 10^{2} V) at point P due to the dipole is (\\epsilon_{0} = permittivity of free space and \\frac{1}{4 \\pi \\epsilon_{0}} = K)",
+          "options": {
+            "1": "(\\frac{5}{8})qK",
+            "2": "(\\frac{8}{5})qK",
+            "3": "(\\frac{8}{3})qK",
+            "4": "(\\frac{3}{8})qK"
+          },
+          "correct_answer": "4",
+          "has_diagram": true
+        },
+        {
+          "year": 2023,
+          "question_number": 73,
+          "question": "The stability of $Cu^{2+}$ is more than $Cu^+$ salts in aqueous solution due to",
+          "options": {
+            "1": "Enthalpy of atomization",
+            "2": "Hydration energy",
+            "3": "Second ionisation enthalpy",
+            "4": "First ionisation enthalpy"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 48,
+          "question": "A big circular coil of 1000 turns and average radius 10 m is rotating about its horizontal diameter at 2 rad s$^{-1}$. If the vertical component of earth's magnetic field at that place is $2 \\times 10^{-5}$ T and electrical resistance of the coil is $12.56 \\Omega$, then the maximum induced current in the coil will be",
+          "options": {
+            "1": "2 A",
+            "2": "0.25 A",
+            "3": "1.5 A",
+            "4": "1 A"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 49,
+          "question": "Two point charges $-q$ and $+q$ are placed at a distance of $L$, as shown in the figure. The magnitude of electric field intensity at a distance $R(R >> L)$ varies as:",
+          "options": {
+            "1": "$\\frac{1}{R^6}$",
+            "2": "$\\frac{1}{R^2}$",
+            "3": "$\\frac{1}{R^3}$",
+            "4": "$\\frac{1}{R^4}$"
+          },
+          "correct_answer": "3",
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 50,
+          "question": "A capacitor of capacitance $C = 900$ pF is charged fully by 100 V battery $B$ as shown in figure (a). Then it is disconnected from the battery and connected to another uncharged capacitor of capacitance $C = 900$ pF as shown in figure (b). The electrostatic energy stored by the system (b) is",
+          "options": {
+            "1": "$1.5 \\times 10^{-6}$ J",
+            "2": "$4.5 \\times 10^{-6}$ J",
+            "3": "$3.25 \\times 10^{-6}$ J",
+            "4": "$2.25 \\times 10^{-6}$ J"
+          },
+          "correct_answer": "4",
+          "has_diagram": true
+        },
+        {
+          "year": 2022,
+          "question_number": 63,
+          "question": "Given below are half cell reactions: \u2212 + \u2212 + + + \u2192 + 2 4 2 MnO 8H 5e Mn 4H O + \u2212= \u2212 2 4 \u00ba Mn /MnO E 1.510 V + \u2212 + + \u2192 2 2 1O 2H 2e H O 2 = + 2 2 \u00ba O /H O E 1.223 V Will the permanganate ion, \u2013 4 MnO liberate O2 from water in the presence of an acid?",
+          "options": {
+            "1": "No, because \uf0b0 = \u2212 cell E 2.733 V",
+            "2": "Yes, because \uf0b0 = + cell E 0.287 V",
+            "3": "No, because \uf0b0 = cell E \u2013 0.287 V",
+            "4": "Yes, because \uf0b0 = + cell E 2.733 V"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 62,
+          "question": "The molar conductance of NaCl, HCl and CH3COONa at infinite dilution are 126.45, 426.16 and 91.0 S cm2 mol\u20131 respectively. The molar conductance of CH3COOH at infinite dilution is. Choose the right option for your answer.",
+          "options": {
+            "1": "540.48 S cm2 mol\u20131",
+            "2": "201.28 S cm2 mol\u20131",
+            "3": "390.71 S cm2 mol\u20131",
+            "4": "698.28 S cm2 mol\u20131"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
         }
       ]
     },
     "10_3": {
-      "chapter": 3,
       "class": 10,
+      "chapter": 3,
       "chapter_name": "Metals and Non-metals",
-      "subject": "Chemistry",
-      "total_count": 5,
+      "total_count": 6,
+      "by_year": {
+        "2021": 3,
+        "2022": 1,
+        "2023": 1,
+        "2024": 1,
+        "2025": 0
+      },
       "questions": [
         {
           "year": 2024,
@@ -6160,9 +6012,20 @@
             "4": "Development of green coating on copper and bronze ornaments"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": "chem_10_3_015",
-          "mapping_status": "verified"
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 46,
+          "question": "Two thin lenses are of same focal lengths (f), but one is convex and the other one is concave. When they are placed in contact with each other, the equivalent focal length of the combination will be",
+          "options": {
+            "1": "\\frac{f}{4}",
+            "2": "\\frac{f}{2}",
+            "3": "Infinite",
+            "4": "Zero"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
         },
         {
           "year": 2022,
@@ -6175,9 +6038,7 @@
             "4": ""
           },
           "correct_answer": "1",
-          "has_diagram": true,
-          "concept_id": "chem_10_3_006",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2021,
@@ -6189,9 +6050,7 @@
             "4": "Fe + 2HCl \u2192 FeCl2 + H2\u2191"
           },
           "correct_answer": "3",
-          "has_diagram": true,
-          "concept_id": "chem_10_3_009",
-          "mapping_status": "verified"
+          "has_diagram": true
         },
         {
           "year": 2021,
@@ -6204,9 +6063,7 @@
             "4": "Distillation"
           },
           "correct_answer": "4",
-          "has_diagram": false,
-          "concept_id": "chem_10_3_014",
-          "mapping_status": "verified"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -6219,18 +6076,145 @@
             "4": "Magnesium chloride"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": "chem_10_3_011",
-          "mapping_status": "verified"
+          "has_diagram": false
+        }
+      ]
+    },
+    "12_7": {
+      "class": 12,
+      "chapter": 7,
+      "chapter_name": "Class 12 Chapter 7",
+      "total_count": 1,
+      "by_year": {
+        "2021": 0,
+        "2022": 0,
+        "2023": 0,
+        "2024": 1,
+        "2025": 0
+      },
+      "questions": [
+        {
+          "year": 2024,
+          "question_number": 66,
+          "question": "Which of the following set of ions act as oxidising agents?",
+          "options": {
+            "1": "Ce\u2074\u207a and Tb\u2074\u207a",
+            "2": "La\u00b3\u207a and Lu\u00b3\u207a",
+            "3": "Eu\u00b2\u207a and Yb\u00b2\u207a",
+            "4": "Eu\u00b2\u207a and Tb\u2074\u207a"
+          },
+          "correct_answer": "1",
+          "has_diagram": false
+        }
+      ]
+    },
+    "12_4": {
+      "class": 12,
+      "chapter": 4,
+      "chapter_name": "d and f Block Elements",
+      "total_count": 2,
+      "by_year": {
+        "2021": 0,
+        "2022": 1,
+        "2023": 0,
+        "2024": 1,
+        "2025": 0
+      },
+      "questions": [
+        {
+          "year": 2024,
+          "question_number": 68,
+          "question": "The UV-visible absorption bands in the spectra of lanthanoid ions are 'X', probably because of the excitation of electrons involving 'Y'. The 'X' and 'Y', respectively, are :",
+          "options": {
+            "1": "Broad and f orbitals",
+            "2": "Narrow and f orbitals",
+            "3": "Broad and d and f orbitals",
+            "4": "Narrow and d and f orbitals"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2022,
+          "question_number": 85,
+          "question": "Gadolinium has a low value of third ionisation enthalpy because of",
+          "options": {
+            "1": "high basic character",
+            "2": "small size",
+            "3": "high exchange enthalpy",
+            "4": "high electronegativity"
+          },
+          "correct_answer": "3",
+          "has_diagram": false
+        }
+      ]
+    },
+    "11_2": {
+      "class": 11,
+      "chapter": 2,
+      "chapter_name": "Structure of Atom",
+      "total_count": 3,
+      "by_year": {
+        "2021": 1,
+        "2022": 0,
+        "2023": 1,
+        "2024": 1,
+        "2025": 0
+      },
+      "questions": [
+        {
+          "year": 2024,
+          "question_number": 76,
+          "question": "The quantum numbers of four electrons are given below : I. l 1 n 4; l 2; m 2; s 2 = = = \u2212 = \u2212 II. l 1 n 3; l 2; m 1; s 2 = = = = + III. l 1 n 4; l 1; m 0; s 2 = = = = + IV. l 1 n 3; l 1; m \u20131; s 2 = = = = + The correct decreasing order of energy of these electrons is",
+          "options": {
+            "1": "IV > II > III > I",
+            "2": "I > III > II > IV",
+            "3": "III > I > II > IV",
+            "4": "I > II > III > IV"
+          },
+          "correct_answer": "2",
+          "has_diagram": false
+        },
+        {
+          "year": 2023,
+          "question_number": 53,
+          "question": "The relation between $n_m$, ($n_m$ = the number of permissible values of magnetic quantum number ($m$)) for a given value of azimuthal quantum number ($l$), is",
+          "options": {
+            "1": "$l = 2n_m + 1$",
+            "2": "$n_m = 2l^2 + 1$",
+            "3": "$n_m = l + 2$",
+            "4": "$l = \\frac{n_m-1}{2}$"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
+        },
+        {
+          "year": 2021,
+          "question_number": 68,
+          "question": "The pKb of dimethylamine and pKa of acetic acid are 3.27 and 4.77 respectively at T (K). The correct option for the pH of dimethylammonium acetate solution is :",
+          "options": {
+            "1": "6.25",
+            "2": "8.50",
+            "3": "5.50",
+            "4": "7.75"
+          },
+          "correct_answer": "4",
+          "has_diagram": false
         }
       ]
     },
     "12_12": {
-      "chapter": 12,
       "class": 12,
+      "chapter": 12,
       "chapter_name": "Polymers",
-      "subject": "Chemistry",
       "total_count": 2,
+      "by_year": {
+        "2021": 1,
+        "2022": 1,
+        "2023": 0,
+        "2024": 0,
+        "2025": 0
+      },
       "questions": [
         {
           "year": 2022,
@@ -6243,9 +6227,7 @@
             "4": "Thermoplastic polymers are capable of repeatedly softening and hardening on heating and cooling respectively"
           },
           "correct_answer": "1",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "no_mapping"
+          "has_diagram": false
         },
         {
           "year": 2021,
@@ -6258,18 +6240,22 @@
             "4": "Novolac"
           },
           "correct_answer": "2",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "no_mapping"
+          "has_diagram": false
         }
       ]
     },
     "12_13": {
-      "chapter": 13,
       "class": 12,
+      "chapter": 13,
       "chapter_name": "Chemistry in Everyday Life",
-      "subject": "Chemistry",
       "total_count": 1,
+      "by_year": {
+        "2021": 1,
+        "2022": 0,
+        "2023": 0,
+        "2024": 0,
+        "2025": 0
+      },
       "questions": [
         {
           "year": 2021,
@@ -6282,9 +6268,7 @@
             "4": "Upto 1900 K"
           },
           "correct_answer": "3",
-          "has_diagram": false,
-          "concept_id": null,
-          "mapping_status": "no_mapping"
+          "has_diagram": false
         }
       ]
     }
