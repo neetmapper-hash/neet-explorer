@@ -34,10 +34,13 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // If user is not logged in and trying to access a protected route
+  const hasCode = request.nextUrl.searchParams.has('code')
+
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/register')
+    !request.nextUrl.pathname.startsWith('/register') &&
+    !hasCode
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -47,6 +50,7 @@ export async function middleware(request: NextRequest) {
   // If user is logged in and tries to access login/register, redirect to heatmap
   if (
     user &&
+    !hasCode &&
     (request.nextUrl.pathname.startsWith('/login') ||
       request.nextUrl.pathname.startsWith('/register'))
   ) {
