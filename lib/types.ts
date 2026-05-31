@@ -53,6 +53,7 @@ export interface Question {
   options: Record<string, string>;
   correct_answer: string;
   has_diagram: boolean;
+  image_file?: string;
 }
 
 export interface ChapterEntry {
