@@ -677,8 +677,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ chain, conceptId, answer, studyPath, fromCache: false });
 
-  } catch (err) {
-    console.error('Ancestry API error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Ancestry API error:', err?.message ?? err);
+    return NextResponse.json({ error: err?.message ?? 'Internal server error' }, { status: 500 });
   }
 }
