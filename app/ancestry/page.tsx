@@ -137,6 +137,11 @@ export default function AncestryPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .ancestry-main { padding-top: 68px !important; padding-bottom: 80px !important; padding-left: 16px !important; padding-right: 16px !important; }
+        }
+      `}</style>
       <Sidebar
         currentPage="ancestry"
         subject={subject}
@@ -159,7 +164,7 @@ export default function AncestryPage() {
         onYearsChange={() => {}}
       />
 
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', maxWidth: '760px' }}>
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', maxWidth: '760px' }} className="ancestry-main">
 
         {/* Header */}
         <div style={{ marginBottom: '28px' }}>
