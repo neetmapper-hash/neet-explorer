@@ -15,25 +15,21 @@ export default function LoginPage() {
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get('code')
     if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (!error) {
-          window.location.href = '/heatmap'
+      supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+        if (!error && data.session) {
+          setTimeout(() => {
+            window.location.replace('/heatmap')
+          }, 500)
         }
       })
     }
   }, [])
 
-  const handleLogin = async () => {
-    setLoading(true)
-    setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      router.refresh();
-      window.location.href = '/heatmap'
-    }
+  const handleGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'https://neet-explorer-ivory.vercel.app/auth/callback' },
+    })
   }
 
   const handleGoogle = async () => {
