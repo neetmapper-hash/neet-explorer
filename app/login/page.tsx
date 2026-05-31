@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useEffect } from 'react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,6 +12,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code')
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (!error) {
+          window.location.href = '/heatmap'
+        }
+      })
+    }
+  }, [])
 
   const handleLogin = async () => {
     setLoading(true)
@@ -26,6 +37,8 @@ export default function LoginPage() {
   }
 
   const handleGoogle = async () => {
+    await supabase.auth.signOut();
+    await new Promise(r => setTimeout(r, 500));
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: 'https://neet-explorer-ivory.vercel.app/auth/callback' },
