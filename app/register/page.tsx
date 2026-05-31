@@ -37,12 +37,9 @@ export default function RegisterPage() {
   }
 
   const handleGoogle = async () => {
-    const redirectTo = process.env.NEXT_PUBLIC_SITE_URL
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
-      : `${location.origin}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      options: { redirectTo: 'https://neet-explorer-ivory.vercel.app/auth/callback' },
     })
   }
 
