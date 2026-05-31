@@ -729,10 +729,36 @@ export default function ConceptMapPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div className="concept-map-wrapper" style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .concept-map-wrapper { flex-direction: column !important; padding-top: 52px; padding-bottom: 64px; }
+          .concept-map-sidebar { width: 100% !important; min-width: 100% !important; border-right: none !important; border-bottom: 1px solid #1e1e1e; max-height: 280px; overflow-y: auto; }
+          .concept-map-canvas { min-height: 60vh !important; }
+          .concept-map-topbar { display: flex !important; }
+          .concept-map-bottomnav { display: flex !important; }
+        }
+        .concept-map-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #0a0a0a; border-bottom: 1px solid #1e1e1e; padding: 12px 16px; align-items: center; }
+        .concept-map-bottomnav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #0a0a0a; border-top: 1px solid #1e1e1e; padding: 8px 0; justify-content: space-around; align-items: center; }
+      `}</style>
+
+      {/* Mobile top bar */}
+      <div className="concept-map-topbar">
+        <div style={{ fontSize: '15px', fontWeight: 800, color: '#f9fafb' }}>🌱 Bija Vidya</div>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <div className="concept-map-bottomnav">
+        {([['🔥','Heatmap','/heatmap'],['🧬','Ancestry','/ancestry'],['🗺','Map','/concept-map'],['📚','Quiz','/quiz']] as const).map(([emoji, label, href]) => (
+          <button key={href} onClick={() => router.push(href)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 16px', color: href === '/concept-map' ? '#4ade80' : '#4b5563' }}>
+            <span style={{ fontSize: '20px' }}>{emoji}</span>
+            <span style={{ fontSize: '10px', fontWeight: href === '/concept-map' ? 700 : 400, fontFamily: 'inherit' }}>{label}</span>
+          </button>
+        ))}
+      </div>
 
       {/* Sidebar */}
-      <div style={{ width: sidebarOpen ? '248px' : '44px', minWidth: sidebarOpen ? '248px' : '44px', background: '#0a0a0a', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', transition: 'width 0.22s ease, min-width 0.22s ease', overflow: 'hidden', zIndex: 10 }}>
+      <div className="concept-map-sidebar" style={{ width: sidebarOpen ? '248px' : '44px', minWidth: sidebarOpen ? '248px' : '44px', background: '#0a0a0a', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', transition: 'width 0.22s ease, min-width 0.22s ease', overflow: 'hidden', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', padding: sidebarOpen ? '14px 14px 10px' : '14px 0', borderBottom: '1px solid #1e1e1e' }}>
           {sidebarOpen && <span style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb' }}>Filters</span>}
           <button onClick={() => setSidebarOpen(o => !o)} style={{ background: '#141414', border: '1px solid #1e1e1e', borderRadius: '7px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', fontSize: '12px', flexShrink: 0 }}>
@@ -865,7 +891,7 @@ export default function ConceptMapPage() {
           )}
         </div>
 
-        <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
+        <div ref={containerRef} className="concept-map-canvas" style={{ flex: 1, position: 'relative' }}>
           {nodes.length === 0 ? (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
               <div style={{ fontSize: '52px', opacity: 0.12 }}>🗺</div>
