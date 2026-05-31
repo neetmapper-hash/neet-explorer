@@ -164,6 +164,16 @@ export default function QuizPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .quiz-browser { width: 100% !important; min-height: unset !important; padding-top: 52px; padding-bottom: 64px; }
+          .quiz-browser.hide-mobile { display: none !important; }
+          .quiz-main { padding-top: 68px !important; padding-bottom: 80px !important; padding-left: 16px !important; padding-right: 16px !important; }
+          .quiz-main.hide-mobile { display: none !important; }
+          .quiz-mobile-back { display: flex !important; }
+        }
+        .quiz-mobile-back { display: none; align-items: center; gap: 8px; padding: 12px 16px; background: #0a0a0a; border-bottom: 1px solid #1e1e1e; color: #6b7280; font-size: 13px; cursor: pointer; width: 100%; border-top: none; border-left: none; border-right: none; font-family: inherit; }
+      `}</style>
       <Sidebar currentPage="quiz" subject={subject} selectedYears={[2021,2022,2023,2024,2025]}
         onPageChange={page => {
           if (page === 'heatmap') router.push('/heatmap');
@@ -174,7 +184,7 @@ export default function QuizPage() {
         onYearsChange={() => {}} />
 
       {/* Concept browser */}
-      <div style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
+      <div className={`quiz-browser${selectedConcept ? ' hide-mobile' : ''}`} style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
         <div style={{ padding: '16px 14px 10px', borderBottom: '1px solid #1e1e1e' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb', marginBottom: '8px' }}>📚 Concepts</div>
           <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
@@ -208,7 +218,10 @@ export default function QuizPage() {
       </div>
 
       {/* Main panel */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+      <main className={`quiz-main${!selectedConcept ? ' hide-mobile' : ''}`} style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+        <button className="quiz-mobile-back" onClick={() => { setSelectedConcept(null); resetQuiz(); }}>
+          ← Back to concepts
+        </button>
         {!selectedConcept ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
             <div style={{ fontSize: '32px' }}>📚</div>
