@@ -468,7 +468,22 @@ export default function HeatmapPage() {
                                   {q.has_diagram && q.image_file && (
                                     <div className="mt-3 mb-3">
                                       <img
-                                        src={`/images/questions/question_images_2025/question_images/2025_${q.image_file}`}
+                                        src={(() => {
+  const base = q.image_file!.replace('.png','').replace(/^q0*/, '');
+  const folder = '/images/questions/question_images_2025/question_images';
+  return `${folder}/2025_q${base}.png`;
+})()}
+onError={(e) => {
+  const base = q.image_file!.replace('.png','').replace(/^q0*/, '');
+  const folder = '/images/questions/question_images_2025/question_images';
+  const el = e.target as HTMLImageElement;
+  if (!el.dataset.fallback) {
+    el.dataset.fallback = '1';
+    el.src = `${folder}/q${base}.png`;
+  } else {
+    el.style.display = 'none';
+  }
+}}
 
                                         alt="Question diagram"
                                         className="rounded-lg max-w-full"
