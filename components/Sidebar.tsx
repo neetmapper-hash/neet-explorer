@@ -22,11 +22,12 @@ const NAV_ITEMS = [
   { page: 'quiz',     emoji: '📚', label: 'Quiz' },
 ] as const;
 
+const SUBJECTS: Subject[] = ['Biology', 'Physics', 'Chemistry'];
+
 export default function Sidebar({
   currentPage, subject, selectedYears, onPageChange,
   onSubjectChange, onYearsChange, showBackButton, onBack,
 }: SidebarProps) {
-  const subjects: Subject[] = ['Biology', 'Physics', 'Chemistry'];
   const supabase = createClient();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,6 +50,7 @@ export default function Sidebar({
 
   return (
     <>
+      {/* ── Desktop Sidebar ── */}
       <div className="desktop-sidebar" style={{
         width: '224px', height: '100vh', background: '#0a0a0a',
         borderRight: '1px solid #1e1e1e', display: 'flex',
@@ -85,7 +87,7 @@ export default function Sidebar({
         <div>
           <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>Subject</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {subjects.map((s) => {
+            {SUBJECTS.map((s) => {
               const isActive = subject === s;
               const emoji = s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿';
               return (
@@ -154,50 +156,51 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Mobile Top Bar */}
+      {/* ── Mobile Top Bar ── */}
       <div className="mobile-topbar" style={{
         display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         background: '#0a0a0a', borderBottom: '1px solid #1e1e1e',
-        padding: '12px 16px', alignItems: 'center', justifyContent: 'space-between',
+        flexDirection: 'column',
       }}>
-        <div style={{ fontSize: '15px', fontWeight: 800, color: '#f9fafb' }}>🌱 Bija Vidya</div>
-        <button onClick={() => setMenuOpen(!menuOpen)} style={{
-          background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer',
-          fontSize: '22px', lineHeight: 1, padding: '4px',
-        }}>
-          {menuOpen ? '✕' : '☰'}
-        </button>
+        {/* Title row */}
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '15px', fontWeight: 800, color: '#f9fafb' }}>🌱 Bija Vidya</div>
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{
+            background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer',
+            fontSize: '20px', lineHeight: 1, padding: '4px',
+          }}>
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+        {/* Subject tab bar */}
+        <div style={{ display: 'flex', borderTop: '1px solid #1e1e1e' }}>
+          {SUBJECTS.map((s) => {
+            const isActive = subject === s;
+            const emoji = s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿';
+            return (
+              <button key={s} onClick={() => onSubjectChange(s)} style={{
+                flex: 1, padding: '8px 4px',
+                background: isActive ? '#0f1f0f' : 'transparent',
+                border: 'none',
+                borderBottom: `2px solid ${isActive ? '#4ade80' : 'transparent'}`,
+                color: isActive ? '#4ade80' : '#6b7280',
+                fontSize: '13px', fontWeight: isActive ? 700 : 400,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                {emoji} {s}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Mobile Dropdown Menu */}
+      {/* ── Mobile Dropdown Menu ── */}
       {menuOpen && (
         <div className="mobile-menu" style={{
-          display: 'none', position: 'fixed', top: '52px', left: 0, right: 0, zIndex: 99,
+          display: 'none', position: 'fixed', top: '88px', left: 0, right: 0, zIndex: 99,
           background: '#0f0f0f', borderBottom: '1px solid #1e1e1e',
           padding: '16px', flexDirection: 'column', gap: '16px',
         }}>
-          <div>
-            <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>Subject</div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {subjects.map((s) => {
-                const isActive = subject === s;
-                const emoji = s === 'Physics' ? '⚡' : s === 'Chemistry' ? '⚗️' : '🌿';
-                return (
-                  <button key={s} onClick={() => { onSubjectChange(s); setMenuOpen(false); }} style={{
-                    flex: 1, padding: '8px', borderRadius: '8px', fontSize: '13px',
-                    fontWeight: isActive ? 700 : 400,
-                    color: isActive ? '#f9fafb' : '#6b7280',
-                    background: isActive ? '#1a1a1a' : 'transparent',
-                    border: `1px solid ${isActive ? '#2d2d2d' : '#1e1e1e'}`,
-                    cursor: 'pointer', fontFamily: 'inherit',
-                  }}>
-                    {emoji} {s}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {currentPage === 'heatmap' && (
             <div>
               <div style={{ fontSize: '10px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 700 }}>Year Filter</div>
@@ -232,7 +235,7 @@ export default function Sidebar({
         </div>
       )}
 
-      {/* Mobile Bottom Nav */}
+      {/* ── Mobile Bottom Nav ── */}
       <div className="mobile-bottomnav" style={{
         display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
         background: '#0a0a0a', borderTop: '1px solid #1e1e1e',
@@ -253,12 +256,17 @@ export default function Sidebar({
         })}
       </div>
 
+      {/* ── Responsive Styles ── */}
       <style>{`
         @media (max-width: 768px) {
           .desktop-sidebar { display: none !important; }
           .mobile-topbar { display: flex !important; }
           .mobile-bottomnav { display: flex !important; }
           .mobile-menu { display: flex !important; }
+          .heatmap-main { padding-top: 96px !important; padding-bottom: 72px !important; }
+          .ancestry-main { padding-top: 100px !important; padding-bottom: 80px !important; padding-left: 16px !important; padding-right: 16px !important; }
+          .quiz-main { padding-top: 100px !important; padding-bottom: 80px !important; padding-left: 16px !important; padding-right: 16px !important; }
+          .quiz-browser { padding-top: 88px !important; padding-bottom: 64px !important; }
         }
       `}</style>
     </>
