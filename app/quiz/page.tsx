@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Subject } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import { getSeenSetIds, markSetAsSeen } from '@/lib/quizSession';
+import QuizResumeDialog from '@/components/QuizResumeDialog';
+import { createClient } from '@/lib/supabase/client';
 
 interface Concept {
   id: string; concept_name: string; summary: string; key_terms: string[];
@@ -24,6 +26,11 @@ interface ChapterGroup {
 }
 
 interface LevelResult { level: string; score: number; total: number; passed: boolean; }
+
+interface ResumeDialogState {
+  concept: Concept;
+  savedLevel: number; // highest level completed (1–6), never 0 (dialog not shown when 0)
+}
 
 const LEVELS = ['easy', 'medium', 'hard', 'advanced', 'expert', 'neet'];
 
@@ -56,6 +63,8 @@ function groupByChapter(concepts: Concept[]): ChapterGroup[] {
 
 export default function QuizPage() {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+
   const [subject, setSubject] = useState<Subject>('Biology');
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +81,90 @@ export default function QuizPage() {
   const [previousQuestions, setPreviousQuestions] = useState<string[]>([]);
   const [showSummary, setShowSummary] = useState(false);
   const [levelComplete, setLevelComplete] = useState(false);
-  const [fromCache, setFromCache] = useState(false); // shows cache indicator in UI
+  const [fromCache, setFromCache] = useState(false);
+
+  // ── Progress persistence state ──────────────────────────────────────────
+  const [userId, setUserId] = useState<string | null>(null);
+  const [resumeDialog, setResumeDialog] = useState<ResumeDialogState | null>(null);
+  // Tracks the starting level of the current session (not persisted — local only)
+  // Used so "start fresh" doesn't overwrite a previously-earned highestLevel in Supabase
+  const [sessionStartLevel, setSessionStartLevel] = useState(0);
+
+  // Get user ID once on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUserId(data.session?.user.id ?? null);
+    });
+  }, []);
+
+  // ── Fetch saved progress for a concept ──────────────────────────────────
+  async function fetchProgress(conceptId: string): Promise<number> {
+    if (!userId) return 0;
+    const { data } = await supabase
+      .from('user_quiz_progress')
+      .select('highest_level_completed')
+      .eq('user_id', userId)
+      .eq('concept_id', conceptId)
+      .single();
+    return data?.highest_level_completed ?? 0;
+  }
+
+  // ── Save progress after passing a level ─────────────────────────────────
+  // Only updates if the new level is higher than what is stored — never downgrades
+  async function saveProgress(conceptId: string, completedLevelIndex: number) {
+    if (!userId) return;
+    const levelNumber = completedLevelIndex + 1; // convert 0-based index → 1-based number
+    await supabase
+      .from('user_quiz_progress')
+      .upsert(
+        {
+          user_id: userId,
+          concept_id: conceptId,
+          highest_level_completed: levelNumber,
+          last_attempted_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id,concept_id',
+          // Only update if the new value is higher — prevents "start fresh" runs
+          // from overwriting a previously-earned record.
+          // We handle this with ignoreDuplicates: false and a raw check below.
+          ignoreDuplicates: false,
+        }
+      );
+
+    // Re-fetch and only update if truly higher (Supabase upsert doesn't support
+    // conditional updates natively in the JS client, so we do a read-then-write)
+    const { data: existing } = await supabase
+      .from('user_quiz_progress')
+      .select('highest_level_completed')
+      .eq('user_id', userId)
+      .eq('concept_id', conceptId)
+      .single();
+
+    if ((existing?.highest_level_completed ?? 0) < levelNumber) {
+      await supabase
+        .from('user_quiz_progress')
+        .update({ highest_level_completed: levelNumber, last_attempted_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .eq('concept_id', conceptId);
+    }
+  }
+
+  // ── Handle concept selection ─────────────────────────────────────────────
+  async function handleConceptSelect(concept: Concept) {
+    setSelectedConcept(concept);
+    resetQuiz();
+
+    const savedLevel = await fetchProgress(concept.id);
+
+    if (savedLevel === 0) {
+      // No history — do nothing, let user click Start buttons normally
+      return;
+    }
+
+    // Has history — show resume dialog
+    setResumeDialog({ concept, savedLevel });
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -89,6 +181,7 @@ export default function QuizPage() {
     setQuizMode(null); setCurrentLevel(0); setQuestions([]); setAnswers({});
     setLevelResults([]); setPreviousQuestions([]); setShowSummary(false);
     setLevelComplete(false); setQuizError(null); setFromCache(false);
+    setSessionStartLevel(0);
   }
 
   const filtered = useMemo(() => {
@@ -108,7 +201,7 @@ export default function QuizPage() {
     return map;
   }, [filtered]);
 
-  const toggleClass = (cls: number) => { console.log("toggle", cls, typeof cls);
+  const toggleClass = (cls: number) => {
     setExpandedClasses(prev => { const next = new Set(prev); next.has(cls) ? next.delete(cls) : next.add(cls); return next; });
   };
 
@@ -124,21 +217,28 @@ export default function QuizPage() {
           subject, classLevel: selectedConcept.class, chapter: selectedConcept.chapter_name,
           concepts: chapterConcepts, mode: mode === 'assertion' ? 'assertion_reasoning' : 'mcq',
           difficulty: level, previousQuestions,
-          seenSetIds: getSeenSetIds(), // ← send seen set IDs from sessionStorage
+          seenSetIds: getSeenSetIds(),
         }),
       });
       const data = await res.json();
       if (data.success) {
         setQuestions(data.questions);
-        setFromCache(data.fromCache ?? false); // ← track if questions came from cache
-        markSetAsSeen(data.setId);             // ← mark this set as seen in sessionStorage
+        setFromCache(data.fromCache ?? false);
+        markSetAsSeen(data.setId);
         setPreviousQuestions(prev => [...prev, ...data.questions.map((q: QuizQuestion) => q.question)]);
       } else { setQuizError(data.error ?? 'Failed to generate questions'); }
     } catch { setQuizError('Network error — please try again'); }
     finally { setLoadingQuiz(false); }
   }
 
-  function startQuiz(mode: 'mcq' | 'assertion') { resetQuiz(); setQuizMode(mode); generateLevel(0, mode); }
+  // ── Start quiz — called from buttons AND from resume dialog ─────────────
+  function startQuiz(mode: 'mcq' | 'assertion', fromLevelIndex: number = 0) {
+    resetQuiz();
+    setSessionStartLevel(fromLevelIndex);
+    setQuizMode(mode);
+    setCurrentLevel(fromLevelIndex);
+    generateLevel(fromLevelIndex, mode);
+  }
 
   function selectAnswer(qIdx: number, option: string) {
     if (answers[qIdx]) return;
@@ -150,10 +250,22 @@ export default function QuizPage() {
   const levelScore = useMemo(() => questions.filter((q, i) => answers[i] === q.answer).length, [questions, answers]);
   const levelPassed = levelScore >= 3;
 
-  function nextLevel() {
-    setLevelResults(prev => [...prev, { level: LEVELS[currentLevel], score: levelScore, total: questions.length, passed: levelPassed }]);
-    if (currentLevel >= LEVELS.length - 1) { setShowSummary(true); }
-    else { const next = currentLevel + 1; setCurrentLevel(next); generateLevel(next, quizMode!); }
+  async function nextLevel() {
+    const results = [...levelResults, { level: LEVELS[currentLevel], score: levelScore, total: questions.length, passed: levelPassed }];
+    setLevelResults(results);
+
+    // ── Persist progress if level was passed ────────────────────────────
+    if (levelPassed && selectedConcept) {
+      await saveProgress(selectedConcept.id, currentLevel);
+    }
+
+    if (currentLevel >= LEVELS.length - 1) {
+      setShowSummary(true);
+    } else {
+      const next = currentLevel + 1;
+      setCurrentLevel(next);
+      generateLevel(next, quizMode!);
+    }
   }
 
   function retryLevel() { generateLevel(currentLevel, quizMode!); }
@@ -161,6 +273,9 @@ export default function QuizPage() {
   const totalScore = levelResults.reduce((s, r) => s + r.score, 0);
   const totalPossible = levelResults.reduce((s, r) => s + r.total, 0);
   const lc = LEVEL_COLORS[LEVELS[currentLevel]] ?? LEVEL_COLORS.easy;
+
+  // ── Progress bar: show from sessionStartLevel, not always from 0 ────────
+  const visibleLevels = LEVELS.slice(sessionStartLevel);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
@@ -174,6 +289,7 @@ export default function QuizPage() {
         }
         .quiz-mobile-back { display: none; align-items: center; gap: 8px; padding: 12px 16px; background: #0a0a0a; border-bottom: 1px solid #1e1e1e; color: #6b7280; font-size: 13px; cursor: pointer; width: 100%; border-top: none; border-left: none; border-right: none; font-family: inherit; }
       `}</style>
+
       <Sidebar currentPage="quiz" subject={subject} selectedYears={[2021,2022,2023,2024,2025]}
         onPageChange={page => {
           if (page === 'heatmap') router.push('/heatmap');
@@ -181,6 +297,33 @@ export default function QuizPage() {
         }}
         onSubjectChange={s => { setSubject(s); setSearch(''); }}
         onYearsChange={() => {}} />
+
+      {/* ── Resume dialog ─────────────────────────────────────────────── */}
+      {resumeDialog && (
+        <QuizResumeDialog
+          conceptName={resumeDialog.concept.concept_name}
+          highestLevel={resumeDialog.savedLevel}
+          onResume={() => {
+            // Resume from the level AFTER the last completed one
+            // savedLevel is 1-based (1=easy done), so resumeIndex = savedLevel (0-based next)
+            const resumeLevelIndex = Math.min(resumeDialog.savedLevel, LEVELS.length - 1);
+            setResumeDialog(null);
+            // Will be set by startQuiz but we need quizMode — ask user to pick mode
+            // Store pending resume level and show mode buttons
+            setSessionStartLevel(resumeLevelIndex);
+            setCurrentLevel(resumeLevelIndex);
+            // Don't auto-start — let user pick MCQ or Assertion below
+            // Just close dialog and show the start buttons; level will be pre-set
+          }}
+          onStartFresh={() => {
+            setSessionStartLevel(0);
+            setCurrentLevel(0);
+            setResumeDialog(null);
+            // Show start buttons from level 0 — user picks mode
+          }}
+          onClose={() => setResumeDialog(null)}
+        />
+      )}
 
       {/* Concept browser */}
       <div className={`quiz-browser${selectedConcept ? ' hide-mobile' : ''}`} style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
@@ -191,7 +334,7 @@ export default function QuizPage() {
         </div>
         {loading ? <div style={{ padding: '20px', color: '#4b5563', fontSize: '12px' }}>Loading...</div> : (
           <div style={{ padding: '6px 0' }}>
-            {(Object.keys(byClass).map(Number).sort((a,b) => a-b)).map((cls) => { const chs = byClass[cls]; console.log("cls", cls, "has", expandedClasses.has(cls), "size", expandedClasses.size); return (
+            {(Object.keys(byClass).map(Number).sort((a,b) => a-b)).map((cls) => { const chs = byClass[cls]; return (
               <div key={cls}>
                 <button onClick={() => toggleClass(Number(cls))} style={{ width: '100%', textAlign: 'left', padding: '7px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
                   <span style={{ fontSize: '11px', color: CLASS_COLOR[cls] ?? '#6b7280' }}>{CLASS_EMOJI[cls]} Class {cls}</span>
@@ -203,7 +346,7 @@ export default function QuizPage() {
                       Ch {ch.chapter_number} · {ch.chapter_name.slice(0, 26)}
                     </div>
                     {ch.concepts.filter(c => c.is_main_topic && !c.parent_concept_name).map(c => (
-                      <button key={c.id} onClick={() => { setSelectedConcept(c); resetQuiz(); }}
+                      <button key={c.id} onClick={() => handleConceptSelect(c)}
                         style={{ width: '100%', textAlign: 'left', padding: '5px 14px 5px 26px', background: selectedConcept?.id === c.id ? '#0f1f0f' : 'transparent', border: 'none', borderLeft: selectedConcept?.id === c.id ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s' }}>
                         <span style={{ fontSize: '11px', color: selectedConcept?.id === c.id ? '#4ade80' : '#6b7280' }}>{c.concept_name}</span>
                       </button>
@@ -261,6 +404,12 @@ export default function QuizPage() {
                   <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#0f1f0f', color: CLASS_COLOR[selectedConcept.class] ?? '#6b7280', border: `1px solid ${CLASS_COLOR[selectedConcept.class] ?? '#1e1e1e'}44` }}>
                     Class {selectedConcept.class} → Ch {selectedConcept.chapter_number}
                   </span>
+                  {/* ── Show resume level badge if coming from dialog ── */}
+                  {sessionStartLevel > 0 && (
+                    <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44' }}>
+                      ▶ Resuming from {LEVEL_LABELS[LEVELS[sessionStartLevel]]}
+                    </span>
+                  )}
                 </div>
                 <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: '0 0 6px' }}>{selectedConcept.concept_name}</h1>
                 <div style={{ fontSize: '12px', color: '#4b5563', marginBottom: '12px' }}>{selectedConcept.chapter_name}</div>
@@ -269,22 +418,30 @@ export default function QuizPage() {
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ fontSize: '11px', color: '#374151', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    Adaptive difficulty — 6 levels × 5 questions · Score ≥ 3/5 to advance
+                    {sessionStartLevel > 0
+                      ? `Resuming · levels ${sessionStartLevel + 1}–6 · Score ≥ 3/5 to advance`
+                      : 'Adaptive difficulty — 6 levels × 5 questions · Score ≥ 3/5 to advance'}
                   </div>
                   <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                    {LEVELS.map(l => (
-                      <span key={l} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: LEVEL_COLORS[l].bg, color: LEVEL_COLORS[l].text, border: `1px solid ${LEVEL_COLORS[l].border}44` }}>
-                        {LEVEL_LABELS[l]}
+                    {LEVELS.map((l, i) => (
+                      <span key={l} style={{
+                        fontSize: '11px', padding: '3px 10px', borderRadius: '20px',
+                        background: i < sessionStartLevel ? '#052e16' : LEVEL_COLORS[l].bg,
+                        color: i < sessionStartLevel ? '#16a34a' : LEVEL_COLORS[l].text,
+                        border: `1px solid ${i < sessionStartLevel ? '#16a34a44' : LEVEL_COLORS[l].border + '44'}`,
+                        opacity: i < sessionStartLevel ? 0.5 : 1,
+                      }}>
+                        {i < sessionStartLevel ? '✓' : ''} {LEVEL_LABELS[l]}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => startQuiz('mcq')} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44', fontFamily: 'inherit' }}>
-                    📝 Start MCQ Quiz
+                  <button onClick={() => startQuiz('mcq', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44', fontFamily: 'inherit' }}>
+                    📝 {sessionStartLevel > 0 ? 'Resume MCQ' : 'Start MCQ Quiz'}
                   </button>
-                  <button onClick={() => startQuiz('assertion')} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#1e1b4b', color: '#a78bfa', border: '1px solid #7c3aed44', fontFamily: 'inherit' }}>
-                    🧠 Assertion &amp; Reasoning
+                  <button onClick={() => startQuiz('assertion', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#1e1b4b', color: '#a78bfa', border: '1px solid #7c3aed44', fontFamily: 'inherit' }}>
+                    🧠 {sessionStartLevel > 0 ? 'Resume Assertion' : 'Assertion & Reasoning'}
                   </button>
                 </div>
               </div>
@@ -293,11 +450,12 @@ export default function QuizPage() {
             {/* Active quiz */}
             {quizMode && (
               <div>
-                {/* Progress bar */}
+                {/* Progress bar — only show levels from sessionStartLevel onwards */}
                 <div style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
-                  {LEVELS.map((l, i) => {
+                  {visibleLevels.map((l, i) => {
+                    const actualIndex = i + sessionStartLevel;
                     const r = levelResults.find(x => x.level === l);
-                    const isCur = i === currentLevel && questions.length > 0;
+                    const isCur = actualIndex === currentLevel && questions.length > 0;
                     return <div key={l} style={{ flex: 1, height: '4px', borderRadius: '4px', background: r ? (r.passed ? '#16a34a' : '#ef4444') : isCur ? LEVEL_COLORS[l].border : '#1e1e1e', transition: 'background 0.3s' }} />;
                   })}
                 </div>
@@ -306,10 +464,11 @@ export default function QuizPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '20px', background: lc.bg, border: `1px solid ${lc.border}` }}>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: lc.text }}>{LEVEL_LABELS[LEVELS[currentLevel]]}</span>
-                    <span style={{ fontSize: '11px', color: lc.text, opacity: 0.7 }}>Level {currentLevel + 1}/{LEVELS.length}</span>
+                    <span style={{ fontSize: '11px', color: lc.text, opacity: 0.7 }}>
+                      Level {currentLevel - sessionStartLevel + 1}/{visibleLevels.length}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {/* Cache indicator — shows only when questions loaded from cache */}
                     {fromCache && !loadingQuiz && questions.length > 0 && (
                       <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '20px', background: '#0c1a0c', color: '#4ade80', border: '1px solid #16a34a44' }}>
                         ⚡ cached
