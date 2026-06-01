@@ -90,12 +90,9 @@ export interface ConceptData {
 
 export type Subject = 'Physics' | 'Chemistry' | 'Biology';
 
-export const AVAILABLE_YEARS = [2021, 2022, 2023, 2024, 2025];
+export const AVAILABLE_YEARS = [2024, 2025];
 
 export const YEAR_COLORS: Record<number, string> = {
-  2021: '#5c4a8a',
-  2022: '#1a5276',
-  2023: '#145a32',
   2024: '#784212',
   2025: '#922b21',
 };
