@@ -276,7 +276,7 @@ export default function QuizPage() {
           .eq('cache_key', cacheKey);
         if (data) {
           const existingIds = data.map((r: { id: string }) => r.id);
-          allSeenSetIds = [...new Set([...allSeenSetIds, ...existingIds])];
+          allSeenSetIds = Array.from(new Set([...allSeenSetIds, ...existingIds]));
         }
       } catch { /* silently fall through — worst case serves cached question */ }
     }
