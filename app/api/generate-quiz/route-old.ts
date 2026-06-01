@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { supabase } from '@/lib/supabase';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? '';
@@ -60,113 +58,6 @@ const DIFFICULTY_DESCRIPTIONS: Record<string, string> = {
   expert:   'tricky — misconceptions, exceptions to rules, subtle distinctions',
   neet:     'NEET exam style — high difficulty, exactly as in past NEET papers',
 };
-
-// ── Concept difficulty_level → quiz level mapping ─────────────────────────────
-// difficulty_level in JSON: "beginner" | "intermediate" | "advanced"
-
-function selectConceptsByLevel(allConcepts: any[], level: string): any[] {
-  const targetDifficulty =
-    level === 'easy' || level === 'medium' ? 'beginner'
-    : level === 'hard' || level === 'advanced' ? 'intermediate'
-    : 'advanced'; // expert, neet
-
-  // Primary: concepts matching the target difficulty
-  let pool = allConcepts.filter((c: any) => c.difficulty_level === targetDifficulty);
-
-  // Always include main topics regardless of difficulty
-  const mainTopics = allConcepts.filter((c: any) => c.is_main_topic && !pool.some((p: any) => p.id === c.id));
-
-  // If pool is small, pad with adjacent difficulty
-  if (pool.length < 4) {
-    const fallback = allConcepts.filter((c: any) => c.difficulty_level !== targetDifficulty);
-    pool = [...pool, ...fallback];
-  }
-
-  return [...mainTopics.slice(0, 2), ...pool].slice(0, 8);
-}
-
-// ── Few-shot examples pulled from real NEET questions at runtime ──────────────
-// See getFewShot() below — static maps removed, real questions used instead.
-
-// ── Load heatmap questions once at module level ───────────────────────────────
-let heatmapData: Record<string, any> | null = null;
-function getHeatmapData() {
-  if (!heatmapData) {
-    try {
-      const filePath = path.join(process.cwd(), 'public', 'heatmap_data.json');
-      heatmapData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    } catch {
-      heatmapData = {};
-    }
-  }
-  return heatmapData!;
-}
-
-// ── Pick real NEET questions as few-shot examples ─────────────────────────────
-// Finds questions from the same subject + chapter with no diagram.
-// Falls back to any question from the subject if chapter has none.
-function getFewShot(subject: string, classLevel: number, chapterNumber: number, isAssertion: boolean): string {
-  if (isAssertion) {
-    // No assertion-reason questions in heatmap — use static fallback
-    return getFewShotARFallback(subject);
-  }
-
-  const data = getHeatmapData();
-  const subjectData = data[subject] ?? {};
-
-  // Try same chapter first
-  const chKey = `${classLevel}_${chapterNumber}`;
-  const chapterQuestions = (subjectData[chKey]?.questions ?? [])
-    .filter((q: any) => !q.has_diagram && q.question && q.options && q.correct_answer);
-
-  // Fall back to any chapter in the subject
-  const pool = chapterQuestions.length >= 2
-    ? chapterQuestions
-    : Object.values(subjectData)
-        .flatMap((ch: any) => ch.questions ?? [])
-        .filter((q: any) => !q.has_diagram && q.question && q.options && q.correct_answer);
-
-  if (pool.length === 0) return getFewShotARFallback(subject);
-
-  // Pick up to 2 questions, prefer different years
-  const shuffle = [...pool].sort(() => Math.random() - 0.5);
-  const picked = shuffle.slice(0, 2);
-
-  return picked.map((q: any) => {
-    const opts = q.options as Record<string, string>;
-    const correctKey = q.correct_answer as string;
-    const correctValue = opts[correctKey];
-    const optList = Object.entries(opts).map(([k, v]) => `${k}) ${v}`).join('  ');
-    return `REAL NEET QUESTION (${q.year}):
-Q: ${q.question}
-Options: ${optList}
-Answer: ${correctKey}) ${correctValue}`;
-  }).join('\n\n');
-}
-
-// ── Static AR fallback (heatmap has no AR questions) ─────────────────────────
-function getFewShotARFallback(subject: string): string {
-  const examples: Record<string, string> = {
-    Biology: `EXAMPLE Assertion-Reason:
-Assertion (A): Mitochondria are called the powerhouse of the cell.
-Reason (R): Mitochondria synthesise ATP through cellular respiration.
-Answer: Both A and R are true and R is the correct explanation of A
-Explanation: ATP is produced in mitochondria — R directly explains A.`,
-
-    Physics: `EXAMPLE Assertion-Reason:
-Assertion (A): A body moving in a circle at constant speed has acceleration.
-Reason (R): The direction of velocity changes continuously in circular motion.
-Answer: Both A and R are true and R is the correct explanation of A
-Explanation: Acceleration is rate of change of velocity (vector). Changing direction = changing velocity = acceleration exists.`,
-
-    Chemistry: `EXAMPLE Assertion-Reason:
-Assertion (A): Diamond is a poor conductor of electricity.
-Reason (R): In diamond, all four valence electrons of carbon are used in covalent bonding, leaving no free electrons.
-Answer: Both A and R are true and R is the correct explanation of A
-Explanation: No free electrons means no electrical conduction. R correctly explains A.`,
-  };
-  return examples[subject] ?? examples['Biology'];
-}
 
 const AR_OPTIONS = [
   'Both A and R are true and R is the correct explanation of A',
@@ -319,7 +210,6 @@ export async function POST(req: Request) {
     const level = difficulty ?? 'easy';
     const levelDesc = DIFFICULTY_DESCRIPTIONS[level] ?? 'moderate difficulty';
     const allConcepts = concepts ?? [];
-    const chapterNumber = allConcepts[0]?.chapter_number ?? 0;
 
     // ── 1. Check cache ─────────────────────────────────────────────────────────
     const cacheKey = buildCacheKey(subject, chapter, classLevel, level, mode);
@@ -339,117 +229,113 @@ export async function POST(req: Request) {
 
     console.log('Cache MISS:', cacheKey, '| calling Groq...');
 
-    // ── 2. Select concepts by difficulty_level ────────────────────────────────
-    const selectedConcepts = selectConceptsByLevel(allConcepts, level);
+    // ── 2. Select concepts ─────────────────────────────────────────────────────
+    const LEVELS = ['easy','medium','hard','advanced','expert','neet'];
+    const levelIndex = LEVELS.indexOf(level);
+    let selectedConcepts: any[];
 
-    // ── 3. Build rich concept context ─────────────────────────────────────────
-    const conceptText = selectedConcepts.map((c: any) => {
-      let text = `Concept: ${c.concept_name}`;
-      if (c.summary) text += `\nSummary: ${c.summary.slice(0, 250)}`;
-      if (c.key_terms?.length) text += `\nKey terms: ${c.key_terms.slice(0, 6).join(', ')}`;
-      if (c.formula?.length) text += `\nFormulas: ${c.formula.slice(0, 4).join(', ')}`;
-      if (c.builds_upon?.length) {
-        const prereqs = c.builds_upon.slice(0, 3).map((b: any) => b.concept_name).join(', ');
-        text += `\nBuilds upon: ${prereqs}`;
-      }
-      return text;
-    }).join('\n\n');
+    if (allConcepts.length <= 8) {
+      selectedConcepts = allConcepts;
+    } else {
+      const step = Math.max(1, Math.floor(allConcepts.length / 6));
+      const startIdx = Math.min(levelIndex * step, allConcepts.length - 8);
+      selectedConcepts = allConcepts.slice(startIdx, startIdx + 8);
+      const mainTopics = allConcepts
+        .filter((c: any) => c.is_main_topic)
+        .slice(0, 3)
+        .filter((c: any) => !selectedConcepts.some((s: any) => s.concept_name === c.concept_name));
+      selectedConcepts = [...mainTopics, ...selectedConcepts].slice(0, 8);
+    }
+
+    const conceptText = selectedConcepts
+      .map((c: any) => 'Concept: ' + c.concept_name + '\nSummary: ' + (c.summary || '').slice(0, 200))
+      .join('\n\n');
 
     const avoidText = previousQuestions.length > 0
       ? '\n\nDo NOT repeat these questions:\n' + previousQuestions.slice(-10).join('\n')
       : '';
 
-    // ── 4. Class restriction text ──────────────────────────────────────────────
+    // ── 3. Class restriction text ──────────────────────────────────────────────
     const classRestriction = getClassRestriction(subject, Number(classLevel));
 
-    // ── 5. Few-shot example — real NEET questions from heatmap ────────────────
-    const fewShot = getFewShot(subject, Number(classLevel), Number(chapterNumber ?? 0), isAssertion);
+    // ── 4. Build prompts ───────────────────────────────────────────────────────
+    const arFormat = '[\n'
+      + '  {\n'
+      + '    "question": "In the following question, a statement of Assertion (A) is followed by a statement of Reason (R).",\n'
+      + '    "difficulty": "' + level + '",\n'
+      + '    "assertion": "Write the assertion statement about ' + chapter + ' here",\n'
+      + '    "reason": "Write the reason statement here",\n'
+      + '    "options": [\n'
+      + '      "Both A and R are true and R is the correct explanation of A",\n'
+      + '      "Both A and R are true but R is not the correct explanation of A",\n'
+      + '      "A is true but R is false",\n'
+      + '      "A is false but R is true"\n'
+      + '    ],\n'
+      + '    "answer": "Both A and R are true and R is the correct explanation of A",\n'
+      + '    "explanation": "Explain why the answer is correct"\n'
+      + '  }\n'
+      + ']';
 
-    // ── 6. Build prompts ───────────────────────────────────────────────────────
-    const arFormat = JSON.stringify([{
-      question: 'In the following question, a statement of Assertion (A) is followed by a statement of Reason (R).',
-      difficulty: level,
-      assertion: 'Write the assertion statement here',
-      reason: 'Write the reason statement here',
-      options: AR_OPTIONS,
-      answer: 'Both A and R are true and R is the correct explanation of A',
-      explanation: 'Explain why the answer is correct',
-    }], null, 2);
-
-    const mcqFormat = JSON.stringify([{
-      question: '...',
-      difficulty: level,
-      options: ['...', '...', '...', '...'],
-      answer: '...',
-      explanation: '...',
-    }], null, 2);
+    const mcqFormat = '[\n'
+      + '  {\n'
+      + '    "question": "...",\n'
+      + '    "difficulty": "' + level + '",\n'
+      + '    "options": ["...", "...", "...", "..."],\n'
+      + '    "answer": "...",\n'
+      + '    "explanation": "..."\n'
+      + '  }\n'
+      + ']';
 
     const prompt = isAssertion
-      ? `Generate EXACTLY 5 Assertion-Reason questions for NEET ${subject}.
-Subject: ${subject} | Class: ${classLevel} | Chapter: ${chapter}
-Difficulty: ${level.toUpperCase()} — ${levelDesc}
-
-${classRestriction}
-
-CONCEPTS TO USE:
-${conceptText}
-${avoidText}
-
-STUDY THIS EXAMPLE CAREFULLY — match its cognitive depth exactly:
-${fewShot}
-
-RULES:
-- Write a factual ASSERTION (A) about the chapter concepts
-- Write a REASON (R) that may or may not explain the assertion
-- Mix answers — do NOT always use option 1. Distribute all 4 answer types across 5 questions
-- OPTIONS must ALWAYS be exactly these 4 in this exact order:
-  1. Both A and R are true and R is the correct explanation of A
-  2. Both A and R are true but R is not the correct explanation of A
-  3. A is true but R is false
-  4. A is false but R is true
-- The answer field must match one of the 4 options EXACTLY as written
-- Explanation must clarify why A and R are each true/false and their relationship
-- Output ONLY valid JSON array, no markdown, no comments, double quotes only, no trailing commas
-
-Format:
-${arFormat}`
-
-      : `Generate EXACTLY 5 MCQ questions for NEET ${subject}.
-Subject: ${subject} | Class: ${classLevel} | Chapter: ${chapter}
-Difficulty: ${level.toUpperCase()} — ${levelDesc}
-
-${classRestriction}
-
-CONCEPTS TO USE:
-${conceptText}
-${avoidText}
-
-STUDY THIS EXAMPLE CAREFULLY — match its cognitive depth and distractor quality exactly:
-${fewShot}
-
-RULES:
-- ALL 5 questions must match the ${level} difficulty shown in the example above
-- Use only concepts listed — do NOT introduce outside concepts
-- Distractors must be plausible — common misconceptions, not obviously wrong answers
-- The correct answer must be clearly defensible from NCERT
-- Output ONLY valid JSON array, no markdown, no comments, double quotes only, no trailing commas
-
-Format:
-${mcqFormat}`;
+      ? 'Generate EXACTLY 5 Assertion-Reason questions for NEET.\n'
+        + 'Subject: ' + subject + '\n'
+        + 'Class: ' + classLevel + '\n'
+        + 'Chapter: ' + chapter + '\n'
+        + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + classRestriction + '\n'
+        + 'Concepts:\n' + conceptText
+        + avoidText + '\n\n'
+        + 'CRITICAL RULES for Assertion-Reason:\n'
+        + '- Write a factual ASSERTION (A) about the concept\n'
+        + '- Write a REASON (R) that may or may not explain the assertion\n'
+        + '- The OPTIONS must ALWAYS be exactly these 4 in this exact order:\n'
+        + '  1. Both A and R are true and R is the correct explanation of A\n'
+        + '  2. Both A and R are true but R is not the correct explanation of A\n'
+        + '  3. A is true but R is false\n'
+        + '  4. A is false but R is true\n'
+        + '- The answer must be one of these 4 options EXACTLY as written above\n'
+        + '- Mix the answers across questions (do not always use option 1)\n'
+        + '- Output ONLY valid JSON array, no markdown\n\n'
+        + 'Format:\n' + arFormat
+      : 'Generate EXACTLY 5 MCQ questions for NEET.\n'
+        + 'Subject: ' + subject + '\n'
+        + 'Class: ' + classLevel + '\n'
+        + 'Chapter: ' + chapter + '\n'
+        + 'Difficulty: ' + level.toUpperCase() + ' - ' + levelDesc + '\n\n'
+        + classRestriction + '\n'
+        + 'Concepts:\n' + conceptText
+        + avoidText + '\n\n'
+        + 'Rules:\n'
+        + '- ALL 5 questions must be ' + level + ' difficulty appropriate for Class ' + classLevel + '\n'
+        + '- Questions must cover the concepts listed above\n'
+        + '- Do NOT introduce any concept not in the concepts list above\n'
+        + '- Output ONLY valid JSON array, no markdown, no comments\n'
+        + '- Double quotes only, no trailing commas\n'
+        + '- Never truncate the output\n\n'
+        + 'Format:\n' + mcqFormat;
 
     console.log('Level:', level, '| Mode:', mode, '| Class:', classLevel, '| Subject:', subject);
 
-    // ── 7. Call Groq — lower temperature on retry for more reliable JSON ───────
+    // ── 5. Call Groq ───────────────────────────────────────────────────────────
     let questions: any[] = [];
-    const temperatures = [0.4, 0.3, 0.2]; // start moderate, reduce on retry
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const raw = await groqCall(prompt, temperatures[attempt]);
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const raw = await groqCall(prompt, 0.4 + (attempt * 0.1));
       if (!raw) continue;
       try {
         const parsed = safeJSONParse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) { questions = parsed; break; }
       } catch (err) {
-        console.error('Parse failed attempt', attempt + 1, String(err).slice(0, 100));
+        console.error('Parse failed attempt', attempt, String(err).slice(0, 100));
       }
     }
 
