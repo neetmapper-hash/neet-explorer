@@ -145,10 +145,9 @@ export default function AncestryPage() {
       <Sidebar
         currentPage="ancestry"
         subject={subject}
-        selectedYears={[2021, 2022, 2023, 2024, 2025]}
+        selectedYears={[2024, 2025]}
         onPageChange={(page) => {
           if (page === 'heatmap') router.push('/heatmap');
-          if (page === 'concept-map') router.push('/concept-map');
           if (page === 'quiz') router.push('/quiz');
         }}
         onSubjectChange={(s) => {
