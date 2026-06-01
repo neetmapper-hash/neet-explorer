@@ -28,8 +28,9 @@ interface ChapterGroup {
 interface LevelResult { level: string; score: number; total: number; passed: boolean; }
 
 interface ResumeDialogState {
-  concept: Concept;
-  savedLevel: number; // highest level completed (1–6), never 0 (dialog not shown when 0)
+  label: string;       // chapter name or concept name shown in dialog
+  chapterKey: string;  // "biology_8_2" — used for progress lookup
+  savedLevel: number;
 }
 
 const LEVELS = ['easy', 'medium', 'hard', 'advanced', 'expert', 'neet'];
@@ -71,8 +72,9 @@ export default function QuizPage() {
   const [search, setSearch] = useState('');
   const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set([]));
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set([]));
-  const [attemptedConcepts, setAttemptedConcepts] = useState<Set<string>>(new Set([]));
+  const [attemptedChapters, setAttemptedChapters] = useState<Set<string>>(new Set([]));
   const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<ChapterGroup | null>(null);
   const [quizMode, setQuizMode] = useState<'mcq' | 'assertion' | null>(null);
   const [currentLevel, setCurrentLevel] = useState(0);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -91,6 +93,7 @@ export default function QuizPage() {
   // Tracks the starting level of the current session (not persisted — local only)
   // Used so "start fresh" doesn't overwrite a previously-earned highestLevel in Supabase
   const [sessionStartLevel, setSessionStartLevel] = useState(0);
+  const [pendingQuizMode, setPendingQuizMode] = useState<'mcq' | 'assertion'>('mcq');
 
   // Get user ID once on mount
   useEffect(() => {
@@ -99,25 +102,41 @@ export default function QuizPage() {
     });
   }, []);
 
-  // Fetch all attempted concept IDs for progress dots in the browser
+  // Fetch all attempted chapter keys for browser indicator
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || concepts.length === 0) return;
     supabase
       .from('user_quiz_progress')
       .select('concept_id')
       .eq('user_id', userId)
       .then(({ data }) => {
-        if (data) setAttemptedConcepts(new Set(data.map((r: { concept_id: string }) => r.concept_id)));
+        if (!data) return;
+        const attemptedIds = new Set(data.map((r: { concept_id: string }) => r.concept_id));
+        const keys = new Set<string>();
+        for (const c of concepts) {
+          if (attemptedIds.has(c.id)) {
+            keys.add(`${c.subject.toLowerCase()}_${c.class}_${c.chapter_number}`);
+          }
+        }
+        setAttemptedChapters(keys);
       });
-  }, [userId]);
+  }, [userId, concepts]);
 
   const toggleChapter = (key: string) => {
     setExpandedChapters(prev => { const next = new Set(prev); next.has(key) ? next.delete(key) : next.add(key); return next; });
   };
 
-  // ── Fetch saved progress for a concept ──────────────────────────────────
-  async function fetchProgress(conceptId: string): Promise<number> {
+  // ── Fetch saved progress for a chapter key ───────────────────────────────
+  // chapter key format: "biology_8_2"
+  // We store by the first main concept ID in that chapter as a stable proxy
+  function getChapterProxyConceptId(ch: ChapterGroup): string {
+    const main = ch.concepts.find(c => c.is_main_topic && !c.parent_concept_name);
+    return main?.id ?? ch.concepts[0]?.id ?? `${ch.class}_${ch.chapter_number}`;
+  }
+
+  async function fetchProgress(chapterKey: string, ch: ChapterGroup): Promise<number> {
     if (!userId) return 0;
+    const conceptId = getChapterProxyConceptId(ch);
     const { data } = await supabase
       .from('user_quiz_progress')
       .select('highest_level_completed')
@@ -127,31 +146,19 @@ export default function QuizPage() {
     return data?.highest_level_completed ?? 0;
   }
 
-  // ── Save progress after passing a level ─────────────────────────────────
-  // Only updates if the new level is higher than what is stored — never downgrades
-  async function saveProgress(conceptId: string, completedLevelIndex: number) {
+  // ── Save progress — keyed to chapter proxy concept ID ────────────────────
+  async function saveProgress(ch: ChapterGroup, completedLevelIndex: number) {
     if (!userId) return;
-    const levelNumber = completedLevelIndex + 1; // convert 0-based index → 1-based number
+    const conceptId = getChapterProxyConceptId(ch);
+    const levelNumber = completedLevelIndex + 1;
+
     await supabase
       .from('user_quiz_progress')
       .upsert(
-        {
-          user_id: userId,
-          concept_id: conceptId,
-          highest_level_completed: levelNumber,
-          last_attempted_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'user_id,concept_id',
-          // Only update if the new value is higher — prevents "start fresh" runs
-          // from overwriting a previously-earned record.
-          // We handle this with ignoreDuplicates: false and a raw check below.
-          ignoreDuplicates: false,
-        }
+        { user_id: userId, concept_id: conceptId, highest_level_completed: levelNumber, last_attempted_at: new Date().toISOString() },
+        { onConflict: 'user_id,concept_id', ignoreDuplicates: false }
       );
 
-    // Re-fetch and only update if truly higher (Supabase upsert doesn't support
-    // conditional updates natively in the JS client, so we do a read-then-write)
     const { data: existing } = await supabase
       .from('user_quiz_progress')
       .select('highest_level_completed')
@@ -166,29 +173,44 @@ export default function QuizPage() {
         .eq('user_id', userId)
         .eq('concept_id', conceptId);
     }
-    // Keep local attempted set in sync so progress dots update immediately
-    setAttemptedConcepts(prev => new Set(prev).add(conceptId));
+
+    // Mark chapter as attempted locally
+    const chapterKey = `${subject.toLowerCase()}_${ch.class}_${ch.chapter_number}`;
+    setAttemptedChapters(prev => new Set(prev).add(chapterKey));
   }
 
-  // ── Handle concept selection ─────────────────────────────────────────────
+  // ── Handle concept click — shows concept detail, clears chapter quiz ──────
   async function handleConceptSelect(concept: Concept) {
     setSelectedConcept(concept);
+    setSelectedChapter(null);
+    resetQuiz();
+  }
+
+  // ── Handle quiz row click — chapter-level quiz entry ─────────────────────
+  async function handleChapterQuizSelect(ch: ChapterGroup, mode: 'mcq' | 'assertion') {
+    setSelectedChapter(ch);
+    setSelectedConcept(null);
     resetQuiz();
 
-    const savedLevel = await fetchProgress(concept.id);
+    const chapterKey = `${subject.toLowerCase()}_${ch.class}_${ch.chapter_number}`;
+    const savedLevel = await fetchProgress(chapterKey, ch);
 
     if (savedLevel === 0) {
-      // No history — do nothing, let user click Start buttons normally
+      // No history — start directly
+      startQuizForChapter(ch, mode, 0);
       return;
     }
 
-    // Has history — show resume dialog
-    setResumeDialog({ concept, savedLevel });
+    // Has history — show resume dialog, then user picks
+    setResumeDialog({ label: ch.chapter_name, chapterKey, savedLevel });
+    // Store mode + chapter so resume/fresh buttons can use them
+    setPendingQuizMode(mode);
   }
 
   useEffect(() => {
     setLoading(true);
     setSelectedConcept(null);
+    setSelectedChapter(null);
     resetQuiz();
     const file = subject === 'Biology' ? 'biology_concepts_new.json'
       : subject === 'Physics' ? 'physics_concepts_new.json' : 'chemistry_concepts_new.json';
@@ -226,15 +248,21 @@ export default function QuizPage() {
   };
 
   async function generateLevel(levelIndex: number, mode: 'mcq' | 'assertion') {
-    if (!selectedConcept) return;
+    const activeChapter = selectedChapter ?? (selectedConcept ? {
+      class: selectedConcept.class,
+      chapter_number: selectedConcept.chapter_number,
+      chapter_name: selectedConcept.chapter_name,
+      concepts: concepts.filter(c => c.class === selectedConcept.class && c.chapter_number === selectedConcept.chapter_number),
+    } as ChapterGroup : null);
+    if (!activeChapter) return;
     setLoadingQuiz(true); setQuizError(null); setQuestions([]); setAnswers({}); setLevelComplete(false); setFromCache(false);
     const level = LEVELS[levelIndex];
-    const chapterConcepts = concepts.filter(c => c.class === selectedConcept.class && c.chapter_number === selectedConcept.chapter_number);
+    const chapterConcepts = concepts.filter(c => c.class === activeChapter.class && c.chapter_number === activeChapter.chapter_number);
     try {
       const res = await fetch('/api/generate-quiz', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject, classLevel: selectedConcept.class, chapter: selectedConcept.chapter_name,
+          subject, classLevel: activeChapter.class, chapter: activeChapter.chapter_name,
           concepts: chapterConcepts, mode: mode === 'assertion' ? 'assertion_reasoning' : 'mcq',
           difficulty: level, previousQuestions,
           seenSetIds: getSeenSetIds(),
@@ -251,7 +279,20 @@ export default function QuizPage() {
     finally { setLoadingQuiz(false); }
   }
 
-  // ── Start quiz — called from buttons AND from resume dialog ─────────────
+  // ── Start quiz from chapter quiz rows ────────────────────────────────────
+  function startQuizForChapter(ch: ChapterGroup, mode: 'mcq' | 'assertion', fromLevelIndex: number) {
+    setSelectedChapter(ch);
+    setSelectedConcept(null);
+    setSessionStartLevel(fromLevelIndex);
+    setQuizMode(mode);
+    setCurrentLevel(fromLevelIndex);
+    // generateLevel reads selectedChapter from state but state hasn't updated yet —
+    // so we pass chapter directly via a local override stored in selectedChapter
+    // The effect is handled because we set selectedChapter above before calling
+    generateLevel(fromLevelIndex, mode);
+  }
+
+  // ── Start quiz — called from concept detail start buttons ─────────────────
   function startQuiz(mode: 'mcq' | 'assertion', fromLevelIndex: number = 0) {
     resetQuiz();
     setSessionStartLevel(fromLevelIndex);
@@ -275,8 +316,8 @@ export default function QuizPage() {
     setLevelResults(results);
 
     // ── Persist progress if level was passed ────────────────────────────
-    if (levelPassed && selectedConcept) {
-      await saveProgress(selectedConcept.id, currentLevel);
+    if (levelPassed && selectedChapter) {
+      await saveProgress(selectedChapter, currentLevel);
     }
 
     if (currentLevel >= LEVELS.length - 1) {
@@ -319,34 +360,25 @@ export default function QuizPage() {
         onYearsChange={() => {}} />
 
       {/* ── Resume dialog ─────────────────────────────────────────────── */}
-      {resumeDialog && (
+      {resumeDialog && selectedChapter && (
         <QuizResumeDialog
-          conceptName={resumeDialog.concept.concept_name}
+          conceptName={resumeDialog.label}
           highestLevel={resumeDialog.savedLevel}
           onResume={() => {
-            // Resume from the level AFTER the last completed one
-            // savedLevel is 1-based (1=easy done), so resumeIndex = savedLevel (0-based next)
             const resumeLevelIndex = Math.min(resumeDialog.savedLevel, LEVELS.length - 1);
             setResumeDialog(null);
-            // Will be set by startQuiz but we need quizMode — ask user to pick mode
-            // Store pending resume level and show mode buttons
-            setSessionStartLevel(resumeLevelIndex);
-            setCurrentLevel(resumeLevelIndex);
-            // Don't auto-start — let user pick MCQ or Assertion below
-            // Just close dialog and show the start buttons; level will be pre-set
+            startQuizForChapter(selectedChapter, pendingQuizMode, resumeLevelIndex);
           }}
           onStartFresh={() => {
-            setSessionStartLevel(0);
-            setCurrentLevel(0);
             setResumeDialog(null);
-            // Show start buttons from level 0 — user picks mode
+            startQuizForChapter(selectedChapter, pendingQuizMode, 0);
           }}
           onClose={() => setResumeDialog(null)}
         />
       )}
 
       {/* Concept browser */}
-      <div className={`quiz-browser${selectedConcept ? ' hide-mobile' : ''}`} style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
+      <div className={`quiz-browser${(selectedConcept || selectedChapter) ? ' hide-mobile' : ''}`} style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
         <div style={{ padding: '16px 14px 10px', borderBottom: '1px solid #1e1e1e' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb', marginBottom: '8px' }}>📚 Concepts</div>
           <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
@@ -366,57 +398,71 @@ export default function QuizPage() {
                   const chKey = `${ch.class}_${ch.chapter_number}`;
                   const mainConcepts = ch.concepts.filter(c => c.is_main_topic && !c.parent_concept_name);
                   const chapterOpen = expandedChapters.has(chKey);
-                  const attemptedCount = mainConcepts.filter(c => attemptedConcepts.has(c.id)).length;
+                  const chapterAttempted = attemptedChapters.has(`${subject.toLowerCase()}_${ch.class}_${ch.chapter_number}`);
+                  const isChapterQuizActive = selectedChapter?.class === ch.class && selectedChapter?.chapter_number === ch.chapter_number;
 
                   return (
                     <div key={chKey}>
-                      {/* Chapter row with +/- toggle */}
+                      {/* Chapter row — +/- toggle only */}
                       <button
                         onClick={() => toggleChapter(chKey)}
-                        style={{ width: '100%', textAlign: 'left', padding: '6px 14px 6px 22px', background: chapterOpen ? '#111' : 'transparent', border: 'none', borderTop: '1px solid #1a1a1a', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '6px', fontFamily: 'inherit' }}
+                        style={{ width: '100%', textAlign: 'left', padding: '6px 14px 6px 22px', background: chapterOpen ? '#111' : 'transparent', border: 'none', borderTop: '1px solid #1a1a1a', borderLeft: isChapterQuizActive ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '6px', fontFamily: 'inherit' }}
                       >
-                        {/* +/- icon */}
                         <span style={{ fontSize: '13px', color: '#374151', flexShrink: 0, marginTop: '1px', lineHeight: 1 }}>
                           {chapterOpen ? '−' : '+'}
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          {/* Chapter number */}
                           <div style={{ fontSize: '9px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
                             Ch {ch.chapter_number}
                           </div>
-                          {/* Full chapter name — wraps, no truncation */}
                           <div style={{ fontSize: '11px', color: chapterOpen ? '#d1d5db' : '#6b7280', fontWeight: 600, lineHeight: 1.4, wordBreak: 'break-word' }}>
                             {ch.chapter_name}
                           </div>
-                          {/* Concept count + progress */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                             <span style={{ fontSize: '9px', color: '#374151' }}>{mainConcepts.length} concepts</span>
-                            {attemptedCount > 0 && (
-                              <span style={{ fontSize: '9px', color: '#16a34a' }}>· {attemptedCount} attempted</span>
+                            {chapterAttempted && (
+                              <span style={{ fontSize: '9px', color: '#16a34a' }}>· ✓ attempted</span>
                             )}
                           </div>
                         </div>
                       </button>
 
-                      {/* Concept list */}
+                      {/* Expanded: concepts + quiz section */}
                       {chapterOpen && (
                         <div style={{ borderBottom: '1px solid #1a1a1a' }}>
+                          {/* Concept list — clickable for concept detail */}
                           {mainConcepts.map(c => {
                             const isSelected = selectedConcept?.id === c.id;
-                            const isAttempted = attemptedConcepts.has(c.id);
                             return (
                               <button key={c.id} onClick={() => handleConceptSelect(c)}
-                                style={{ width: '100%', textAlign: 'left', padding: '7px 14px 7px 36px', background: isSelected ? '#0f1f0f' : 'transparent', border: 'none', borderLeft: isSelected ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {/* Progress dot */}
-                                {isAttempted && (
-                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0, display: 'inline-block' }} />
-                                )}
-                                <span style={{ fontSize: '11px', color: isSelected ? '#4ade80' : isAttempted ? '#d1d5db' : '#6b7280', lineHeight: 1.4 }}>
+                                style={{ width: '100%', textAlign: 'left', padding: '6px 14px 6px 36px', background: isSelected ? '#0f1f0f' : 'transparent', border: 'none', borderLeft: isSelected ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s' }}>
+                                <span style={{ fontSize: '11px', color: isSelected ? '#4ade80' : '#6b7280', lineHeight: 1.4 }}>
                                   {c.concept_name}
                                 </span>
                               </button>
                             );
                           })}
+
+                          {/* Quiz section */}
+                          <div style={{ margin: '6px 14px 4px 36px', borderTop: '1px solid #1e1e1e', paddingTop: '6px' }}>
+                            <div style={{ fontSize: '9px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                              Quiz
+                            </div>
+                            {/* MCQ row */}
+                            <button
+                              onClick={() => handleChapterQuizSelect(ch, 'mcq')}
+                              style={{ width: '100%', textAlign: 'left', padding: '7px 10px', marginBottom: '4px', borderRadius: '8px', background: isChapterQuizActive && quizMode === 'mcq' ? '#052e16' : '#0f1a0f', border: `1px solid ${isChapterQuizActive && quizMode === 'mcq' ? '#16a34a' : '#1a2e1a'}`, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                              <span style={{ fontSize: '12px' }}>📝</span>
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: '#4ade80' }}>MCQ Quiz</span>
+                            </button>
+                            {/* Assertion row */}
+                            <button
+                              onClick={() => handleChapterQuizSelect(ch, 'assertion')}
+                              style={{ width: '100%', textAlign: 'left', padding: '7px 10px', marginBottom: '6px', borderRadius: '8px', background: isChapterQuizActive && quizMode === 'assertion' ? '#1e1b4b' : '#0f0f1a', border: `1px solid ${isChapterQuizActive && quizMode === 'assertion' ? '#7c3aed' : '#1a1a2e'}`, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                              <span style={{ fontSize: '12px' }}>🧠</span>
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: '#a78bfa' }}>Assertion & Reasoning</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -429,11 +475,11 @@ export default function QuizPage() {
       </div>
 
       {/* Main panel */}
-      <main className={`quiz-main${!selectedConcept ? ' hide-mobile' : ''}`} style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
-        <button className="quiz-mobile-back" onClick={() => { setSelectedConcept(null); resetQuiz(); }}>
+      <main className={`quiz-main${!(selectedConcept || selectedChapter) ? ' hide-mobile' : ''}`} style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+        <button className="quiz-mobile-back" onClick={() => { setSelectedConcept(null); setSelectedChapter(null); resetQuiz(); }}>
           ← Back to concepts
         </button>
-        {!selectedConcept ? (
+        {!(selectedConcept || selectedChapter) ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
             <div style={{ fontSize: '32px' }}>📚</div>
             <div style={{ fontSize: '13px', color: '#374151' }}>Select a concept to start the adaptive quiz</div>
@@ -441,7 +487,9 @@ export default function QuizPage() {
         ) : showSummary ? (
           <div style={{ maxWidth: '580px' }}>
             <div style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', marginBottom: '6px' }}>🎯 Quiz Complete!</div>
-            <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '20px' }}>{selectedConcept.concept_name} · {selectedConcept.chapter_name}</div>
+            <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '20px' }}>
+              {selectedChapter ? selectedChapter.chapter_name : `${selectedConcept!.concept_name} · ${selectedConcept!.chapter_name}`}
+            </div>
             <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '14px', padding: '20px', marginBottom: '16px', textAlign: 'center' }}>
               <div style={{ fontSize: '48px', fontWeight: 800, color: totalScore >= totalPossible * 0.6 ? '#4ade80' : '#f87171' }}>{totalScore}/{totalPossible}</div>
               <div style={{ fontSize: '13px', color: '#4b5563', marginTop: '4px' }}>{Math.round(totalScore / Math.max(totalPossible, 1) * 100)}% overall score</div>
@@ -466,24 +514,48 @@ export default function QuizPage() {
           </div>
         ) : (
           <div style={{ maxWidth: '660px' }}>
-            {/* Concept info + start buttons */}
-            {!quizMode && (
+            {/* ── Concept detail (no quiz active) ── */}
+            {selectedConcept && !quizMode && (
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#0f1f0f', color: CLASS_COLOR[selectedConcept.class] ?? '#6b7280', border: `1px solid ${CLASS_COLOR[selectedConcept.class] ?? '#1e1e1e'}44` }}>
                     Class {selectedConcept.class} → Ch {selectedConcept.chapter_number}
                   </span>
-                  {/* ── Show resume level badge if coming from dialog ── */}
+                </div>
+                <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: '0 0 6px' }}>{selectedConcept.concept_name}</h1>
+                <div style={{ fontSize: '12px', color: '#4b5563', marginBottom: '12px' }}>{selectedConcept.chapter_name}</div>
+                <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '10px', padding: '14px', marginBottom: '18px' }}>
+                  <p style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.6, margin: 0 }}>{selectedConcept.summary}</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Chapter quiz start screen (no quiz active) ── */}
+            {selectedChapter && !quizMode && (
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#0f1f0f', color: CLASS_COLOR[selectedChapter.class] ?? '#6b7280', border: `1px solid ${CLASS_COLOR[selectedChapter.class] ?? '#1e1e1e'}44` }}>
+                    Class {selectedChapter.class} → Ch {selectedChapter.chapter_number}
+                  </span>
                   {sessionStartLevel > 0 && (
                     <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44' }}>
                       ▶ Resuming from {LEVEL_LABELS[LEVELS[sessionStartLevel]]}
                     </span>
                   )}
                 </div>
-                <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: '0 0 6px' }}>{selectedConcept.concept_name}</h1>
-                <div style={{ fontSize: '12px', color: '#4b5563', marginBottom: '12px' }}>{selectedConcept.chapter_name}</div>
-                <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '10px', padding: '14px', marginBottom: '18px' }}>
-                  <p style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.6, margin: 0 }}>{selectedConcept.summary}</p>
+                <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: '0 0 6px' }}>{selectedChapter.chapter_name}</h1>
+                <div style={{ fontSize: '12px', color: '#4b5563', marginBottom: '12px' }}>
+                  {selectedChapter.concepts.filter(c => c.is_main_topic && !c.parent_concept_name).length} concepts covered
+                </div>
+                {/* Concept pills */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
+                  {selectedChapter.concepts
+                    .filter(c => c.is_main_topic && !c.parent_concept_name)
+                    .map(c => (
+                      <span key={c.id} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: '#1a1a1a', color: '#6b7280', border: '1px solid #2d2d2d' }}>
+                        {c.concept_name}
+                      </span>
+                    ))}
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ fontSize: '11px', color: '#374151', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -506,10 +578,10 @@ export default function QuizPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => startQuiz('mcq', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44', fontFamily: 'inherit' }}>
+                  <button onClick={() => startQuizForChapter(selectedChapter, 'mcq', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44', fontFamily: 'inherit' }}>
                     📝 {sessionStartLevel > 0 ? 'Resume MCQ' : 'Start MCQ Quiz'}
                   </button>
-                  <button onClick={() => startQuiz('assertion', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#1e1b4b', color: '#a78bfa', border: '1px solid #7c3aed44', fontFamily: 'inherit' }}>
+                  <button onClick={() => startQuizForChapter(selectedChapter, 'assertion', sessionStartLevel)} style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#1e1b4b', color: '#a78bfa', border: '1px solid #7c3aed44', fontFamily: 'inherit' }}>
                     🧠 {sessionStartLevel > 0 ? 'Resume Assertion' : 'Assertion & Reasoning'}
                   </button>
                 </div>
