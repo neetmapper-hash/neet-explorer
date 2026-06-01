@@ -98,6 +98,19 @@ export default function QuizPage() {
   // Used to bypass cache for returning users within the same session
   const [sessionAttemptedChapterKeys, setSessionAttemptedChapterKeys] = useState<Set<string>>(new Set());
 
+  // ── Pre-quiz state ─────────────────────────────────────────────────────────
+  const [preQuizChapter, setPreQuizChapter] = useState<ChapterGroup | null>(null);
+  const [preQuizQuestions, setPreQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [preQuizAnswers, setPreQuizAnswers] = useState<Record<number, string>>({});
+  const [preQuizLoading, setPreQuizLoading] = useState(false);
+  const [preQuizComplete, setPreQuizComplete] = useState(false);
+  const [preQuizError, setPreQuizError] = useState<string | null>(null);
+
+  // ── Concept explanation state ──────────────────────────────────────────────
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explanationConceptId, setExplanationConceptId] = useState<string | null>(null);
+
   // Get user ID once on mount
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -210,10 +223,82 @@ export default function QuizPage() {
     setPendingQuizMode(mode);
   }
 
+  // ── Pre-quiz: launch baseline quiz for a chapter ─────────────────────────
+  async function handlePreQuiz(ch: ChapterGroup) {
+    setPreQuizChapter(ch);
+    setSelectedChapter(null);
+    setSelectedConcept(null);
+    setPreQuizQuestions([]);
+    setPreQuizAnswers({});
+    setPreQuizComplete(false);
+    setPreQuizError(null);
+    setPreQuizLoading(true);
+    resetQuiz();
+    const chapterConcepts = concepts.filter(c => c.class === ch.class && c.chapter_number === ch.chapter_number);
+    // Use the chapter's own class level — no artificial difficulty mapping
+    // Pick 'easy' difficulty so questions are class-appropriate for baseline
+    const difficultyForClass = ch.class <= 9 ? 'easy' : ch.class <= 11 ? 'medium' : 'hard';
+    try {
+      const res = await fetch('/api/generate-quiz', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject, classLevel: ch.class, chapter: ch.chapter_name,
+          concepts: chapterConcepts, mode: 'mcq',
+          difficulty: difficultyForClass, previousQuestions: [],
+          seenSetIds: [],
+        }),
+      });
+      const data = await res.json();
+      if (data.success) setPreQuizQuestions(data.questions);
+      else setPreQuizError(data.error ?? 'Failed to generate pre-quiz');
+    } catch { setPreQuizError('Network error — please try again'); }
+    finally { setPreQuizLoading(false); }
+  }
+
+  function selectPreQuizAnswer(qIdx: number, option: string) {
+    if (preQuizAnswers[qIdx]) return;
+    const next = { ...preQuizAnswers, [qIdx]: option };
+    setPreQuizAnswers(next);
+    if (Object.keys(next).length === preQuizQuestions.length) setPreQuizComplete(true);
+  }
+
+  const preQuizScore = preQuizQuestions.filter((q, i) => preQuizAnswers[i] === q.answer).length;
+
+  // ── Concept explanation: call Groq for tutor-style explanation ───────────
+  async function handleExplainConcept(concept: Concept) {
+    if (explanationConceptId === concept.id && explanation) return; // already loaded
+    setExplanationLoading(true);
+    setExplanation(null);
+    setExplanationConceptId(concept.id);
+    try {
+      const res = await fetch('/api/explain-concept', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          concept_name: concept.concept_name,
+          subject: concept.subject,
+          class: concept.class,
+          summary: concept.summary,
+          key_terms: concept.key_terms,
+          formula: concept.formula,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) setExplanation(data.explanation);
+      else setExplanation('Could not generate explanation. Please try again.');
+    } catch { setExplanation('Network error — please try again.'); }
+    finally { setExplanationLoading(false); }
+  }
+
   useEffect(() => {
     setLoading(true);
     setSelectedConcept(null);
     setSelectedChapter(null);
+    setPreQuizChapter(null);
+    setPreQuizQuestions([]);
+    setPreQuizAnswers({});
+    setPreQuizComplete(false);
+    setExplanation(null);
+    setExplanationConceptId(null);
     resetQuiz();
     const file = subject === 'Biology' ? 'biology_concepts_new.json'
       : subject === 'Physics' ? 'physics_concepts_new.json' : 'chemistry_concepts_new.json';
@@ -456,9 +541,19 @@ export default function QuizPage() {
                         </div>
                       </button>
 
-                      {/* Expanded: concepts + quiz section */}
+                      {/* Expanded: pre-quiz + concepts + quiz section */}
                       {chapterOpen && (
                         <div style={{ borderBottom: '1px solid #1a1a1a' }}>
+                          {/* Pre-quiz button */}
+                          <div style={{ margin: '6px 14px 4px 36px' }}>
+                            <button
+                              onClick={() => handlePreQuiz(ch)}
+                              style={{ width: '100%', textAlign: 'left', padding: '7px 10px', marginBottom: '4px', borderRadius: '8px', background: preQuizChapter?.class === ch.class && preQuizChapter?.chapter_number === ch.chapter_number ? '#1a1200' : '#0f0e00', border: `1px solid ${preQuizChapter?.class === ch.class && preQuizChapter?.chapter_number === ch.chapter_number ? '#ca8a04' : '#1e1a00'}`, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                              <span style={{ fontSize: '12px' }}>📋</span>
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: '#fbbf24' }}>Pre-Quiz</span>
+                              <span style={{ fontSize: '9px', color: '#78716c', marginLeft: 'auto' }}>know your level</span>
+                            </button>
+                          </div>
                           {/* Concept list — clickable for concept detail */}
                           {mainConcepts.map(c => {
                             const isSelected = selectedConcept?.id === c.id;
@@ -504,11 +599,11 @@ export default function QuizPage() {
       </div>
 
       {/* Main panel */}
-      <main className={`quiz-main${!(selectedConcept || selectedChapter) ? ' hide-mobile' : ''}`} style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
-        <button className="quiz-mobile-back" onClick={() => { setSelectedConcept(null); setSelectedChapter(null); resetQuiz(); }}>
+      <main className={`quiz-main${!(selectedConcept || selectedChapter || preQuizChapter) ? ' hide-mobile' : ''}`} style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+        <button className="quiz-mobile-back" onClick={() => { setSelectedConcept(null); setSelectedChapter(null); setPreQuizChapter(null); resetQuiz(); }}>
           ← Back to concepts
         </button>
-        {!(selectedConcept || selectedChapter) ? (
+        {!(selectedConcept || selectedChapter || preQuizChapter) ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
             <div style={{ fontSize: '32px' }}>📚</div>
             <div style={{ fontSize: '13px', color: '#374151' }}>Select a concept to start the adaptive quiz</div>
@@ -543,6 +638,84 @@ export default function QuizPage() {
           </div>
         ) : (
           <div style={{ maxWidth: '660px' }}>
+
+            {/* ── Pre-quiz panel ── */}
+            {preQuizChapter && !quizMode && (
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '20px', background: '#1c1a00', color: '#fbbf24', border: '1px solid #ca8a0444' }}>
+                    📋 Pre-Quiz · Class {preQuizChapter.class} · Ch {preQuizChapter.chapter_number}
+                  </span>
+                </div>
+                <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#f9fafb', margin: '0 0 4px' }}>{preQuizChapter.chapter_name}</h1>
+                <p style={{ fontSize: '12px', color: '#4b5563', margin: '0 0 20px' }}>Answer these 5 questions to know your current level before studying.</p>
+
+                {preQuizLoading && (
+                  <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>⏳</div>
+                    <div style={{ fontSize: '13px', color: '#4b5563' }}>Generating pre-quiz questions...</div>
+                  </div>
+                )}
+
+                {preQuizError && (
+                  <div style={{ background: '#1f0a0a', border: '1px solid #7f1d1d', borderRadius: '10px', padding: '12px 16px', fontSize: '13px', color: '#f87171' }}>
+                    ❌ {preQuizError}
+                    <button onClick={() => handlePreQuiz(preQuizChapter)} style={{ marginLeft: '12px', fontSize: '12px', color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>Try again</button>
+                  </div>
+                )}
+
+                {!preQuizLoading && preQuizQuestions.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {preQuizQuestions.map((q, idx) => {
+                      const sel = preQuizAnswers[idx];
+                      return (
+                        <div key={idx} style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '12px', padding: '16px' }}>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#374151', background: '#1a1a1a', padding: '2px 7px', borderRadius: '20px', flexShrink: 0, marginTop: '2px' }}>Q{idx + 1}</span>
+                            <p style={{ fontSize: '13px', color: '#f9fafb', margin: 0, lineHeight: 1.5 }}>{q.question}</p>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            {q.options.map((opt, oi) => {
+                              const isCorrect = opt === q.answer, isSelected = opt === sel;
+                              let bg = '#1a1a1a', border = '#2d2d2d', color = '#9ca3af';
+                              if (sel) {
+                                if (isCorrect) { bg = '#052e16'; border = '#16a34a'; color = '#4ade80'; }
+                                else if (isSelected) { bg = '#1f0a0a'; border = '#7f1d1d'; color = '#f87171'; }
+                                else { bg = '#111'; border = '#1e1e1e'; color = '#4b5563'; }
+                              }
+                              return <button key={oi} disabled={!!sel} onClick={() => selectPreQuizAnswer(idx, opt)} style={{ textAlign: 'left', padding: '9px 13px', borderRadius: '8px', border: `1px solid ${border}`, background: bg, color, fontSize: '12px', cursor: sel ? 'default' : 'pointer', fontFamily: 'inherit', transition: 'all 0.1s' }}>{opt}</button>;
+                            })}
+                          </div>
+                          {sel && (
+                            <div style={{ marginTop: '10px', background: '#0a1628', border: '1px solid #1e3a5f', borderRadius: '8px', padding: '10px 12px', fontSize: '12px', color: '#93c5fd', lineHeight: 1.6 }}>
+                              <strong>Explanation:</strong> {q.explanation}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Pre-quiz result + CTA */}
+                    {preQuizComplete && (
+                      <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '36px', fontWeight: 800, color: preQuizScore >= 4 ? '#4ade80' : preQuizScore >= 2 ? '#fbbf24' : '#f87171', marginBottom: '4px' }}>
+                          {preQuizScore}/5
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>
+                          {preQuizScore >= 4 ? 'Great baseline! You already know this chapter well.' : preQuizScore >= 2 ? 'Good start — study the concepts to fill the gaps.' : 'Study the concepts first, then take the adaptive quiz.'}
+                        </div>
+                        <button
+                          onClick={() => { setPreQuizChapter(null); setSelectedChapter(preQuizChapter); }}
+                          style={{ width: '100%', padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a44', fontFamily: 'inherit' }}>
+                          📚 Study the concepts →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* ── Concept detail (no quiz active) ── */}
             {selectedConcept && !quizMode && (
               <div style={{ marginBottom: '24px' }}>
@@ -553,8 +726,66 @@ export default function QuizPage() {
                 </div>
                 <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#f9fafb', margin: '0 0 6px' }}>{selectedConcept.concept_name}</h1>
                 <div style={{ fontSize: '12px', color: '#4b5563', marginBottom: '12px' }}>{selectedConcept.chapter_name}</div>
-                <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '10px', padding: '14px', marginBottom: '18px' }}>
+
+                {/* Summary */}
+                <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
                   <p style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.6, margin: 0 }}>{selectedConcept.summary}</p>
+                </div>
+
+                {/* Key terms */}
+                {selectedConcept.key_terms?.length > 0 && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ fontSize: '10px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Key Terms</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {selectedConcept.key_terms.map((t, i) => (
+                        <span key={i} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: '#0a1628', color: '#93c5fd', border: '1px solid #1e3a5f' }}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Formulas */}
+                {selectedConcept.formula?.length > 0 && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ fontSize: '10px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Formulas</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {selectedConcept.formula.map((f, i) => (
+                        <div key={i} style={{ fontSize: '12px', padding: '7px 12px', borderRadius: '8px', background: '#1a0f2e', color: '#c4b5fd', border: '1px solid #4c1d9544', fontFamily: 'monospace' }}>{f}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Builds upon */}
+                {selectedConcept.builds_upon?.length > 0 && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ fontSize: '10px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Prerequisites</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {selectedConcept.builds_upon.map((b, i) => (
+                        <span key={i} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: '#111', color: '#6b7280', border: '1px solid #2d2d2d' }}>
+                          ← {b.concept_name} <span style={{ color: '#374151' }}>Cl.{b.class}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Explain button + result */}
+                <div style={{ marginBottom: '18px' }}>
+                  {!explanation || explanationConceptId !== selectedConcept.id ? (
+                    <button
+                      onClick={() => handleExplainConcept(selectedConcept)}
+                      disabled={explanationLoading}
+                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: explanationLoading ? 'default' : 'pointer', background: '#1a0f2e', color: '#c4b5fd', border: '1px solid #7c3aed44', fontFamily: 'inherit', opacity: explanationLoading ? 0.7 : 1 }}>
+                      {explanationLoading ? '⏳ Generating explanation...' : '✨ Explain this concept'}
+                    </button>
+                  ) : (
+                    <div style={{ background: '#0f0f1a', border: '1px solid #2d2d4a', borderRadius: '10px', padding: '14px' }}>
+                      <div style={{ fontSize: '10px', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>✨ AI Explanation</div>
+                      <div style={{ fontSize: '13px', color: '#d1d5db', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{explanation}</div>
+                      <button onClick={() => { setExplanation(null); setExplanationConceptId(null); }} style={{ marginTop: '10px', fontSize: '11px', color: '#374151', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>✕ Dismiss</button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
