@@ -94,6 +94,9 @@ export default function QuizPage() {
   // Used so "start fresh" doesn't overwrite a previously-earned highestLevel in Supabase
   const [sessionStartLevel, setSessionStartLevel] = useState(0);
   const [pendingQuizMode, setPendingQuizMode] = useState<'mcq' | 'assertion'>('mcq');
+  // Tracks chapters attempted THIS session only — resets on page refresh
+  // Used to bypass cache for returning users within the same session
+  const [sessionAttemptedChapterKeys, setSessionAttemptedChapterKeys] = useState<Set<string>>(new Set());
 
   // Get user ID once on mount
   useEffect(() => {
@@ -258,6 +261,26 @@ export default function QuizPage() {
     setLoadingQuiz(true); setQuizError(null); setQuestions([]); setAnswers({}); setLevelComplete(false); setFromCache(false);
     const level = LEVELS[levelIndex];
     const chapterConcepts = concepts.filter(c => c.class === activeChapter.class && c.chapter_number === activeChapter.chapter_number);
+
+    // ── Cache bypass: if this chapter+level was attempted this session,
+    // fetch all existing cache set IDs and add them to seenSetIds so the
+    // route skips them and generates fresh questions instead.
+    const sessionKey = `${subject.toLowerCase()}_${activeChapter.class}_${activeChapter.chapter_number}_${level}_${mode}`;
+    let allSeenSetIds = getSeenSetIds();
+    if (sessionAttemptedChapterKeys.has(sessionKey)) {
+      try {
+        const cacheKey = `quiz:${subject.toLowerCase()}:${activeChapter.chapter_name.toLowerCase()}:${activeChapter.class}:${level}:${mode === 'assertion' ? 'assertion_reasoning' : 'mcq'}`;
+        const { data } = await supabase
+          .from('quiz_cache')
+          .select('id')
+          .eq('cache_key', cacheKey);
+        if (data) {
+          const existingIds = data.map((r: { id: string }) => r.id);
+          allSeenSetIds = [...new Set([...allSeenSetIds, ...existingIds])];
+        }
+      } catch { /* silently fall through — worst case serves cached question */ }
+    }
+
     try {
       const res = await fetch('/api/generate-quiz', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -265,7 +288,7 @@ export default function QuizPage() {
           subject, classLevel: activeChapter.class, chapter: activeChapter.chapter_name,
           concepts: chapterConcepts, mode: mode === 'assertion' ? 'assertion_reasoning' : 'mcq',
           difficulty: level, previousQuestions,
-          seenSetIds: getSeenSetIds(),
+          seenSetIds: allSeenSetIds,
         }),
       });
       const data = await res.json();
@@ -286,6 +309,14 @@ export default function QuizPage() {
     setSessionStartLevel(fromLevelIndex);
     setQuizMode(mode);
     setCurrentLevel(fromLevelIndex);
+    // Mark every level from fromLevelIndex onwards as session-attempted
+    // so retries on any level bypass cache
+    const apiMode = mode === 'assertion' ? 'assertion_reasoning' : 'mcq';
+    setSessionAttemptedChapterKeys(prev => {
+      const next = new Set(prev);
+      LEVELS.forEach(l => next.add(`${subject.toLowerCase()}_${ch.class}_${ch.chapter_number}_${l}_${apiMode}`));
+      return next;
+    });
     // Pass ch directly to avoid stale selectedChapter state
     generateLevel(fromLevelIndex, mode, ch);
   }
