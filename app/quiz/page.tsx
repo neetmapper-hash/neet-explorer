@@ -70,6 +70,8 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [expandedClasses, setExpandedClasses] = useState<Set<number>>(new Set([]));
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set([]));
+  const [attemptedConcepts, setAttemptedConcepts] = useState<Set<string>>(new Set([]));
   const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
   const [quizMode, setQuizMode] = useState<'mcq' | 'assertion' | null>(null);
   const [currentLevel, setCurrentLevel] = useState(0);
@@ -96,6 +98,22 @@ export default function QuizPage() {
       setUserId(data.session?.user.id ?? null);
     });
   }, []);
+
+  // Fetch all attempted concept IDs for progress dots in the browser
+  useEffect(() => {
+    if (!userId) return;
+    supabase
+      .from('user_quiz_progress')
+      .select('concept_id')
+      .eq('user_id', userId)
+      .then(({ data }) => {
+        if (data) setAttemptedConcepts(new Set(data.map((r: { concept_id: string }) => r.concept_id)));
+      });
+  }, [userId]);
+
+  const toggleChapter = (key: string) => {
+    setExpandedChapters(prev => { const next = new Set(prev); next.has(key) ? next.delete(key) : next.add(key); return next; });
+  };
 
   // ── Fetch saved progress for a concept ──────────────────────────────────
   async function fetchProgress(conceptId: string): Promise<number> {
@@ -148,6 +166,8 @@ export default function QuizPage() {
         .eq('user_id', userId)
         .eq('concept_id', conceptId);
     }
+    // Keep local attempted set in sync so progress dots update immediately
+    setAttemptedConcepts(prev => new Set(prev).add(conceptId));
   }
 
   // ── Handle concept selection ─────────────────────────────────────────────
@@ -336,23 +356,72 @@ export default function QuizPage() {
           <div style={{ padding: '6px 0' }}>
             {(Object.keys(byClass).map(Number).sort((a,b) => a-b)).map((cls) => { const chs = byClass[cls]; return (
               <div key={cls}>
-                <button onClick={() => toggleClass(Number(cls))} style={{ width: '100%', textAlign: 'left', padding: '7px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
-                  <span style={{ fontSize: '11px', color: CLASS_COLOR[cls] ?? '#6b7280' }}>{CLASS_EMOJI[cls]} Class {cls}</span>
+                {/* Class row */}
+                <button onClick={() => toggleClass(Number(cls))} style={{ width: '100%', textAlign: 'left', padding: '8px 14px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: CLASS_COLOR[cls] ?? '#6b7280' }}>{CLASS_EMOJI[cls]} Class {cls}</span>
                   <span style={{ fontSize: '9px', color: '#374151', marginLeft: 'auto' }}>{expandedClasses.has(Number(cls)) ? '▲' : '▼'}</span>
                 </button>
-                {expandedClasses.has(Number(cls)) && chs.map(ch => (
-                  <div key={`${ch.class}_${ch.chapter_number}`}>
-                    <div style={{ padding: '4px 14px 2px 24px', fontSize: '10px', color: '#4b5563', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Ch {ch.chapter_number} · {ch.chapter_name.slice(0, 26)}
-                    </div>
-                    {ch.concepts.filter(c => c.is_main_topic && !c.parent_concept_name).map(c => (
-                      <button key={c.id} onClick={() => handleConceptSelect(c)}
-                        style={{ width: '100%', textAlign: 'left', padding: '5px 14px 5px 26px', background: selectedConcept?.id === c.id ? '#0f1f0f' : 'transparent', border: 'none', borderLeft: selectedConcept?.id === c.id ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s' }}>
-                        <span style={{ fontSize: '11px', color: selectedConcept?.id === c.id ? '#4ade80' : '#6b7280' }}>{c.concept_name}</span>
+
+                {expandedClasses.has(Number(cls)) && chs.map(ch => {
+                  const chKey = `${ch.class}_${ch.chapter_number}`;
+                  const mainConcepts = ch.concepts.filter(c => c.is_main_topic && !c.parent_concept_name);
+                  const chapterOpen = expandedChapters.has(chKey);
+                  const attemptedCount = mainConcepts.filter(c => attemptedConcepts.has(c.id)).length;
+
+                  return (
+                    <div key={chKey}>
+                      {/* Chapter row with +/- toggle */}
+                      <button
+                        onClick={() => toggleChapter(chKey)}
+                        style={{ width: '100%', textAlign: 'left', padding: '6px 14px 6px 22px', background: chapterOpen ? '#111' : 'transparent', border: 'none', borderTop: '1px solid #1a1a1a', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '6px', fontFamily: 'inherit' }}
+                      >
+                        {/* +/- icon */}
+                        <span style={{ fontSize: '13px', color: '#374151', flexShrink: 0, marginTop: '1px', lineHeight: 1 }}>
+                          {chapterOpen ? '−' : '+'}
+                        </span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {/* Chapter number */}
+                          <div style={{ fontSize: '9px', color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+                            Ch {ch.chapter_number}
+                          </div>
+                          {/* Full chapter name — wraps, no truncation */}
+                          <div style={{ fontSize: '11px', color: chapterOpen ? '#d1d5db' : '#6b7280', fontWeight: 600, lineHeight: 1.4, wordBreak: 'break-word' }}>
+                            {ch.chapter_name}
+                          </div>
+                          {/* Concept count + progress */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
+                            <span style={{ fontSize: '9px', color: '#374151' }}>{mainConcepts.length} concepts</span>
+                            {attemptedCount > 0 && (
+                              <span style={{ fontSize: '9px', color: '#16a34a' }}>· {attemptedCount} attempted</span>
+                            )}
+                          </div>
+                        </div>
                       </button>
-                    ))}
-                  </div>
-                ))}
+
+                      {/* Concept list */}
+                      {chapterOpen && (
+                        <div style={{ borderBottom: '1px solid #1a1a1a' }}>
+                          {mainConcepts.map(c => {
+                            const isSelected = selectedConcept?.id === c.id;
+                            const isAttempted = attemptedConcepts.has(c.id);
+                            return (
+                              <button key={c.id} onClick={() => handleConceptSelect(c)}
+                                style={{ width: '100%', textAlign: 'left', padding: '7px 14px 7px 36px', background: isSelected ? '#0f1f0f' : 'transparent', border: 'none', borderLeft: isSelected ? '2px solid #16a34a' : '2px solid transparent', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {/* Progress dot */}
+                                {isAttempted && (
+                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0, display: 'inline-block' }} />
+                                )}
+                                <span style={{ fontSize: '11px', color: isSelected ? '#4ade80' : isAttempted ? '#d1d5db' : '#6b7280', lineHeight: 1.4 }}>
+                                  {c.concept_name}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )})}
           </div>
