@@ -247,8 +247,8 @@ export default function QuizPage() {
     setExpandedClasses(prev => { const next = new Set(prev); next.has(cls) ? next.delete(cls) : next.add(cls); return next; });
   };
 
-  async function generateLevel(levelIndex: number, mode: 'mcq' | 'assertion') {
-    const activeChapter = selectedChapter ?? (selectedConcept ? {
+  async function generateLevel(levelIndex: number, mode: 'mcq' | 'assertion', chapterOverride?: ChapterGroup) {
+    const activeChapter = chapterOverride ?? selectedChapter ?? (selectedConcept ? {
       class: selectedConcept.class,
       chapter_number: selectedConcept.chapter_number,
       chapter_name: selectedConcept.chapter_name,
@@ -286,13 +286,11 @@ export default function QuizPage() {
     setSessionStartLevel(fromLevelIndex);
     setQuizMode(mode);
     setCurrentLevel(fromLevelIndex);
-    // generateLevel reads selectedChapter from state but state hasn't updated yet —
-    // so we pass chapter directly via a local override stored in selectedChapter
-    // The effect is handled because we set selectedChapter above before calling
-    generateLevel(fromLevelIndex, mode);
+    // Pass ch directly to avoid stale selectedChapter state
+    generateLevel(fromLevelIndex, mode, ch);
   }
 
-  // ── Start quiz — called from concept detail start buttons ─────────────────
+  // ── Start quiz — called from chapter start buttons on right panel ─────────
   function startQuiz(mode: 'mcq' | 'assertion', fromLevelIndex: number = 0) {
     resetQuiz();
     setSessionStartLevel(fromLevelIndex);
@@ -325,11 +323,11 @@ export default function QuizPage() {
     } else {
       const next = currentLevel + 1;
       setCurrentLevel(next);
-      generateLevel(next, quizMode!);
+      generateLevel(next, quizMode!, selectedChapter ?? undefined);
     }
   }
 
-  function retryLevel() { generateLevel(currentLevel, quizMode!); }
+  function retryLevel() { generateLevel(currentLevel, quizMode!, selectedChapter ?? undefined); }
 
   const totalScore = levelResults.reduce((s, r) => s + r.score, 0);
   const totalPossible = levelResults.reduce((s, r) => s + r.total, 0);
