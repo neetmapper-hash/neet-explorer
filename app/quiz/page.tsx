@@ -178,7 +178,6 @@ export default function QuizPage() {
         onPageChange={page => {
           if (page === 'heatmap') router.push('/heatmap');
           if (page === 'ancestry') router.push('/ancestry');
-          if (page === 'concept-map') router.push('/concept-map');
         }}
         onSubjectChange={s => { setSubject(s); setSearch(''); }}
         onYearsChange={() => {}} />

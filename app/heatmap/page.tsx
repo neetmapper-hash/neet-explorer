@@ -270,8 +270,8 @@ export default function HeatmapPage() {
         currentPage="heatmap"
         subject={subject}
         selectedYears={selectedYears}
-        onPageChange={(page) => { if (page === 'ancestry') router.push('/ancestry'); if (page === 'concept-map') router.push('/concept-map'); if (page === 'quiz') router.push('/quiz'); if (page === 'quiz') router.push('/quiz');
-          if (page === 'concept-map') router.push('/concept-map'); }}
+        onPageChange={(page) => { if (page === 'ancestry') router.push('/ancestry'); if (page === 'quiz') router.push('/quiz'); if (page === 'quiz') router.push('/quiz');
+          }}
         onSubjectChange={(s) => { setSubject(s); }}
         onYearsChange={setSelectedYears}
       />
