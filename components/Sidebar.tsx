@@ -6,10 +6,10 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
-  currentPage: 'heatmap' | 'ancestry' | 'quiz';
+  currentPage:  'ancestry' | 'heatmap' | 'quiz' ;
   subject: Subject;
   selectedYears: number[];
-  onPageChange: (page: 'heatmap' | 'ancestry' | 'quiz') => void;
+  onPageChange: (page: 'ancestry' | 'heatmap' | 'quiz') => void;
   onSubjectChange: (subject: Subject) => void;
   onYearsChange: (years: number[]) => void;
   showBackButton?: boolean;
@@ -17,9 +17,9 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { page: 'heatmap',  emoji: '🔥', label: 'Heatmap' },
   { page: 'ancestry', emoji: '🧬', label: 'Ancestry' },
   { page: 'quiz',     emoji: '📚', label: 'Quiz' },
+  { page: 'heatmap',  emoji: '🔥', label: 'Heatmap' },
 ] as const;
 
 const SUBJECTS: Subject[] = ['Biology', 'Physics', 'Chemistry'];
