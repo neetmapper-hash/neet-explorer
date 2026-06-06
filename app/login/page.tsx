@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { initGuestSession } from '@/lib/guestSession'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,9 +18,7 @@ export default function LoginPage() {
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
         if (!error && data.session) {
-          setTimeout(() => {
-            window.location.replace('/heatmap')
-          }, 1500)
+          setTimeout(() => { window.location.replace('/heatmap') }, 1500)
         }
       })
     }
@@ -29,12 +28,8 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      window.location.href = '/heatmap'
-    }
+    if (error) { setError(error.message); setLoading(false); }
+    else { window.location.href = '/heatmap' }
   }
 
   const handleGoogle = async () => {
@@ -44,53 +39,50 @@ export default function LoginPage() {
     })
   }
 
+  const handleGuestMode = () => {
+    // Set a cookie so middleware lets them through
+    document.cookie = 'bv_guest_mode=1; path=/; max-age=86400; SameSite=Lax';
+    // Init session storage tracking
+    initGuestSession();
+    router.push('/heatmap');
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-gray-900 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-3xl font-bold text-white mb-2">NEET Explorer</h1>
-        <p className="text-gray-400 mb-8">Sign in to continue</p>
+
+        {/* Branding */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-2xl">🌱</span>
+          <h1 className="text-3xl font-bold text-white">Bija Vidya</h1>
+        </div>
+        <p className="text-gray-400 mb-2 text-sm">Learn from the root</p>
+        <p className="text-gray-500 mb-8 text-xs">AI-powered NEET preparation — trace any concept back to its foundation</p>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
+          <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>
         )}
 
         <div className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600 placeholder-gray-500" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-          />
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-          >
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600 placeholder-gray-500" />
+          <button onClick={handleLogin} disabled={loading}
+            className="w-full bg-green-700 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </div>
 
-        <div className="flex items-center my-6">
+        <div className="flex items-center my-5">
           <div className="flex-1 h-px bg-gray-700" />
           <span className="px-4 text-gray-500 text-sm">or</span>
           <div className="flex-1 h-px bg-gray-700" />
         </div>
 
-        <button
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 rounded-lg transition"
-        >
+        <button onClick={handleGoogle}
+          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 rounded-lg transition mb-3">
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -100,11 +92,23 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <p className="text-center text-gray-500 mt-6 text-sm">
+        {/* Guest mode — prominent but secondary */}
+        <div className="border border-dashed border-gray-700 rounded-lg p-4 mb-4">
+          <p className="text-gray-400 text-xs text-center mb-3">
+            Not ready to sign up? Try it first — no account needed.
+          </p>
+          <button onClick={handleGuestMode}
+            className="w-full border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-medium py-2.5 rounded-lg transition text-sm">
+            👀 Try without registering
+          </button>
+          <p className="text-gray-600 text-xs text-center mt-2">
+            2 free ancestry traces · Easy + Medium quiz levels
+          </p>
+        </div>
+
+        <p className="text-center text-gray-500 mt-4 text-sm">
           Don't have an account?{' '}
-          <a href="/register" className="text-blue-400 hover:underline">
-            Register
-          </a>
+          <a href="/register" className="text-green-400 hover:underline">Register</a>
         </p>
       </div>
     </div>

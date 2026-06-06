@@ -10,6 +10,8 @@ interface AncestryChainProps {
   questionText: string;
   answer?: string;
   studyPath?: string;
+  isGuest?: boolean;
+  onGuestNudge?: () => void;
 }
 
 interface MCQQuestion {
@@ -389,7 +391,7 @@ function ExplainPopup({ concept, classNum, chapterNum, onClose }: ExplainPopupPr
 }
 
 // ── MAIN COMPONENT ─────────────────────────────────────────────────────────────
-export default function AncestryChain({ chain, isLoading, error, questionText, answer, studyPath }: AncestryChainProps) {
+export default function AncestryChain({ chain, isLoading, error, questionText, answer, studyPath, isGuest, onGuestNudge }: AncestryChainProps) {
   const [explainConcept, setExplainConcept] = useState<{ concept: Concept; classNum: number; chapterNum: number } | null>(null);
 
   if (isLoading) {
@@ -486,18 +488,28 @@ export default function AncestryChain({ chain, isLoading, error, questionText, a
       </div>
 
       {studyPath && (
-        <div className="bg-[#1a1a2e] border border-[#2a2a4a] rounded-xl p-4 mb-6">
-          <div className="text-xs font-bold text-[#7878ff] mb-2">📖 STUDY PATH</div>
-          <div className="text-[#d0d0d0] text-sm leading-relaxed">{studyPath}</div>
+        <div style={{ position: 'relative', marginBottom: '24px' }}>
+          <div className="bg-[#1a1a2e] border border-[#2a2a4a] rounded-xl p-4">
+            <div className="text-xs font-bold text-[#7878ff] mb-2">📖 STUDY PATH</div>
+            <div className="text-[#d0d0d0] text-sm leading-relaxed" style={{ filter: isGuest ? 'blur(4px)' : 'none', userSelect: isGuest ? 'none' : 'auto' }}>{studyPath}</div>
+          </div>
+          {isGuest && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: 'rgba(10,10,10,0.7)' }}>
+              <div style={{ fontSize: '13px', color: '#f9fafb', fontWeight: 700, marginBottom: '8px' }}>🔒 Sign up to see your full study path</div>
+              <button onClick={onGuestNudge} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a', fontFamily: 'inherit' }}>
+                Sign up free →
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      <div>
+      <div style={{ position: 'relative' }}>
         <h3 className="text-sm font-semibold text-[#888] uppercase tracking-wider mb-3">
           📚 Revise From First Principles
           <span className="ml-2 text-[#555] normal-case font-normal">Build your foundation in this order</span>
         </h3>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1" style={{ filter: isGuest ? 'blur(3px)' : 'none', userSelect: isGuest ? 'none' : 'auto' }}>
           {chain.map((concept, i) => {
             const { classNum, chapterNum } = parseConceptId(concept.id);
             const cfg = CLASS_CONFIG[classNum] ?? { emoji: '📖', color: '#888' };
@@ -511,6 +523,14 @@ export default function AncestryChain({ chain, isLoading, error, questionText, a
             );
           })}
         </div>
+        {isGuest && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', background: 'rgba(10,10,10,0.7)' }}>
+            <div style={{ fontSize: '13px', color: '#f9fafb', fontWeight: 700, marginBottom: '8px' }}>🔒 Sign up to see your revision order</div>
+            <button onClick={onGuestNudge} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: '#052e16', color: '#4ade80', border: '1px solid #16a34a', fontFamily: 'inherit' }}>
+              Sign up free →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

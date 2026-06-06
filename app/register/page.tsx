@@ -15,25 +15,13 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
 
   const handleRegister = async () => {
-    setError('')
-    setSuccess('')
-    if (password !== confirm) {
-      setError('Passwords do not match')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
+    setError(''); setSuccess('')
+    if (password !== confirm) { setError('Passwords do not match'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      setSuccess('Check your email for a confirmation link!')
-      setLoading(false)
-    }
+    if (error) { setError(error.message); setLoading(false); }
+    else { setSuccess('Check your email for a confirmation link!'); setLoading(false); }
   }
 
   const handleGoogle = async () => {
@@ -48,62 +36,39 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-gray-900 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-        <p className="text-gray-400 mb-8">Join NEET Explorer today</p>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-500/10 border border-green-500 text-green-400 px-4 py-3 rounded-lg mb-6 text-sm">
-            {success}
-          </div>
-        )}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-2xl">🌱</span>
+          <h1 className="text-3xl font-bold text-white">Bija Vidya</h1>
+        </div>
+        <p className="text-gray-400 mb-1 text-sm">Create your free account</p>
+        <p className="text-gray-500 mb-8 text-xs">Unlimited ancestry traces · All 6 quiz levels · Progress saved</p>
+
+        {error && <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>}
+        {success && <div className="bg-green-500/10 border border-green-500 text-green-400 px-4 py-3 rounded-lg mb-6 text-sm">{success}</div>}
 
         <div className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600 placeholder-gray-500" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600 placeholder-gray-500" />
+          <input type="password" placeholder="Confirm Password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-          />
-          <button
-            onClick={handleRegister}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600 placeholder-gray-500" />
+          <button onClick={handleRegister} disabled={loading}
+            className="w-full bg-green-700 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50">
+            {loading ? 'Creating account...' : 'Create Free Account'}
           </button>
         </div>
 
-        <div className="flex items-center my-6">
+        <div className="flex items-center my-5">
           <div className="flex-1 h-px bg-gray-700" />
           <span className="px-4 text-gray-500 text-sm">or</span>
           <div className="flex-1 h-px bg-gray-700" />
         </div>
 
-        <button
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 rounded-lg transition"
-        >
+        <button onClick={handleGoogle}
+          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 rounded-lg transition">
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -115,9 +80,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-gray-500 mt-6 text-sm">
           Already have an account?{' '}
-          <a href="/login" className="text-blue-400 hover:underline">
-            Sign In
-          </a>
+          <a href="/login" className="text-green-400 hover:underline">Sign In</a>
         </p>
       </div>
     </div>

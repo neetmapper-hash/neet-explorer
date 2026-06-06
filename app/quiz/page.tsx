@@ -6,7 +6,16 @@ import { Subject } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import { getSeenSetIds, markSetAsSeen } from '@/lib/quizSession';
 import QuizResumeDialog from '@/components/QuizResumeDialog';
+import GuestNudgeModal from '@/components/GuestNudgeModal';
 import { createClient } from '@/lib/supabase/client';
+import {
+  isGuestSession,
+  incrementGuestQuizLevelsPassed,
+  getGuestQuizLevelsPassed,
+  isGuestQuizLimitReached,
+  GUEST_MAX_QUIZ_LEVEL,
+  GUEST_QUIZ_NUDGE_AFTER,
+} from '@/lib/guestSession';
 
 interface Concept {
   id: string; concept_name: string; summary: string; key_terms: string[];
@@ -97,6 +106,14 @@ export default function QuizPage() {
   // Tracks chapters attempted THIS session only — resets on page refresh
   // Used to bypass cache for returning users within the same session
   const [sessionAttemptedChapterKeys, setSessionAttemptedChapterKeys] = useState<Set<string>>(new Set());
+
+  // ── Guest state ────────────────────────────────────────────────────────────
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestNudge, setGuestNudge] = useState<'quiz_level' | 'quiz_hard' | null>(null);
+
+  useEffect(() => {
+    setIsGuest(isGuestSession());
+  }, []);
 
   // ── Pre-quiz state ─────────────────────────────────────────────────────────
   const [preQuizChapter, setPreQuizChapter] = useState<ChapterGroup | null>(null);
@@ -429,15 +446,35 @@ export default function QuizPage() {
     const results = [...levelResults, { level: LEVELS[currentLevel], score: levelScore, total: questions.length, passed: levelPassed }];
     setLevelResults(results);
 
-    // ── Persist progress if level was passed ────────────────────────────
-    if (levelPassed && selectedChapter) {
+    // ── Persist progress if level was passed (logged-in users only) ──────
+    if (levelPassed && selectedChapter && !isGuest) {
       await saveProgress(selectedChapter, currentLevel);
+    }
+
+    // ── Guest: show nudge after passing a level ──────────────────────────
+    if (isGuest && levelPassed) {
+      const totalPassed = incrementGuestQuizLevelsPassed();
+      // After passing medium (level 1), block and show hard nudge
+      if (currentLevel >= GUEST_MAX_QUIZ_LEVEL) {
+        setGuestNudge('quiz_hard');
+        return;
+      }
+      // After passing easy (level 0), show save-progress nudge but continue
+      if (totalPassed === GUEST_QUIZ_NUDGE_AFTER) {
+        setGuestNudge('quiz_level');
+        // Don't return — let them continue to medium
+      }
     }
 
     if (currentLevel >= LEVELS.length - 1) {
       setShowSummary(true);
     } else {
       const next = currentLevel + 1;
+      // ── Guest: block levels beyond Medium ───────────────────────────
+      if (isGuest && isGuestQuizLimitReached(next)) {
+        setGuestNudge('quiz_hard');
+        return;
+      }
       setCurrentLevel(next);
       generateLevel(next, quizMode!, selectedChapter ?? undefined);
     }
@@ -475,6 +512,15 @@ export default function QuizPage() {
 
       {/* ── Resume dialog ─────────────────────────────────────────────── */}
       {resumeDialog && selectedChapter && (
+
+      {/* ── Guest nudge modal ──────────────────────────────────────────── */}
+      {guestNudge && (
+        <GuestNudgeModal
+          trigger={guestNudge}
+          onSignUp={() => router.push('/register')}
+          onDismiss={() => setGuestNudge(null)}
+        />
+      )}
         <QuizResumeDialog
           conceptName={resumeDialog.label}
           highestLevel={resumeDialog.savedLevel}
@@ -495,6 +541,12 @@ export default function QuizPage() {
       <div className={`quiz-browser${(selectedConcept || selectedChapter) ? ' hide-mobile' : ''}`} style={{ width: '290px', minHeight: '100vh', background: '#0d0d0d', borderRight: '1px solid #1e1e1e', overflowY: 'auto', flexShrink: 0 }}>
         <div style={{ padding: '16px 14px 10px', borderBottom: '1px solid #1e1e1e' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#f9fafb', marginBottom: '8px' }}>📚 Concepts</div>
+          {isGuest && (
+            <div style={{ background: '#1c1a00', border: '1px solid #ca8a0444', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '10px', color: '#fbbf24' }}>👀 Guest · Easy + Medium only</span>
+              <button onClick={() => router.push('/register')} style={{ fontSize: '10px', color: '#4ade80', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Sign up</button>
+            </div>
+          )}
           <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '7px 12px', color: '#f9fafb', fontSize: '12px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
         </div>
