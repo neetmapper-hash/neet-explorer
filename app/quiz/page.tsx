@@ -510,9 +510,6 @@ export default function QuizPage() {
         onSubjectChange={s => { setSubject(s); setSearch(''); }}
         onYearsChange={() => {}} />
 
-      {/* ── Resume dialog ─────────────────────────────────────────────── */}
-      {resumeDialog && selectedChapter && (
-
       {/* ── Guest nudge modal ──────────────────────────────────────────── */}
       {guestNudge && (
         <GuestNudgeModal
@@ -521,6 +518,9 @@ export default function QuizPage() {
           onDismiss={() => setGuestNudge(null)}
         />
       )}
+
+      {/* ── Resume dialog ─────────────────────────────────────────────── */}
+      {resumeDialog && selectedChapter && (
         <QuizResumeDialog
           conceptName={resumeDialog.label}
           highestLevel={resumeDialog.savedLevel}
