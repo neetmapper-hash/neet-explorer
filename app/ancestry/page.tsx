@@ -13,7 +13,7 @@ function extractKeywords(text: string): string[] {
     .filter(w => w.length > 2 && !stopWords.has(w)).slice(0, 12);
 }
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Subject, Concept } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
@@ -63,6 +63,17 @@ export default function AncestryPage() {
   const [studyPath, setStudyPath] = useState<string>('');
   const [fromCache, setFromCache] = useState(false);
   const [fromHeatmap, setFromHeatmap] = useState(false);
+  const [isDiagramQuestion, setIsDiagramQuestion] = useState(false);
+
+  // ── Image upload state ────────────────────────────────────────────────────
+  const [uploadedImage, setUploadedImage] = useState<{ base64: string; mimeType: string; preview: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Voice input state ─────────────────────────────────────────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // ── Guest state ──────────────────────────────────────────────────────────
   const [isGuest, setIsGuest] = useState(false);
@@ -91,9 +102,69 @@ export default function AncestryPage() {
     if (correct) { setCorrectAnswer(correct); sessionStorage.removeItem('ancestry_correct'); }
   }, []);
 
+  // ── Image upload handler ──────────────────────────────────────────────────
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      setUploadedImage({ base64, mimeType: file.type, preview: result });
+      setQuestion('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearImage = () => {
+    setUploadedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // ── Voice recording handler ───────────────────────────────────────────────
+  const handleVoiceToggle = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    setVoiceError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'recording.webm');
+        try {
+          const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (data.text) { setQuestion(data.text.trim()); setUploadedImage(null); }
+          else setVoiceError('Could not transcribe audio. Please try again.');
+        } catch {
+          setVoiceError('Voice transcription failed. Please try again.');
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch {
+      setVoiceError('Microphone access denied. Please allow microphone access in your browser.');
+    }
+  };
+
   const handleSearch = async (q?: string, isHeatmap?: boolean) => {
     const queryText = q ?? question;
-    if (!queryText.trim()) return;
+    const hasImage = !!uploadedImage;
+    if (!queryText.trim() && !hasImage) return;
 
     // ── Guest limit check ────────────────────────────────────────────────
     if (isGuest && hasReachedAncestryLimit()) {
@@ -102,35 +173,49 @@ export default function AncestryPage() {
       return;
     }
 
-    setQuestion(queryText);
+    if (queryText) setQuestion(queryText);
     setIsLoading(true);
     setError(null);
     setChain([]);
     setStudyPath('');
     setFromCache(false);
+    setIsDiagramQuestion(false);
     setHasSearched(true);
     const isFromHeatmap = isHeatmap ?? fromHeatmap;
 
     try {
+      const body: any = {
+        subject,
+        options: questionOptions,
+        correctAnswer,
+        keywords: extractKeywords(queryText),
+        fromHeatmap: isFromHeatmap,
+      };
+
+      if (hasImage) {
+        body.imageBase64 = uploadedImage!.base64;
+        body.imageMimeType = uploadedImage!.mimeType;
+        body.question = queryText || ' ';
+      } else {
+        body.question = queryText;
+      }
+
       const res = await fetch('/api/ancestry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: queryText, subject,
-          options: questionOptions, correctAnswer,
-          keywords: extractKeywords(queryText),
-          fromHeatmap: isFromHeatmap,
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       setChain(data.chain ?? []);
       setAnswer(data.answer ?? '');
       setStudyPath(data.studyPath ?? '');
       setFromCache(data.fromCache ?? false);
+      setIsDiagramQuestion(data.isDiagramQuestion ?? false);
+      if (data.extractedQuestion) setQuestion(data.extractedQuestion);
       if (data.error && !data.chain?.length) setError(data.error);
       if (!res.ok) throw new Error('Failed to fetch ancestry');
 
-      // ── Increment guest count after successful trace ──────────────────
+      // ── Increment guest count ────────────────────────────────────────
       if (isGuest) {
         const newCount = incrementGuestAncestryCount();
         const left = Math.max(0, GUEST_ANCESTRY_LIMIT - newCount);
@@ -231,14 +316,66 @@ export default function AncestryPage() {
           </div>
         </div>
 
-        {/* Search box */}
+        {/* Rich input box */}
         <div style={{ marginBottom: '28px' }}>
-          <textarea value={question} onChange={(e) => { setQuestion(e.target.value); setFromHeatmap(false); }}
-            placeholder={`Enter your NEET ${subject} question here...`} rows={3}
-            style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '12px', padding: '12px 16px', color: '#f9fafb', fontSize: '14px', resize: 'none', outline: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box' }}
-            onFocus={e => (e.target.style.borderColor = '#16a34a44')}
-            onBlur={e => (e.target.style.borderColor = '#1e1e1e')}
-          />
+          <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: '14px', overflow: 'hidden', transition: 'border-color 0.12s' }}
+            onFocus={() => {}} onBlur={() => {}}>
+
+            {/* Image preview */}
+            {uploadedImage && (
+              <div style={{ padding: '12px 14px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img src={uploadedImage.preview} alt="Uploaded question" style={{ height: '80px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #2d2d2d' }} />
+                  <button onClick={clearImage} style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', background: '#374151', border: 'none', color: '#f9fafb', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit' }}>✕</button>
+                </div>
+                <span style={{ fontSize: '11px', color: '#4b5563' }}>Image attached — click search to trace this question</span>
+              </div>
+            )}
+
+            {/* Diagram warning */}
+            {isDiagramQuestion && !isLoading && (
+              <div style={{ margin: '8px 14px 0', padding: '8px 12px', background: '#1c1a00', borderRadius: '8px', fontSize: '11px', color: '#fbbf24', border: '1px solid #ca8a0444' }}>
+                ⚠️ This appears to be a diagram-based question — results may be less accurate
+              </div>
+            )}
+
+            {/* Textarea */}
+            <textarea
+              value={question}
+              onChange={(e) => { setQuestion(e.target.value); setFromHeatmap(false); if (e.target.value) setUploadedImage(null); }}
+              placeholder={uploadedImage ? 'Add any extra context (optional)...' : `Enter your NEET ${subject} question here, or upload an image...`}
+              rows={3}
+              style={{ width: '100%', background: 'transparent', border: 'none', padding: '14px 16px 8px', color: '#f9fafb', fontSize: '14px', resize: 'none', outline: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box' }}
+            />
+
+            {/* Toolbar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderTop: '1px solid #1a1a1a' }}>
+              {/* Image upload button */}
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Upload question image"
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', background: uploadedImage ? '#052e16' : '#1a1a1a', border: `1px solid ${uploadedImage ? '#16a34a44' : '#2d2d2d'}`, color: uploadedImage ? '#4ade80' : '#6b7280', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                📎 {uploadedImage ? 'Image attached' : 'Upload image'}
+              </button>
+
+              {/* Voice button */}
+              <button
+                onClick={handleVoiceToggle}
+                title={isRecording ? 'Stop recording' : 'Ask by voice'}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', background: isRecording ? '#1f0a0a' : '#1a1a1a', border: `1px solid ${isRecording ? '#7f1d1d' : '#2d2d2d'}`, color: isRecording ? '#f87171' : '#6b7280', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                {isRecording ? '⏹ Stop' : '🎤 Voice'}
+              </button>
+
+              {isRecording && (
+                <span style={{ fontSize: '10px', color: '#f87171', animation: 'pulse 1s infinite' }}>● Recording...</span>
+              )}
+
+              {voiceError && (
+                <span style={{ fontSize: '10px', color: '#f87171' }}>{voiceError}</span>
+              )}
+            </div>
+          </div>
 
           {Object.keys(questionOptions).length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', marginBottom: '8px' }}>
@@ -255,9 +392,11 @@ export default function AncestryPage() {
             </div>
           )}
 
-          <button onClick={() => handleSearch()} disabled={isLoading || !question.trim() || guestLimitReached}
-            style={{ marginTop: '8px', width: '100%', padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 700, background: (isLoading || !question.trim() || guestLimitReached) ? '#1a1a1a' : '#052e16', color: (isLoading || !question.trim() || guestLimitReached) ? '#374151' : '#4ade80', border: `1px solid ${(isLoading || !question.trim() || guestLimitReached) ? '#1e1e1e' : '#16a34a44'}`, cursor: (isLoading || !question.trim() || guestLimitReached) ? 'not-allowed' : 'pointer', transition: 'all 0.12s', fontFamily: 'inherit' }}>
-            {guestLimitReached ? '🔒 Sign up to trace more concepts' : isLoading ? 'Searching…' : '🔍 Find Concept Ancestry'}
+          <button
+            onClick={() => handleSearch()}
+            disabled={isLoading || (!question.trim() && !uploadedImage) || guestLimitReached}
+            style={{ marginTop: '8px', width: '100%', padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 700, background: (isLoading || (!question.trim() && !uploadedImage) || guestLimitReached) ? '#1a1a1a' : '#052e16', color: (isLoading || (!question.trim() && !uploadedImage) || guestLimitReached) ? '#374151' : '#4ade80', border: `1px solid ${(isLoading || (!question.trim() && !uploadedImage) || guestLimitReached) ? '#1e1e1e' : '#16a34a44'}`, cursor: (isLoading || (!question.trim() && !uploadedImage) || guestLimitReached) ? 'not-allowed' : 'pointer', transition: 'all 0.12s', fontFamily: 'inherit' }}>
+            {guestLimitReached ? '🔒 Sign up to trace more concepts' : isLoading ? '🔍 Searching…' : '🔍 Find Concept Ancestry'}
           </button>
         </div>
 

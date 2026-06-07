@@ -72,7 +72,48 @@ async function groqCall(
   return null;
 }
 
-function parseJson<T>(raw: string | null): T | null {
+// ── Vision call — Llama 4 Scout for image-based questions ─────────────────────
+async function groqVisionCall(imageBase64: string, mimeType: string): Promise<string | null> {
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 512,
+        temperature: 0.1,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${imageBase64}` },
+            },
+            {
+              type: 'text',
+              text: `This is a NEET exam question image. Extract the complete question text exactly as written.
+If there are multiple choice options (A, B, C, D or 1, 2, 3, 4), include them.
+If the question relies on a diagram or figure that cannot be described in text, say "DIAGRAM_QUESTION: " followed by your best description of what the diagram shows and what is being asked.
+Output ONLY the question text — no preamble, no explanation.`,
+            },
+          ],
+        }],
+      }),
+    });
+    if (!res.ok) {
+      console.error('Vision call failed:', res.status, await res.text());
+      return null;
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() ?? null;
+  } catch (e) {
+    console.error('Vision exception:', e);
+    return null;
+  }
+}
   if (!raw) return null;
   const clean = raw.replace(/```json|```/g, '').trim();
   const start = clean.indexOf('{');
@@ -541,13 +582,35 @@ export async function POST(req: NextRequest) {
     console.log('GROQ_API_KEY set:', !!GROQ_API_KEY, 'length:', GROQ_API_KEY.length);
 
     const {
-      question,
+      question: rawQuestion,
       subject: providedSubject,
       options,
       correctAnswer,
       keywords: clientKeywords = [],
-      fromHeatmap = false,   // <-- client sends this flag when question comes from heatmap
+      fromHeatmap = false,
+      imageBase64 = null,
+      imageMimeType = 'image/jpeg',
     } = await req.json();
+
+    // ── 0. If image provided, extract question text via Llama 4 Scout ──────────
+    let question = rawQuestion ?? '';
+    let isDiagramQuestion = false;
+
+    if (imageBase64) {
+      console.log('Image upload detected — calling Llama 4 Scout vision');
+      const extracted = await groqVisionCall(imageBase64, imageMimeType);
+      if (!extracted) {
+        return NextResponse.json({ error: 'Could not read the image. Please try a clearer photo.' }, { status: 400 });
+      }
+      if (extracted.startsWith('DIAGRAM_QUESTION:')) {
+        isDiagramQuestion = true;
+        question = extracted.replace('DIAGRAM_QUESTION:', '').trim();
+        console.log('Diagram question detected:', question.slice(0, 80));
+      } else {
+        question = extracted;
+        console.log('Extracted question from image:', question.slice(0, 80));
+      }
+    }
 
     if (!question) {
       return NextResponse.json({ error: 'question is required' }, { status: 400 });
@@ -678,7 +741,7 @@ export async function POST(req: NextRequest) {
     await saveToCache(cacheKey, question, subject, conceptId, chain, answer, studyPath);
     console.log('Saved to cache:', cacheKey);
 
-    return NextResponse.json({ chain, conceptId, answer, studyPath, fromCache: false });
+    return NextResponse.json({ chain, conceptId, answer, studyPath, fromCache: false, isDiagramQuestion, extractedQuestion: imageBase64 ? question : undefined });
 
   } catch (err: any) {
     console.error('Ancestry API error:', err?.message ?? err);
