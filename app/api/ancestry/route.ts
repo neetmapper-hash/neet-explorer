@@ -114,6 +114,8 @@ Output ONLY the question text — no preamble, no explanation.`,
     return null;
   }
 }
+
+function parseJson<T>(raw: string | null): T | null {
   if (!raw) return null;
   const clean = raw.replace(/```json|```/g, '').trim();
   const start = clean.indexOf('{');
