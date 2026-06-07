@@ -24,8 +24,10 @@ import {
   getGuestAncestryCount,
   incrementGuestAncestryCount,
   hasReachedAncestryLimit,
+  clearGuestSession,
   GUEST_ANCESTRY_LIMIT,
 } from '@/lib/guestSession';
+import { createClient } from '@/lib/supabase/client';
 
 const SAMPLES: Record<Subject, string[]> = {
   Physics: [
@@ -83,12 +85,22 @@ export default function AncestryPage() {
 
   useEffect(() => {
     const guest = isGuestSession();
-    setIsGuest(guest);
-    if (guest) {
-      const count = getGuestAncestryCount();
-      setGuestTracesLeft(Math.max(0, GUEST_ANCESTRY_LIMIT - count));
-      setGuestLimitReached(count >= GUEST_ANCESTRY_LIMIT);
-    }
+    // If supabase has an active session, clear any stale guest state
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        clearGuestSession();
+        document.cookie = 'bv_guest_mode=; path=/; max-age=0';
+        setIsGuest(false);
+        return;
+      }
+      setIsGuest(guest);
+      if (guest) {
+        const count = getGuestAncestryCount();
+        setGuestTracesLeft(Math.max(0, GUEST_ANCESTRY_LIMIT - count));
+        setGuestLimitReached(count >= GUEST_ANCESTRY_LIMIT);
+      }
+    });
   }, []);
 
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { initGuestSession } from '@/lib/guestSession'
+import { initGuestSession, clearGuestSession } from '@/lib/guestSession'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -18,6 +18,8 @@ export default function LoginPage() {
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
         if (!error && data.session) {
+          clearGuestSession()
+          document.cookie = 'bv_guest_mode=; path=/; max-age=0'
           setTimeout(() => { window.location.replace('/heatmap') }, 1500)
         }
       })
@@ -29,7 +31,11 @@ export default function LoginPage() {
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(error.message); setLoading(false); }
-    else { window.location.href = '/heatmap' }
+    else {
+      clearGuestSession()
+      document.cookie = 'bv_guest_mode=; path=/; max-age=0'
+      window.location.href = '/heatmap'
+    }
   }
 
   const handleGoogle = async () => {

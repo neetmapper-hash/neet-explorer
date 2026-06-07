@@ -13,6 +13,7 @@ import {
   incrementGuestQuizLevelsPassed,
   getGuestQuizLevelsPassed,
   isGuestQuizLimitReached,
+  clearGuestSession,
   GUEST_MAX_QUIZ_LEVEL,
   GUEST_QUIZ_NUDGE_AFTER,
 } from '@/lib/guestSession';
@@ -112,7 +113,18 @@ export default function QuizPage() {
   const [guestNudge, setGuestNudge] = useState<'quiz_level' | 'quiz_hard' | null>(null);
 
   useEffect(() => {
-    setIsGuest(isGuestSession());
+    const guest = isGuestSession();
+    if (!guest) { setIsGuest(false); return; }
+    // Double-check — if a real Supabase session exists, clear stale guest state
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        clearGuestSession();
+        document.cookie = 'bv_guest_mode=; path=/; max-age=0';
+        setIsGuest(false);
+      } else {
+        setIsGuest(true);
+      }
+    });
   }, []);
 
   // ── Pre-quiz state ─────────────────────────────────────────────────────────
