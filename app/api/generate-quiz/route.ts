@@ -432,6 +432,7 @@ RULES:
 - Use only concepts listed — do NOT introduce outside concepts
 - Distractors must be plausible — common misconceptions, not obviously wrong answers
 - The correct answer must be clearly defensible from NCERT
+- The "answer" field MUST be copied VERBATIM from one of the 4 options — exact same text, character for character. Do NOT use a letter (A/B/C/D) or index — use the full option text
 - Output ONLY valid JSON array, no markdown, no comments, double quotes only, no trailing commas
 
 Format:
@@ -459,6 +460,31 @@ ${mcqFormat}`;
         options: AR_OPTIONS,
         answer: AR_OPTIONS.includes(q.answer) ? q.answer : AR_OPTIONS[0],
       }));
+    } else {
+      // Normalize MCQ answers — LLM sometimes returns a letter (A/B/C/D) or
+      // truncated text instead of the exact option string. Fix it here.
+      questions = questions.map((q: any) => {
+        if (!Array.isArray(q.options)) return q;
+        // 1. Exact match — already correct
+        if (q.options.includes(q.answer)) return q;
+        // 2. Case-insensitive match
+        const looseMatch = q.options.find((o: string) =>
+          o.trim().toLowerCase() === q.answer?.trim().toLowerCase()
+        );
+        if (looseMatch) return { ...q, answer: looseMatch };
+        // 3. Letter index match — "A", "B", "C", "D"
+        const letterIndex = ['a', 'b', 'c', 'd'].indexOf(q.answer?.trim().toLowerCase());
+        if (letterIndex !== -1 && q.options[letterIndex]) {
+          return { ...q, answer: q.options[letterIndex] };
+        }
+        // 4. Partial match — answer text is contained within an option
+        const partialMatch = q.options.find((o: string) =>
+          o.toLowerCase().includes(q.answer?.trim().toLowerCase())
+        );
+        if (partialMatch) return { ...q, answer: partialMatch };
+        // Give up — will show as wrong, but at least won't crash
+        return q;
+      });
     }
 
     const valid = questions.filter((q: any) => {

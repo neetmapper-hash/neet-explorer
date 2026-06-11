@@ -291,7 +291,10 @@ export default function QuizPage() {
     if (Object.keys(next).length === preQuizQuestions.length) setPreQuizComplete(true);
   }
 
-  const preQuizScore = preQuizQuestions.filter((q, i) => preQuizAnswers[i] === q.answer).length;
+  const preQuizScore = preQuizQuestions.filter((q, i) => {
+    const normalise = (s?: string) => s?.trim().toLowerCase() ?? '';
+    return preQuizAnswers[i] === q.answer || normalise(preQuizAnswers[i]) === normalise(q.answer);
+  }).length;
 
   // ── Concept explanation: call Groq for tutor-style explanation ───────────
   async function handleExplainConcept(concept: Concept) {
@@ -451,7 +454,10 @@ export default function QuizPage() {
     if (Object.keys(newAnswers).length === questions.length) setLevelComplete(true);
   }
 
-  const levelScore = useMemo(() => questions.filter((q, i) => answers[i] === q.answer).length, [questions, answers]);
+  const levelScore = useMemo(() => {
+    const normalise = (s?: string) => s?.trim().toLowerCase() ?? '';
+    return questions.filter((q, i) => answers[i] === q.answer || normalise(answers[i]) === normalise(q.answer)).length;
+  }, [questions, answers]);
   const levelPassed = levelScore >= 3;
 
   async function nextLevel() {
@@ -740,7 +746,9 @@ export default function QuizPage() {
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                             {q.options.map((opt, oi) => {
-                              const isCorrect = opt === q.answer, isSelected = opt === sel;
+                              const normalise = (s?: string) => s?.trim().toLowerCase() ?? '';
+                              const isCorrect = opt === q.answer || normalise(opt) === normalise(q.answer);
+                              const isSelected = opt === sel;
                               let bg = '#1a1a1a', border = '#2d2d2d', color = '#9ca3af';
                               if (sel) {
                                 if (isCorrect) { bg = '#052e16'; border = '#16a34a'; color = '#4ade80'; }
@@ -983,7 +991,9 @@ export default function QuizPage() {
                           )}
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                             {q.options.map((opt, oi) => {
-                              const isCorrect = opt === q.answer, isSelected = opt === sel;
+                              const normalise = (s?: string) => s?.trim().toLowerCase() ?? '';
+                              const isCorrect = opt === q.answer || normalise(opt) === normalise(q.answer);
+                              const isSelected = opt === sel;
                               let bg = '#1a1a1a', border = '#2d2d2d', color = '#9ca3af';
                               if (sel) {
                                 if (isCorrect) { bg = '#052e16'; border = '#16a34a'; color = '#4ade80'; }
